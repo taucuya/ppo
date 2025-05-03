@@ -1,0 +1,9 @@
+drop table if exists review cascade;
+drop table if exists "order" cascade;
+drop table if exists order_item cascade;
+drop table if exists worker cascade;
+drop table if exists basket cascade;
+drop table if exists basket_item cascade;
+drop table if exists product cascade;
+drop table if exists brand cascade;
+drop table if exists "user" cascade;
