@@ -10,7 +10,7 @@ import (
 type OrderService interface {
 	Create(ctx context.Context, o structs.Order) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.Order, error)
-	GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItems, error)
+	GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error)
 	GetStatus(ctx context.Context, id uuid.UUID) (string, error)
 	ChangeOrderStatus(ctx context.Context, id uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -19,7 +19,7 @@ type OrderService interface {
 type OrderRepository interface {
 	Create(ctx context.Context, o structs.Order) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.Order, error)
-	GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItems, error)
+	GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error)
 	GetStatus(ctx context.Context, id uuid.UUID) (string, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	UpdateStatus(ctx context.Context, id uuid.UUID, status string) error
@@ -46,7 +46,7 @@ func (s *Service) GetById(ctx context.Context, id uuid.UUID) (structs.Order, err
 	return o, nil
 }
 
-func (s *Service) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItems, error) {
+func (s *Service) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error) {
 	items, err := s.rep.GetItems(ctx, id)
 	if err != nil {
 		return nil, err

@@ -135,28 +135,24 @@ func TestAddProductToBasket(t *testing.T) {
 	}
 	userRep := user_rep.New(db)
 
-	if err := userRep.Create(ctx, user); err != nil {
+	id, err := userRep.Create(ctx, user)
+	if err != nil {
 		t.Fatalf("не удалось создать пользователя: %v", err)
-	}
-
-	var userId uuid.UUID
-	if err := db.QueryRowContext(ctx, `SELECT id FROM "user" WHERE mail = $1`, user.Mail).Scan(&userId); err != nil {
-		t.Fatalf("не удалось получить id пользователя: %v", err)
 	}
 
 	basketRep := basket_rep.New(db)
 	basket := structs.Basket{
-		IdUser: userId,
+		IdUser: id,
 		Date:   time.Now(),
 	}
 	if err := basketRep.Create(ctx, basket); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		t.Fatalf("не удалось создать корзину: %v", err)
 	}
 
 	var basketId uuid.UUID
-	if err := db.QueryRowContext(ctx, `SELECT id FROM basket WHERE id_user = $1`, userId).Scan(&basketId); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+	if err := db.QueryRowContext(ctx, `SELECT id FROM basket WHERE id_user = $1`, id).Scan(&basketId); err != nil {
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		t.Fatalf("не удалось получить id корзины: %v", err)
 	}
 
@@ -166,13 +162,13 @@ func TestAddProductToBasket(t *testing.T) {
 		PriceCategory: "mid",
 	}
 	if err := repBrand.Create(ctx, brand); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_, _ = db.ExecContext(ctx, "DELETE FROM basket WHERE id = $1", basketId)
 		t.Fatalf("не удалось добавить бренд: %v", err)
 	}
 	var brandId uuid.UUID
 	if err := db.QueryRowContext(ctx, `SELECT id FROM brand WHERE name = $1`, brand.Name).Scan(&brandId); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_, _ = db.ExecContext(ctx, "DELETE FROM basket WHERE id = $1", basketId)
 		t.Fatalf("не удалось получить id бренда: %v", err)
 	}
@@ -188,7 +184,7 @@ func TestAddProductToBasket(t *testing.T) {
 		Articule:    "EYE-789",
 	}
 	if err := repProd.Create(ctx, product); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_, _ = db.ExecContext(ctx, "DELETE FROM basket WHERE id = $1", basketId)
 		_ = repBrand.Delete(ctx, brandId)
 		t.Fatalf("не удалось добавить продукт: %v", err)
@@ -196,7 +192,7 @@ func TestAddProductToBasket(t *testing.T) {
 
 	var productId uuid.UUID
 	if err := db.QueryRowContext(ctx, `SELECT id FROM product WHERE art = $1`, product.Articule).Scan(&productId); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_, _ = db.ExecContext(ctx, "DELETE FROM basket WHERE id = $1", basketId)
 		_ = repBrand.Delete(ctx, brandId)
 		t.Fatalf("не удалось получить id продукта: %v", err)
@@ -208,7 +204,7 @@ func TestAddProductToBasket(t *testing.T) {
 		Amount:    3,
 	}
 	if err := basketRep.AddItem(ctx, item); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_, _ = db.ExecContext(ctx, "DELETE FROM basket WHERE id = $1", basketId)
 		_ = repBrand.Delete(ctx, brandId)
 		_ = repProd.Delete(ctx, productId)
@@ -226,13 +222,9 @@ func TestAddReviewToProduct(t *testing.T) {
 		Phone:    "+79990001122",
 	}
 	userRep := user_rep.New(db)
-	if err := userRep.Create(ctx, user); err != nil {
+	id, err := userRep.Create(ctx, user)
+	if err != nil {
 		t.Fatalf("не удалось создать пользователя: %v", err)
-	}
-
-	var userId uuid.UUID
-	if err := db.QueryRowContext(ctx, `SELECT id FROM "user" WHERE mail = $1`, user.Mail).Scan(&userId); err != nil {
-		t.Fatalf("не удалось получить id пользователя: %v", err)
 	}
 
 	brand := structs.Brand{
@@ -241,13 +233,13 @@ func TestAddReviewToProduct(t *testing.T) {
 		PriceCategory: "premium",
 	}
 	if err := repBrand.Create(ctx, brand); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		t.Fatalf("не удалось создать бренд: %v", err)
 	}
 
 	var brandId uuid.UUID
 	if err := db.QueryRowContext(ctx, `SELECT id FROM brand WHERE name = $1`, brand.Name).Scan(&brandId); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		t.Fatalf("не удалось получить id бренда: %v", err)
 	}
 
@@ -262,27 +254,27 @@ func TestAddReviewToProduct(t *testing.T) {
 		Articule:    "MASC-001",
 	}
 	if err := repProd.Create(ctx, product); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_ = repBrand.Delete(ctx, brandId)
 		t.Fatalf("не удалось создать продукт: %v", err)
 	}
 
 	var productId uuid.UUID
 	if err := db.QueryRowContext(ctx, `SELECT id FROM product WHERE art = $1`, product.Articule).Scan(&productId); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_ = repBrand.Delete(ctx, brandId)
 		t.Fatalf("не удалось получить id продукта: %v", err)
 	}
 
 	reviewRep := review_rep.New(db)
 	review := structs.Review{
-		IdUser:    userId,
+		IdUser:    id,
 		IdProduct: productId,
 		Rating:    5,
 		Text:      "Очень понравилось!",
 	}
 	if err := reviewRep.Create(ctx, review); err != nil {
-		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", userId)
+		_, _ = db.ExecContext(ctx, "DELETE FROM \"user\" WHERE id = $1", id)
 		_ = repBrand.Delete(ctx, brandId)
 		_ = repProd.Delete(ctx, productId)
 		t.Fatalf("не удалось создать отзыв: %v", err)
@@ -300,7 +292,7 @@ func TestFullFlow(t *testing.T) {
 	user := user_rep.New(db)
 	worker := worker_rep.New(db)
 
-	err := user.Create(ctx, structs.User{
+	id, err := user.Create(ctx, structs.User{
 		Name:          "Alice",
 		Mail:          "alice@example.com",
 		Password:      "secure123",
@@ -311,8 +303,7 @@ func TestFullFlow(t *testing.T) {
 		Date_of_birth: time.Now().AddDate(-30, 0, 0),
 	})
 	require.NoError(t, err)
-	var userId uuid.UUID
-	err = db.QueryRowContext(ctx, `SELECT id FROM "user" WHERE mail = $1`, "alice@example.com").Scan(&userId)
+	err = db.QueryRowContext(ctx, `SELECT id FROM "user" WHERE mail = $1`, "alice@example.com").Scan(&id)
 
 	require.NoError(t, err)
 	err = brand.Create(ctx, structs.Brand{
@@ -340,12 +331,12 @@ func TestFullFlow(t *testing.T) {
 	err = db.QueryRowContext(ctx, `SELECT id FROM product WHERE art = $1`, "ART123").Scan(&productId)
 	require.NoError(t, err)
 	err = basket.Create(ctx, structs.Basket{
-		IdUser: userId,
+		IdUser: id,
 		Date:   time.Now(),
 	})
 	require.NoError(t, err)
 	var basketId uuid.UUID
-	db.QueryRowContext(ctx, `SELECT id FROM basket WHERE id_user = $1`, userId).Scan(&basketId)
+	db.QueryRowContext(ctx, `SELECT id FROM basket WHERE id_user = $1`, id).Scan(&basketId)
 	require.NoError(t, err)
 	err = basket.AddItem(ctx, structs.BasketItem{
 		IdProduct: productId,
@@ -356,7 +347,7 @@ func TestFullFlow(t *testing.T) {
 
 	err = review.Create(ctx, structs.Review{
 		IdProduct: productId,
-		IdUser:    userId,
+		IdUser:    id,
 		Rating:    5,
 		Text:      "Excellent product!",
 		Date:      time.Now(),
@@ -364,22 +355,22 @@ func TestFullFlow(t *testing.T) {
 	require.NoError(t, err)
 
 	var reviewId uuid.UUID
-	db.QueryRowContext(ctx, `SELECT id FROM review WHERE id_user = $1`, userId).Scan(&reviewId)
+	db.QueryRowContext(ctx, `SELECT id FROM review WHERE id_user = $1`, id).Scan(&reviewId)
 	require.NoError(t, err)
 
 	err = worker.Create(ctx, structs.Worker{
-		IdUser:   userId,
+		IdUser:   id,
 		JobTitle: "Courier",
 	})
 	require.NoError(t, err)
 
 	var workerId uuid.UUID
-	db.QueryRowContext(ctx, `SELECT id FROM "worker" WHERE id_user = $1`, userId).Scan(&workerId)
+	db.QueryRowContext(ctx, `SELECT id FROM "worker" WHERE id_user = $1`, id).Scan(&workerId)
 	require.NoError(t, err)
 
 	err = order.Create(ctx, structs.Order{
 		Date:     time.Now(),
-		IdUser:   userId,
+		IdUser:   id,
 		Address:  "Dream St. 42",
 		Status:   "pending",
 		Price:    99.99,
@@ -388,13 +379,13 @@ func TestFullFlow(t *testing.T) {
 	require.NoError(t, err)
 
 	var orderId uuid.UUID
-	db.QueryRowContext(ctx, `SELECT id FROM "order" WHERE id_user = $1`, userId).Scan(&orderId)
+	db.QueryRowContext(ctx, `SELECT id FROM "order" WHERE id_user = $1`, id).Scan(&orderId)
 	require.NoError(t, err)
 
 	gotWorker, err := worker.GetById(ctx, workerId)
 	require.NoError(t, err)
 	require.Equal(t, "Courier", gotWorker.JobTitle)
-	require.Equal(t, userId, gotWorker.IdUser)
+	require.Equal(t, id, gotWorker.IdUser)
 
 	status, err := order.GetStatus(ctx, orderId)
 	require.NoError(t, err)

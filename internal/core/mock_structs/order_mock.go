@@ -94,10 +94,10 @@ func (mr *MockOrderServiceMockRecorder) GetById(ctx, id interface{}) *gomock.Cal
 }
 
 // GetItems mocks base method.
-func (m *MockOrderService) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItems, error) {
+func (m *MockOrderService) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetItems", ctx, id)
-	ret0, _ := ret[0].([]structs.OrderItems)
+	ret0, _ := ret[0].([]structs.OrderItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -190,10 +190,10 @@ func (mr *MockOrderRepositoryMockRecorder) GetById(ctx, id interface{}) *gomock.
 }
 
 // GetItems mocks base method.
-func (m *MockOrderRepository) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItems, error) {
+func (m *MockOrderRepository) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetItems", ctx, id)
-	ret0, _ := ret[0].([]structs.OrderItems)
+	ret0, _ := ret[0].([]structs.OrderItem)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

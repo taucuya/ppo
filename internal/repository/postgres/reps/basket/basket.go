@@ -28,9 +28,18 @@ func (rep *Repository) Create(ctx context.Context, b structs.Basket) error {
 	return err
 }
 
+func (rep *Repository) GetBIdByUId(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	var bid uuid.UUID
+	err := rep.db.GetContext(ctx, &bid, "select id from basket where id_user = $1", id)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to scan id: %w", err)
+	}
+	return bid, nil
+}
+
 func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error) {
 	var b structs.Basket
-	err := rep.db.GetContext(ctx, &b, "select * from baket where id = $1", id)
+	err := rep.db.GetContext(ctx, &b, "select * from basket where id = $1", id)
 	if err != nil {
 		return structs.Basket{}, fmt.Errorf("failed to scan basket: %w", err)
 	} else {
@@ -43,10 +52,16 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Baske
 	}
 }
 
-func (rep *Repository) GetItems(ctx context.Context, id_basket uuid.UUID) ([]structs.BasketItem, error) {
+func (rep *Repository) GetItems(ctx context.Context, id_user uuid.UUID) ([]structs.BasketItem, error) {
 	var items []rep_structs.BasketItem
-	err := rep.db.SelectContext(ctx, &items, "select * from basket_item where id_basket = $1", id_basket)
+	id_basket, err := rep.GetBIdByUId(ctx, id_user)
 	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	err = rep.db.SelectContext(ctx, &items, "select * from basket_item where id_basket = $1", id_basket)
+	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	} else {
 		var itms []structs.BasketItem
@@ -56,6 +71,7 @@ func (rep *Repository) GetItems(ctx context.Context, id_basket uuid.UUID) ([]str
 				IdBasket:  v.IdBasket,
 				Amount:    v.Amount})
 		}
+		fmt.Println(err)
 		return itms, err
 	}
 }

@@ -17,9 +17,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	controller "github.com/taucuya/ppo/internal/controllers"
 	"github.com/taucuya/ppo/internal/core/service/auth"
+	"github.com/taucuya/ppo/internal/core/service/basket"
 	"github.com/taucuya/ppo/internal/core/service/user"
 	auth_prov "github.com/taucuya/ppo/internal/providers/jwt/auth"
 	auth_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/auth"
+	basket_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/basket"
 	user_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/user"
 )
 
@@ -58,7 +60,7 @@ func main() {
 
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(15*time.Minute), time.Duration(7*24*time.Hour))
-	// bar := basket_rep.New(db)
+	bar := basket_rep.New(db)
 	// brr := brand_rep.New(db)
 	// or := order_rep.New(db)
 	// pr := product_rep.New(db)
@@ -68,7 +70,7 @@ func main() {
 
 	us := user.New(ur)
 	as := auth.New(ap, ar, us)
-	// bas := basket.New(bar)
+	bas := basket.New(bar)
 	// brs := brand.New(brr)
 	// os := order.New(or)
 	// ps := product.New(pr)
@@ -76,8 +78,9 @@ func main() {
 	// ws := worker.New(wr)
 
 	c := controller.Controller{
-		UserService: *us,
-		AuthServise: *as,
+		UserService:   *us,
+		AuthServise:   *as,
+		BasketService: *bas,
 	}
 
 	router := gin.Default()
@@ -88,6 +91,14 @@ func main() {
 			auth.POST("/signup", c.SignupHandler)
 			auth.POST("/login", c.LoginHandler)
 			auth.POST("/logout", c.LogoutHandler)
+		}
+
+		basket := api.Group("/basket")
+		{
+			basket.GET("/:id/items", c.GetBasketItemsHandler)
+			basket.POST("", c.AddBasketItemHandler)
+			basket.DELETE("", c.DeleteBasketItemHandler)
+			basket.PUT("", c.UpdateBasketItemAmountHandler)
 		}
 	}
 

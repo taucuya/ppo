@@ -18,6 +18,7 @@ type BasketService interface {
 
 type BasketRepository interface {
 	Create(ctx context.Context, b structs.Basket) error
+	GetBIdByUId(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error)
 	GetItems(ctx context.Context, id_basket uuid.UUID) ([]structs.BasketItem, error)
 	AddItem(ctx context.Context, i structs.BasketItem) error
@@ -39,15 +40,19 @@ func (s *Service) Create(ctx context.Context, b structs.Basket) error {
 }
 
 func (s *Service) GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error) {
-	b, err := s.rep.GetById(ctx, id)
+	bid, err := s.rep.GetBIdByUId(ctx, id)
+	if err != nil {
+		return structs.Basket{}, err
+	}
+	b, err := s.rep.GetById(ctx, bid)
 	if err != nil {
 		return structs.Basket{}, err
 	}
 	return b, nil
 }
 
-func (s *Service) GetItems(ctx context.Context, id_basket uuid.UUID) ([]structs.BasketItem, error) {
-	arr, err := s.rep.GetItems(ctx, id_basket)
+func (s *Service) GetItems(ctx context.Context, id_user uuid.UUID) ([]structs.BasketItem, error) {
+	arr, err := s.rep.GetItems(ctx, id_user)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +60,6 @@ func (s *Service) GetItems(ctx context.Context, id_basket uuid.UUID) ([]structs.
 }
 
 func (s *Service) AddItem(ctx context.Context, i structs.BasketItem) error {
-	// id := structs.GenId()
 	err := s.rep.AddItem(ctx, i)
 	return err
 }

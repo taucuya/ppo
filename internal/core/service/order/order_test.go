@@ -163,7 +163,7 @@ func TestGetItems(t *testing.T) {
 	productID := structs.GenId()
 	itemID := structs.GenId()
 
-	testItems := []structs.OrderItems{
+	testItems := []structs.OrderItem{
 		{
 			Id:        itemID,
 			IdProduct: productID,
@@ -176,7 +176,7 @@ func TestGetItems(t *testing.T) {
 		name    string
 		id      uuid.UUID
 		mock    func()
-		want    []structs.OrderItems
+		want    []structs.OrderItem
 		wantErr bool
 	}{
 		{
@@ -192,9 +192,9 @@ func TestGetItems(t *testing.T) {
 			name: "empty order",
 			id:   orderID,
 			mock: func() {
-				mockRepo.EXPECT().GetItems(gomock.Any(), orderID).Return([]structs.OrderItems{}, nil)
+				mockRepo.EXPECT().GetItems(gomock.Any(), orderID).Return([]structs.OrderItem{}, nil)
 			},
-			want:    []structs.OrderItems{},
+			want:    []structs.OrderItem{},
 			wantErr: false,
 		},
 		{
