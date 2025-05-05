@@ -2,6 +2,7 @@ package basket_rep
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -78,13 +79,21 @@ func (rep *Repository) GetItems(ctx context.Context, id_user uuid.UUID) ([]struc
 
 func (rep *Repository) AddItem(ctx context.Context, i structs.BasketItem) error {
 	it := rep_structs.BasketItem{
-		Id:        i.Id,
 		IdProduct: i.IdProduct,
 		IdBasket:  i.IdBasket,
 		Amount:    i.Amount,
 	}
-	_, err := rep.db.NamedExecContext(ctx, `insert into basket_item (id_product, id_basket, amount) 
+
+	var item rep_structs.BasketItem
+
+	err := rep.db.GetContext(ctx, &item, `select * from basket_item where id_basket = $1
+	 and id_product = $2`, i.IdBasket, i.IdProduct)
+	if err != sql.ErrNoRows {
+		err = rep.UpdateItemAmount(ctx, item.Id, item.Amount+it.Amount)
+	} else {
+		_, err = rep.db.NamedExecContext(ctx, `insert into basket_item (id_product, id_basket, amount) 
 		values (:id_product, :id_basket, :amount)`, it)
+	}
 	return err
 }
 

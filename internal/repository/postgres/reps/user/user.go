@@ -40,8 +40,8 @@ func (rep *Repository) Create(ctx context.Context, u structs.User) (uuid.UUID, e
 	err = rep.db.GetContext(ctx, &id,
 		`insert into "user" 
 		(name, date_of_birth, mail, password, phone, address, status, role) 
-		VALUES (:name, :date_of_birth, :mail, :password, :phone, :address, :status, :role) 
-		RETURNING id`, usr)
+		values (:name, :date_of_birth, :mail, :password, :phone, :address, :status, :role) 
+		returning id`, usr)
 
 	if err != nil {
 		return uuid.UUID{}, err

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 
 	items, err := c.BasketService.GetItems(ctx.Request.Context(), id)
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get items"})
 		return
 	}
@@ -27,14 +29,36 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
-	var input structs.BasketItem
+	var input struct {
+		IdProduct string `json:"id_product"`
+		IdBasket  string `json:"id_basket"`
+		Amount    int    `json:"amount"`
+	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := c.BasketService.AddItem(ctx.Request.Context(), input); err != nil {
+	idProduct, err := uuid.Parse(input.IdProduct)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id_product"})
+		return
+	}
+
+	idBasket, err := uuid.Parse(input.IdBasket)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id_basket"})
+		return
+	}
+
+	item := structs.BasketItem{
+		IdProduct: idProduct,
+		IdBasket:  idBasket,
+		Amount:    input.Amount,
+	}
+
+	if err := c.BasketService.AddItem(ctx.Request.Context(), item); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add item"})
 		return
 	}
