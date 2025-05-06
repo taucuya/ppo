@@ -60,9 +60,9 @@ func (rep *Repository) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (rep *Repository) GetAllBrands(ctx context.Context) ([]structs.Brand, error) {
+func (rep *Repository) GetAllBrandsInCategory(ctx context.Context, category string) ([]structs.Brand, error) {
 	var brands []rep_structs.Brand
-	err := rep.db.SelectContext(ctx, &brands, "select * from brand order by name")
+	err := rep.db.SelectContext(ctx, &brands, "select * from brand where price_category = $1 order by name", category)
 	if err != nil {
 		return nil, err
 	}

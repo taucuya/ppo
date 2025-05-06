@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +19,6 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 
 	items, err := c.BasketService.GetItems(ctx.Request.Context(), id)
 	if err != nil {
-		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get items"})
 		return
 	}
@@ -67,7 +65,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
-	idStr := ctx.Param("item_id")
+	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid item ID"})

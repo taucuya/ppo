@@ -18,10 +18,14 @@ import (
 	controller "github.com/taucuya/ppo/internal/controllers"
 	"github.com/taucuya/ppo/internal/core/service/auth"
 	"github.com/taucuya/ppo/internal/core/service/basket"
+	"github.com/taucuya/ppo/internal/core/service/brand"
+	"github.com/taucuya/ppo/internal/core/service/order"
 	"github.com/taucuya/ppo/internal/core/service/user"
 	auth_prov "github.com/taucuya/ppo/internal/providers/jwt/auth"
 	auth_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/auth"
 	basket_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/basket"
+	brand_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/brand"
+	order_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/order"
 	user_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/user"
 )
 
@@ -61,8 +65,8 @@ func main() {
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(15*time.Minute), time.Duration(7*24*time.Hour))
 	bar := basket_rep.New(db)
-	// brr := brand_rep.New(db)
-	// or := order_rep.New(db)
+	brr := brand_rep.New(db)
+	or := order_rep.New(db)
 	// pr := product_rep.New(db)
 	// rr := review_rep.New(db)
 	ur := user_rep.New(db)
@@ -71,8 +75,8 @@ func main() {
 	us := user.New(ur)
 	as := auth.New(ap, ar, us)
 	bas := basket.New(bar)
-	// brs := brand.New(brr)
-	// os := order.New(or)
+	brs := brand.New(brr)
+	oss := order.New(or)
 	// ps := product.New(pr)
 	// rs := review.New(rr)
 	// ws := worker.New(wr)
@@ -81,6 +85,8 @@ func main() {
 		UserService:   *us,
 		AuthServise:   *as,
 		BasketService: *bas,
+		BrandService:  *brs,
+		OrderService:  *oss,
 	}
 
 	router := gin.Default()
@@ -97,8 +103,23 @@ func main() {
 		{
 			basket.GET("/:id/items", c.GetBasketItemsHandler)
 			basket.POST("", c.AddBasketItemHandler)
-			basket.DELETE("", c.DeleteBasketItemHandler)
+			basket.DELETE("/:id", c.DeleteBasketItemHandler)
 			basket.PUT("", c.UpdateBasketItemAmountHandler)
+		}
+
+		brand := api.Group("/brand")
+		{
+			brand.POST("", c.CreateBrandHandler)
+			brand.DELETE("/:id", c.DeleteBrandHandler)
+			brand.GET("/:cat", c.GetAllBrandsInCategoryHander)
+		}
+
+		order := api.Group("/order")
+		{
+			order.POST("", c.CreateOrderHandler)
+			order.GET("/:id/items", c.GetOrderItemsHandler)
+			order.PUT("/:id/status", c.ChangeOrderStatusHandler)
+			order.DELETE("/:id", c.DeleteOrderHandler)
 		}
 	}
 

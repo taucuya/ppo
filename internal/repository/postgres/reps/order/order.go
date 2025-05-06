@@ -37,7 +37,7 @@ func (rep *Repository) Create(ctx context.Context, o structs.Order) error {
 		return err
 	}
 	var basket_id uuid.UUID
-	var items []structs.BasketItem
+	var items []rep_structs.BasketItem
 	err = rep.db.GetContext(ctx, &basket_id, "select id from basket where id_user = $1", o.IdUser)
 	if err != nil {
 		return err

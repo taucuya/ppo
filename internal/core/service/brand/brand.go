@@ -18,7 +18,7 @@ type BrandRepository interface {
 	Create(ctx context.Context, b structs.Brand) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.Brand, error)
 	Delete(ctx context.Context, id uuid.UUID) error
-	GetAllBrands(ctx context.Context) ([]structs.Brand, error)
+	GetAllBrandsInCategory(ctx context.Context, category string) ([]structs.Brand, error)
 }
 
 type Service struct {
@@ -47,8 +47,8 @@ func (s *Service) Delete(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-func (s *Service) GetAllBrands(ctx context.Context) ([]structs.Brand, error) {
-	arr, err := s.rep.GetAllBrands(ctx)
+func (s *Service) GetAllBrandsInCategory(ctx context.Context, category string) ([]structs.Brand, error) {
+	arr, err := s.rep.GetAllBrandsInCategory(ctx, category)
 	if err != nil {
 		return nil, err
 	}
