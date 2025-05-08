@@ -20,13 +20,17 @@ func New(db *sqlx.DB) *Repository {
 
 func (rep *Repository) Create(ctx context.Context, w structs.Worker) error {
 	wr := rep_structs.Worker{
-		Id:       w.Id,
 		IdUser:   w.IdUser,
 		JobTitle: w.JobTitle,
 	}
 	_, err := rep.db.NamedExecContext(ctx,
 		"insert into worker (id_user, job_title) values (:id_user, :job_title)",
 		wr)
+	if err != nil {
+		return err
+	}
+	_, err = rep.db.ExecContext(ctx, `update "user" set role = 
+	"worker" where id_user = $1`, wr.IdUser)
 	return err
 }
 

@@ -76,6 +76,22 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, items)
 }
 
+func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID format"})
+		return
+	}
+
+	order, err := c.OrderService.GetById(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, order)
+}
+
 func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	var input struct {
 		Status string `json:"status"`

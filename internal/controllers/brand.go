@@ -33,6 +33,22 @@ func (c *Controller) CreateBrandHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Brand created"})
 }
 
+func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand ID format"})
+		return
+	}
+
+	brand, err := c.BrandService.GetById(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Brand not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, brand)
+}
+
 func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param("id"))
 

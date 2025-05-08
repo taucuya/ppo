@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"time"
 
@@ -69,9 +69,11 @@ func (c *Controller) LoginHandler(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetCookie("access_token", accessToken, 900, "/", "localhost", false, true)
+	ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "localhost", false, true)
+
 	ctx.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
+		"message": "Login successful",
 	})
 }
 
@@ -84,7 +86,6 @@ func (c *Controller) LogoutHandler(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(refreshToken.Rt)
 	if refreshToken.Rt == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Refresh token required"})
 		return
@@ -96,4 +97,27 @@ func (c *Controller) LogoutHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
+
+func (c *Controller) Verify(ctx *gin.Context) bool {
+	atoken, err := ctx.Cookie("access_token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return false
+	}
+
+	rtoken, err := ctx.Cookie("refresh_token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "refresh token missing"})
+		return false
+	}
+
+	new, agood, rgood, err := c.AuthServise.VerifyTokens(context.Background(), atoken, rtoken)
+	if agood && rgood && err == nil {
+		if new != `` {
+			ctx.SetCookie("access_token", new, 900, "/", "localhost", false, true)
+		}
+		return true
+	}
+	return false
 }

@@ -10,6 +10,11 @@ import (
 
 func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 
+	good := c.Verify(ctx)
+	if !good {
+		return
+	}
+
 	idStr := ctx.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {

@@ -49,6 +49,22 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Review created"})
 }
 
+func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid review ID format"})
+		return
+	}
+
+	review, err := c.ReviewService.GetById(ctx, id)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Review not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, review)
+}
+
 func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {

@@ -57,7 +57,7 @@ func (p *Provider) VerifyToken(ctx context.Context, token string) (bool, error) 
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return true, nil
+			return false, jwt.ErrTokenExpired
 		}
 		return false, err
 	}
@@ -65,8 +65,7 @@ func (p *Provider) VerifyToken(ctx context.Context, token string) (bool, error) 
 	if !parsedToken.Valid {
 		return false, jwt.ErrTokenUnverifiable
 	}
-
-	return false, nil
+	return true, nil
 }
 
 func (p *Provider) RefreshToken(ctx context.Context, atoken string, rtoken string) (string, error) {
@@ -84,7 +83,15 @@ func (p *Provider) RefreshToken(ctx context.Context, atoken string, rtoken strin
 	if !ok || refreshClaims["id"] == nil {
 		return "", errors.New("invalid refresh token claims")
 	}
-	id := uuid.UUID(refreshClaims["id"].(uuid.UUID))
+
+	idStr, ok := refreshClaims["id"].(string)
+	if !ok {
+		return "", errors.New("invalid id in refresh token")
+	}
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return "", errors.New("malformed UUID in refresh token")
+	}
 
 	accessToken, _ := jwt.Parse(atoken, func(t *jwt.Token) (interface{}, error) {
 		return p.key, nil

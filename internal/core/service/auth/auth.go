@@ -2,7 +2,9 @@ package auth
 
 import (
 	"context"
+	"errors"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/taucuya/ppo/internal/core/structs"
 	"golang.org/x/crypto/bcrypt"
@@ -78,23 +80,25 @@ func (s *Service) LogOut(ctx context.Context, rtoken string) error {
 }
 
 func (s *Service) VerifyAToken(ctx context.Context, token string) (bool, error) {
-	expired, err := s.prov.VerifyToken(ctx, token)
+	valid, err := s.prov.VerifyToken(ctx, token)
 	if err != nil {
-		return expired, err
+		return false, err
 	}
-	return expired, nil
+	return valid, nil
 }
 
 func (s *Service) VerifyRToken(ctx context.Context, token string) (uuid.UUID, bool, error) {
-	expired, err := s.prov.VerifyToken(ctx, token)
+	valid, err := s.prov.VerifyToken(ctx, token)
 	if err != nil {
-		return uuid.UUID{}, expired, err
+		return uuid.UUID{}, false, err
 	}
+
 	id, err := s.rep.VerifyToken(ctx, token)
 	if err != nil {
-		return uuid.UUID{}, expired, err
+		return uuid.UUID{}, false, err
 	}
-	return id, expired, nil
+
+	return id, valid, nil
 }
 
 func (s *Service) RefreshToken(ctx context.Context, atoken string, rtoken string) (string, error) {
@@ -103,4 +107,26 @@ func (s *Service) RefreshToken(ctx context.Context, atoken string, rtoken string
 		return "", err
 	}
 	return token, nil
+}
+
+func (s *Service) VerifyTokens(ctx context.Context, atoken string, rtoken string) (string, bool, bool, error) {
+	accessValid, err := s.VerifyAToken(ctx, atoken)
+	if err != nil && !errors.Is(err, jwt.ErrTokenExpired) {
+		return ``, false, false, err
+	}
+
+	_, refreshValid, err := s.VerifyRToken(ctx, rtoken)
+	if err != nil {
+		return ``, accessValid, false, err
+	}
+	var newAccessToken string
+	if !accessValid && refreshValid {
+		newAccessToken, err = s.RefreshToken(ctx, atoken, rtoken)
+		if err != nil {
+			return ``, false, refreshValid, err
+		}
+		return newAccessToken, true, refreshValid, nil
+	}
+
+	return newAccessToken, accessValid, refreshValid, nil
 }
