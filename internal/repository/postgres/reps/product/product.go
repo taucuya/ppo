@@ -58,6 +58,30 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Produ
 	return pr, nil
 }
 
+func (rep *Repository) GetByCategory(ctx context.Context, category string) ([]structs.Product, error) {
+	var ps []rep_structs.Product
+	if err := rep.db.SelectContext(ctx, &ps, `select * from product where category = $1`, category); err != nil {
+		return nil, err
+	}
+
+	var products []structs.Product
+
+	for _, v := range ps {
+		products = append(products, structs.Product{
+			Id:          v.Id,
+			Name:        v.Name,
+			Description: v.Description,
+			Price:       v.Price,
+			Category:    v.Category,
+			Amount:      v.Amount,
+			IdBrand:     v.IdBrand,
+			PicLink:     v.PicLink,
+			Articule:    v.Articule,
+		})
+	}
+	return products, nil
+}
+
 func (rep *Repository) Delete(ctx context.Context, id uuid.UUID) error {
 	result, err := rep.db.ExecContext(ctx,
 		`delete from product where id = $1`, id)

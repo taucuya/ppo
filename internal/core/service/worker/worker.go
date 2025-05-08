@@ -12,6 +12,7 @@ type WorkerService interface {
 	GetById(ctx context.Context, id uuid.UUID) (structs.Worker, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetAllWorkers(ctx context.Context) ([]structs.Worker, error)
+	AcceptOrder(ctx context.Context, id_order uuid.UUID, id_worker uuid.UUID) error
 }
 
 type WorkerRepository interface {
@@ -19,6 +20,7 @@ type WorkerRepository interface {
 	GetById(ctx context.Context, id uuid.UUID) (structs.Worker, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetAllWorkers(ctx context.Context) ([]structs.Worker, error)
+	AcceptOrder(ctx context.Context, id_order uuid.UUID, id_worker uuid.UUID) error
 }
 
 type Service struct {
@@ -53,4 +55,9 @@ func (s *Service) GetAllWorkers(ctx context.Context) ([]structs.Worker, error) {
 		return nil, err
 	}
 	return workers, nil
+}
+
+func (s *Service) AcceptOrder(ctx context.Context, id_order uuid.UUID, id_worker uuid.UUID) error {
+	err := s.rep.AcceptOrder(ctx, id_order, id_worker)
+	return err
 }

@@ -204,7 +204,7 @@ func TestGetAllBrands(t *testing.T) {
 		{
 			name: "successful get all",
 			mock: func() {
-				mockRepo.EXPECT().GetAllBrands(gomock.Any()).Return(testBrands, nil)
+				mockRepo.EXPECT().GetAllBrandsInCategory(gomock.Any(), testBrands[1].PriceCategory).Return(testBrands, nil)
 			},
 			want:    testBrands,
 			wantErr: false,
@@ -212,7 +212,7 @@ func TestGetAllBrands(t *testing.T) {
 		{
 			name: "empty list",
 			mock: func() {
-				mockRepo.EXPECT().GetAllBrands(gomock.Any()).Return([]structs.Brand{}, nil)
+				mockRepo.EXPECT().GetAllBrandsInCategory(gomock.Any(), "econom").Return([]structs.Brand{}, nil)
 			},
 			want:    []structs.Brand{},
 			wantErr: false,
@@ -220,7 +220,7 @@ func TestGetAllBrands(t *testing.T) {
 		{
 			name: "repository error",
 			mock: func() {
-				mockRepo.EXPECT().GetAllBrands(gomock.Any()).Return(nil, testError)
+				mockRepo.EXPECT().GetAllBrandsInCategory(gomock.Any(), testBrands[2].PriceCategory).Return(nil, testError)
 			},
 			want:    nil,
 			wantErr: true,
@@ -230,7 +230,7 @@ func TestGetAllBrands(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mock()
-			got, err := service.GetAllBrands(context.Background())
+			got, err := service.GetAllBrandsInCategory(context.Background(), testBrands[1].PriceCategory)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetAllBrands() error = %v, wantErr %v", err, tt.wantErr)
 				return

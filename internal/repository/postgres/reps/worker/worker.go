@@ -75,3 +75,13 @@ func (rep *Repository) GetAllWorkers(ctx context.Context) ([]structs.Worker, err
 	}
 	return w, nil
 }
+
+func (rep *Repository) AcceptOrder(ctx context.Context, id_order uuid.UUID, id_worker uuid.UUID) error {
+	_, err := rep.db.ExecContext(ctx, `update "order" set id_worker = $1 where id = $2`, id_worker, id_order)
+	if err != nil {
+		return err
+	}
+	// в курсовой это делает триггер
+	_, err = rep.db.ExecContext(ctx, `update "order" set status = $1 where id = $2`, "принятый", id_order)
+	return err
+}

@@ -20,13 +20,19 @@ import (
 	"github.com/taucuya/ppo/internal/core/service/basket"
 	"github.com/taucuya/ppo/internal/core/service/brand"
 	"github.com/taucuya/ppo/internal/core/service/order"
+	"github.com/taucuya/ppo/internal/core/service/product"
+	"github.com/taucuya/ppo/internal/core/service/review"
 	"github.com/taucuya/ppo/internal/core/service/user"
+	"github.com/taucuya/ppo/internal/core/service/worker"
 	auth_prov "github.com/taucuya/ppo/internal/providers/jwt/auth"
 	auth_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/auth"
 	basket_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/basket"
 	brand_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/brand"
 	order_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/order"
+	product_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/product"
+	review_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/review"
 	user_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/user"
+	worker_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/worker"
 )
 
 func runSQLScripts(db *sqlx.DB, scripts []string) error {
@@ -67,26 +73,29 @@ func main() {
 	bar := basket_rep.New(db)
 	brr := brand_rep.New(db)
 	or := order_rep.New(db)
-	// pr := product_rep.New(db)
-	// rr := review_rep.New(db)
+	pr := product_rep.New(db)
+	rr := review_rep.New(db)
 	ur := user_rep.New(db)
-	// wr := worker_rep.New(db)
+	wr := worker_rep.New(db)
 
 	us := user.New(ur)
 	as := auth.New(ap, ar, us)
 	bas := basket.New(bar)
 	brs := brand.New(brr)
 	oss := order.New(or)
-	// ps := product.New(pr)
-	// rs := review.New(rr)
-	// ws := worker.New(wr)
+	ps := product.New(pr)
+	rs := review.New(rr)
+	ws := worker.New(wr)
 
 	c := controller.Controller{
-		UserService:   *us,
-		AuthServise:   *as,
-		BasketService: *bas,
-		BrandService:  *brs,
-		OrderService:  *oss,
+		UserService:    *us,
+		AuthServise:    *as,
+		BasketService:  *bas,
+		BrandService:   *brs,
+		OrderService:   *oss,
+		ProductService: *ps,
+		ReviewService:  *rs,
+		WorkerService:  *ws,
 	}
 
 	router := gin.Default()
@@ -120,6 +129,35 @@ func main() {
 			order.GET("/:id/items", c.GetOrderItemsHandler)
 			order.PUT("/:id/status", c.ChangeOrderStatusHandler)
 			order.DELETE("/:id", c.DeleteOrderHandler)
+			order.PUT("/:id", c.AcceptOrderHandler)
+		}
+
+		product := api.Group("/product")
+		{
+			product.POST("", c.CreateProductHandler)
+			product.DELETE("/:id", c.DeleteProductHandler)
+			product.GET("/:category", c.GetProductsByCategoryHandler)
+			product.GET("/reviews/:id", c.GetReviewsForProductHandler)
+		}
+
+		review := api.Group("/review")
+		{
+			review.POST("", c.CreateReviewHandler)
+			review.DELETE("/:id", c.DeleteReviewHandler)
+		}
+
+		user := api.Group("/user")
+		{
+			user.GET("/email", c.GetUserByEmailHandler)
+			user.GET("/phone", c.GetUserByPhoneHandler)
+		}
+
+		worker := api.Group("/worker")
+		{
+			worker.POST("", c.CreateWorkerHandler)
+			worker.GET("", c.GetAllWorkersHandler)
+			worker.GET("/:id", c.GetWorkerByIdHandler)
+			worker.DELETE("/:id", c.DeleteWorkerHandler)
 		}
 	}
 
