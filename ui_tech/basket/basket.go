@@ -1,17 +1,18 @@
 package basket
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 )
 
 func GetBasketItems(client *http.Client) {
-
 	url := "http://localhost:8080/api/v1/basket/items"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -29,7 +30,7 @@ func GetBasketItems(client *http.Client) {
 	var items []map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&items)
 
-	fmt.Println("✅", "Basket items:")
+	fmt.Println("✅ Basket items:")
 	for _, item := range items {
 		fmt.Printf("ID: %v, Product ID: %v, Amount: %v\n", item["Id"], item["IdProduct"], item["Amount"])
 	}
@@ -57,16 +58,23 @@ func GetBasket(client *http.Client) {
 		return
 	}
 
-	fmt.Println(basket)
-	fmt.Printf("✅ Basket ID: %v, Status: %v\n", basket["Id"], basket["Status"])
+	fmt.Printf("✅ Basket ID: %v, User ID: %v, Date: %v\n", basket["Id"], basket["IdUser"], basket["Date"])
 }
 
-func AddToBasket(client *http.Client, productID string, amountStr string) {
+func AddToBasket(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product ID (UUID): ")
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
+
 	idProduct, err := uuid.Parse(productID)
 	if err != nil {
 		fmt.Println("❌ Invalid product ID:", err)
 		return
 	}
+
+	fmt.Print("Enter Amount: ")
+	amountStr, _ := reader.ReadString('\n')
+	amountStr = strings.TrimSpace(amountStr)
 
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
@@ -109,7 +117,11 @@ func AddToBasket(client *http.Client, productID string, amountStr string) {
 	}
 }
 
-func DeleteFromBasket(client *http.Client, productID string) {
+func DeleteFromBasket(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product ID (UUID) to delete: ")
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
+
 	idProduct, err := uuid.Parse(productID)
 	if err != nil {
 		fmt.Println("❌ Invalid product ID:", err)
@@ -144,18 +156,26 @@ func DeleteFromBasket(client *http.Client, productID string) {
 	json.NewDecoder(resp.Body).Decode(&respData)
 
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅", "Item deleted from basket!")
+		fmt.Println("✅ Item deleted from basket!")
 	} else {
 		fmt.Println("❌ Error:", respData["error"])
 	}
 }
 
-func UpdateItemAmount(client *http.Client, product_id string, amountStr string) {
-	productID, err := uuid.Parse(product_id)
+func UpdateItemAmount(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product ID (UUID) to update: ")
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
+
+	idProduct, err := uuid.Parse(productID)
 	if err != nil {
 		fmt.Println("❌ Invalid product ID:", err)
 		return
 	}
+
+	fmt.Print("Enter new amount: ")
+	amountStr, _ := reader.ReadString('\n')
+	amountStr = strings.TrimSpace(amountStr)
 
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
@@ -164,7 +184,7 @@ func UpdateItemAmount(client *http.Client, product_id string, amountStr string) 
 	}
 
 	payload := map[string]interface{}{
-		"product_id": productID,
+		"product_id": idProduct,
 		"amount":     amount,
 	}
 

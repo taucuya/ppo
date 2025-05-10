@@ -35,8 +35,14 @@ func CreateWorker(client *http.Client, reader *bufio.Reader) {
 	}
 	defer resp.Body.Close()
 
-	data, _ := io.ReadAll(resp.Body)
-	fmt.Println("✅ Response:", string(data))
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	if resp.StatusCode == http.StatusCreated {
+		fmt.Println("✅ Worker created successfully!")
+	} else {
+		fmt.Println("❌ Failed to create worker:", result["error"])
+	}
 }
 
 func DeleteWorker(client *http.Client, reader *bufio.Reader) {
@@ -52,8 +58,17 @@ func DeleteWorker(client *http.Client, reader *bufio.Reader) {
 	}
 	defer resp.Body.Close()
 
-	data, _ := io.ReadAll(resp.Body)
-	fmt.Println("✅ Response:", string(data))
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		fmt.Println("❌ Failed to decode response:", err)
+		return
+	}
+
+	if resp.StatusCode == http.StatusOK {
+		fmt.Printf("✅ Worker with ID %s successfully deleted!\n", id)
+	} else {
+		fmt.Printf("❌ Failed to delete worker. Error: %s\n", result["error"])
+	}
 }
 
 func GetWorkerById(client *http.Client, reader *bufio.Reader) {
@@ -68,8 +83,21 @@ func GetWorkerById(client *http.Client, reader *bufio.Reader) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println("✅ Worker:", string(body))
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("❌ Failed to retrieve worker. Status: %s\n", resp.Status)
+		return
+	}
+
+	var worker map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&worker); err != nil {
+		fmt.Println("❌ Failed to decode response:", err)
+		return
+	}
+
+	fmt.Println("✅ Worker Details:")
+	fmt.Printf("ID: %v\n", worker["Id"])
+	fmt.Printf("User ID: %v\n", worker["IdUser"])
+	fmt.Printf("Job Title: %s\n", worker["JobTitle"])
 }
 
 func GetAllWorkers(client *http.Client) {
@@ -80,8 +108,29 @@ func GetAllWorkers(client *http.Client) {
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println("✅ Workers:", string(body))
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("❌ Failed to get workers. Status: %s\n", resp.Status)
+		return
+	}
+
+	var workers []map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&workers); err != nil {
+		fmt.Println("❌ Failed to decode response:", err)
+		return
+	}
+
+	if len(workers) == 0 {
+		fmt.Println("❌ No workers found.")
+		return
+	}
+
+	fmt.Println("✅ Workers List:")
+	for _, worker := range workers {
+		fmt.Printf("ID: %v\n", worker["Id"])
+		fmt.Printf("User ID: %v\n", worker["IdUser"])
+		fmt.Printf("Job Title: %s\n", worker["JobTitle"])
+		fmt.Println("------------------------------")
+	}
 }
 
 func AcceptOrder(client *http.Client, reader *bufio.Reader) {
@@ -104,17 +153,17 @@ func AcceptOrder(client *http.Client, reader *bufio.Reader) {
 
 	body, _ := io.ReadAll(resp.Body)
 
-	var pretty map[string]interface{}
-
-	prettyJSON, err := json.MarshalIndent(pretty, "", "  ")
-	if err != nil {
-		fmt.Println("❌ Failed to format JSON:", err)
-		fmt.Println("Raw Response:", string(body))
+	var response map[string]interface{}
+	if err := json.Unmarshal(body, &response); err != nil {
+		fmt.Println("❌ Failed to decode JSON:", err)
 		return
 	}
 
-	fmt.Println("✅ Response:")
-	fmt.Println(string(prettyJSON))
+	if msg, exists := response["message"]; exists {
+		fmt.Printf("✅ %v\n", msg)
+	} else {
+		fmt.Println("❌ No success message found in response.")
+	}
 }
 
 func GetWorkerOrders(client *http.Client) {
@@ -144,13 +193,13 @@ func GetWorkerOrders(client *http.Client) {
 	}
 
 	if len(orders) == 0 {
-		fmt.Println("ℹ️ No orders found for this worker.")
+		fmt.Println("No orders found for this worker.")
 		return
 	}
 
 	fmt.Println("📦 Worker Orders:")
 	for i, order := range orders {
-		fmt.Printf("\n📝 Order #%d\n", i+1)
+		fmt.Printf("\n Order #%d\n", i+1)
 		for key, value := range order {
 			fmt.Printf("   %s: %v\n", key, value)
 		}

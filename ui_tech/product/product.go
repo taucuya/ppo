@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -82,7 +83,11 @@ func CreateProduct(client *http.Client, reader *bufio.Reader) {
 	}
 }
 
-func DeleteProduct(client *http.Client, id string) {
+func DeleteProduct(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product ID to delete: ")
+	id, _ := reader.ReadString('\n')
+	id = strings.TrimSpace(id)
+
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/product/"+id, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -103,9 +108,12 @@ func DeleteProduct(client *http.Client, id string) {
 	}
 }
 
-func GetProduct(client *http.Client, query string) {
-	url := "http://localhost:8080/api/v1/product/?" + query
+func GetProduct(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter search query (e.g. Name=ProductName): ")
+	query, _ := reader.ReadString('\n')
+	query = strings.TrimSpace(query)
 
+	url := "http://localhost:8080/api/v1/product/?" + query
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -119,15 +127,35 @@ func GetProduct(client *http.Client, query string) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		fmt.Printf("❌ Failed to get product. Status: %s\nDetails: %s\n", resp.Status, string(body))
+		return
+	}
+
 	var product map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&product); err != nil {
 		fmt.Println("❌ Failed to decode product:", err)
 		return
 	}
-	fmt.Printf("✅ Product: %+v\n", product)
+
+	fmt.Println("✅ Product Information:")
+	fmt.Printf("  ID:          %v\n", product["Id"])
+	fmt.Printf("  Name:        %v\n", product["Name"])
+	fmt.Printf("  Description: %v\n", product["Description"])
+	fmt.Printf("  Price:       %.2f\n", product["Price"])
+	fmt.Printf("  Category:    %v\n", product["Category"])
+	fmt.Printf("  Amount:      %v\n", product["Amount"])
+	fmt.Printf("  Brand ID:    %v\n", product["IdBrand"])
+	fmt.Printf("  Articule:    %v\n", product["Articule"])
+	fmt.Printf("  Picture URL: %v\n", product["PicLink"])
 }
 
-func GetProductsByCategory(client *http.Client, category string) {
+func GetProductsByCategory(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Category: ")
+	category, _ := reader.ReadString('\n')
+	category = strings.TrimSpace(category)
+
 	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/product/category/"+category, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -141,18 +169,33 @@ func GetProductsByCategory(client *http.Client, category string) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		fmt.Printf("❌ Failed to get products. Status: %s\nDetails: %s\n", resp.Status, string(body))
+		return
+	}
+
 	var products []map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
 		fmt.Println("❌ Failed to decode products:", err)
 		return
 	}
-	fmt.Println("✅ Products in category:")
-	for _, p := range products {
-		fmt.Println(p)
+
+	if len(products) == 0 {
+		fmt.Println("No products found in this category.")
+		return
+	}
+	fmt.Printf("✅ Products in category '%s':\n", category)
+	for i, p := range products {
+		fmt.Printf("%d. %v — %v руб. (ID: %v)\n", i+1, p["Name"], p["Price"], p["Id"])
 	}
 }
 
-func GetProductsByBrand(client *http.Client, brand string) {
+func GetProductsByBrand(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Brand: ")
+	brand, _ := reader.ReadString('\n')
+	brand = strings.TrimSpace(brand)
+
 	url := fmt.Sprintf("http://localhost:8080/api/v1/product/brand/%s", brand)
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -173,8 +216,9 @@ func GetProductsByBrand(client *http.Client, brand string) {
 		fmt.Println("❌ Failed to decode products:", err)
 		return
 	}
+
 	fmt.Println("✅ Products by brand:")
-	for _, p := range products {
-		fmt.Println(p)
+	for i, p := range products {
+		fmt.Printf("%d. %v — %v руб. (ID: %v)\n", i+1, p["Name"], p["Price"], p["Id"])
 	}
 }

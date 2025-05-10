@@ -46,7 +46,6 @@ func CreateReview(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer YOUR_TOKEN")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -59,7 +58,7 @@ func CreateReview(client *http.Client, reader *bufio.Reader) {
 	json.NewDecoder(resp.Body).Decode(&result)
 
 	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅", result["message"])
+		fmt.Println("✅ Review created!")
 	} else {
 		fmt.Println("❌ Failed to create review:", result["error"])
 	}
@@ -88,7 +87,13 @@ func GetReviewById(client *http.Client, reader *bufio.Reader) {
 	}
 
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Review:", review)
+		fmt.Println("✅ Review Details:")
+		fmt.Printf("- ID: %v\n", review["Id"])
+		fmt.Printf("- Product ID: %v\n", review["IdProduct"])
+		fmt.Printf("- User ID: %v\n", review["IdUser"])
+		fmt.Printf("- Rating: %v/5\n", review["Rating"])
+		fmt.Printf("- Text: %v\n", review["Text"])
+		fmt.Printf("- Date: %v\n", review["Date"])
 	} else {
 		fmt.Println("❌ Error:", review["error"])
 	}
@@ -117,9 +122,20 @@ func GetReviewsByProductId(client *http.Client, reader *bufio.Reader) {
 	}
 
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Reviews:")
+		fmt.Println("✅ Reviews for Product ID:", pid)
+		if len(reviews) == 0 {
+			fmt.Println("No reviews found for this product.")
+			return
+		}
+
 		for _, r := range reviews {
-			fmt.Println(r)
+			fmt.Println("\n---- Review ----")
+			fmt.Printf("Review ID: %v\n", r["Id"])
+			fmt.Printf("User ID: %v\n", r["IdUser"])
+			fmt.Printf("Rating: %v/5\n", r["Rating"])
+			fmt.Printf("Text: %v\n", r["Text"])
+			fmt.Printf("Date: %v\n", r["Date"])
+			fmt.Println("-----------------")
 		}
 	} else {
 		fmt.Println("❌ Failed to get reviews")
@@ -146,7 +162,7 @@ func DeleteReview(client *http.Client, reader *bufio.Reader) {
 	json.NewDecoder(resp.Body).Decode(&result)
 
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅", result["message"])
+		fmt.Println("✅ Review deleted!")
 	} else {
 		fmt.Println("❌ Failed to delete review:", result["error"])
 	}

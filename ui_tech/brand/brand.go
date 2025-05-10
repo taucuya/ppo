@@ -59,7 +59,11 @@ func CreateBrand(client *http.Client, reader *bufio.Reader) {
 	}
 }
 
-func GetBrandById(client *http.Client, brandID string) {
+func GetBrandById(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Brand ID: ")
+	brandID, _ := reader.ReadString('\n')
+	brandID = strings.TrimSpace(brandID)
+
 	id, err := uuid.Parse(brandID)
 	if err != nil {
 		fmt.Println("❌ Invalid brand ID:", err)
@@ -74,18 +78,20 @@ func GetBrandById(client *http.Client, brandID string) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK {
-		var brand map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&brand)
-		fmt.Println("✅ Brand details:")
-		fmt.Printf("%+v\n", brand)
-	} else {
-		body, _ := io.ReadAll(resp.Body)
-		fmt.Printf("❌ Error: %s\n", string(body))
+	var brand map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&brand); err != nil {
+		fmt.Println("❌ Failed to decode response:", err)
+		return
 	}
+
+	fmt.Printf("✅ Brand ID: %v, Name: %v, \n Description: %v, Price category: %v\n", brand["Id"],
+		brand["Name"], brand["Description"], brand["PriceCategory"])
 }
 
-func DeleteBrand(client *http.Client, brandID string) {
+func DeleteBrand(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Brand ID: ")
+	brandID, _ := reader.ReadString('\n')
+	brandID = strings.TrimSpace(brandID)
 	id, err := uuid.Parse(brandID)
 	if err != nil {
 		fmt.Println("❌ Invalid brand ID:", err)
@@ -114,7 +120,11 @@ func DeleteBrand(client *http.Client, brandID string) {
 	}
 }
 
-func GetBrandsByCategory(client *http.Client, category string) {
+func GetBrandsByCategory(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Category: ")
+	category, _ := reader.ReadString('\n')
+	category = strings.TrimSpace(category)
+
 	url := fmt.Sprintf("http://localhost:8080/api/v1/brand/category/%s", category)
 	resp, err := client.Get(url)
 	if err != nil {
@@ -128,7 +138,7 @@ func GetBrandsByCategory(client *http.Client, category string) {
 		json.NewDecoder(resp.Body).Decode(&brands)
 		fmt.Println("✅ Brands in category:", category)
 		for _, brand := range brands {
-			fmt.Printf("- %v\t%v\n", brand["Name"], brand["Id"])
+			fmt.Printf("- %v ID: %v \n", brand["Name"], brand["Id"])
 		}
 	} else {
 		body, _ := io.ReadAll(resp.Body)

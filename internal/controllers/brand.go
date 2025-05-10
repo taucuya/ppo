@@ -80,11 +80,6 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {
-	good := c.Verify(ctx)
-	if !good {
-		return
-	}
-
 	category := ctx.Param("cat")
 
 	res, err := c.BrandService.GetAllBrandsInCategory(ctx, category)

@@ -47,13 +47,13 @@ func (s *Service) GetById(ctx context.Context, id uuid.UUID) (structs.Product, e
 	return p, nil
 }
 
-func (s *Service) GetByName(ctx context.Context, name string) (structs.Product, error) {
-	p, err := s.rep.GetByName(ctx, name)
-	if err != nil {
-		return structs.Product{}, err
-	}
-	return p, nil
-}
+// func (s *Service) GetByName(ctx context.Context, name string) (structs.Product, error) {
+// 	p, err := s.rep.GetByName(ctx, name)
+// 	if err != nil {
+// 		return structs.Product{}, err
+// 	}
+// 	return p, nil
+// }
 
 func (s *Service) GetByArticule(ctx context.Context, art string) (structs.Product, error) {
 	p, err := s.rep.GetByArticule(ctx, art)

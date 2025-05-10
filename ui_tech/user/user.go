@@ -25,9 +25,23 @@ func GetUserByEmail(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	var data map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&data)
-	fmt.Printf("✅ User: %+v\n", data)
+	var user map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+		fmt.Println("❌ Failed to decode user data:", err)
+		return
+	}
+
+	fmt.Println("✅ User Information:")
+	fmt.Println("---------------------------")
+	fmt.Printf("User ID: %v\n", user["Id"])
+	fmt.Printf("Name: %v\n", user["Name"])
+	fmt.Printf("Date of Birth: %v\n", user["Date_of_birth"])
+	fmt.Printf("Email: %v\n", user["Mail"])
+	fmt.Printf("Phone: %v\n", user["Phone"])
+	fmt.Printf("Address: %v\n", user["Address"])
+	fmt.Printf("Status: %v\n", user["Status"])
+	fmt.Printf("Role: %v\n", user["Role"])
+	fmt.Println("---------------------------")
 }
 
 func GetUserByPhone(client *http.Client, reader *bufio.Reader) {
@@ -51,7 +65,21 @@ func GetUserByPhone(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	var data map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&data)
-	fmt.Printf("✅ User: %+v\n", data)
+	var user map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+		fmt.Println("❌ Failed to decode user data:", err)
+		return
+	}
+
+	fmt.Println("✅ User Information:")
+	fmt.Println("---------------------------")
+	fmt.Printf("User ID: %v\n", user["Id"])
+	fmt.Printf("Name: %v\n", user["Name"])
+	fmt.Printf("Date of Birth: %v\n", user["Date_of_birth"])
+	fmt.Printf("Email: %v\n", user["Mail"])
+	fmt.Printf("Phone: %v\n", user["Phone"])
+	fmt.Printf("Address: %v\n", user["Address"])
+	fmt.Printf("Status: %v\n", user["Status"])
+	fmt.Printf("Role: %v\n", user["Role"])
+	fmt.Println("---------------------------")
 }
