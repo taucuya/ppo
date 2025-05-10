@@ -29,8 +29,7 @@ func (rep *Repository) Create(ctx context.Context, w structs.Worker) error {
 	if err != nil {
 		return err
 	}
-	_, err = rep.db.ExecContext(ctx, `update "user" set role = 
-	"worker" where id_user = $1`, wr.IdUser)
+	_, err = rep.db.ExecContext(ctx, `update "user" set role = $1 where id = $2`, "работник склада", wr.IdUser)
 	return err
 }
 
@@ -46,6 +45,32 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Worke
 		JobTitle: w.JobTitle,
 	}
 	return wr, nil
+}
+
+func (rep *Repository) GetOrders(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	var wid uuid.UUID
+	if err := rep.db.GetContext(ctx, &wid, `select id from worker where id_user = $1`, id); err != nil {
+		return nil, err
+	}
+	var o []rep_structs.Order
+	err := rep.db.SelectContext(ctx, &o, `select * from "order" where id in (select 
+	id_order from order_worker where id_worker = $1)`, wid)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get orders: %w", err)
+	}
+	var ords []structs.Order
+	for _, v := range o {
+		ords = append(ords, structs.Order{
+			Id:      v.Id,
+			Date:    v.Date,
+			IdUser:  v.IdUser,
+			Address: v.Address,
+			Status:  v.Status,
+			Price:   v.Price,
+		})
+	}
+
+	return ords, nil
 }
 
 func (rep *Repository) Delete(ctx context.Context, id uuid.UUID) error {
@@ -80,8 +105,13 @@ func (rep *Repository) GetAllWorkers(ctx context.Context) ([]structs.Worker, err
 	return w, nil
 }
 
-func (rep *Repository) AcceptOrder(ctx context.Context, id_order uuid.UUID, id_worker uuid.UUID) error {
-	_, err := rep.db.ExecContext(ctx, `update "order" set id_worker = $1 where id = $2`, id_worker, id_order)
+func (rep *Repository) AcceptOrder(ctx context.Context, id_order uuid.UUID, id uuid.UUID) error {
+	var wid uuid.UUID
+	if err := rep.db.GetContext(ctx, &wid, `select id from worker where id_user = $1`, id); err != nil {
+		return err
+	}
+
+	_, err := rep.db.ExecContext(ctx, `insert into order_worker (id_order, id_worker) values ($1, $2)`, id_order, wid)
 	if err != nil {
 		return err
 	}

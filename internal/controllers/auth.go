@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -17,8 +18,6 @@ func (c *Controller) SignupHandler(ctx *gin.Context) {
 		Password    string `json:"password" binding:"required"`
 		Phone       string `json:"phone" binding:"required"`
 		Address     string `json:"address" binding:"required"`
-		Status      string `json:"status"`
-		Role        string `json:"role"`
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
@@ -38,12 +37,13 @@ func (c *Controller) SignupHandler(ctx *gin.Context) {
 		Password:      input.Password,
 		Phone:         input.Phone,
 		Address:       input.Address,
-		Status:        input.Status,
-		Role:          input.Role,
+		Status:        "новый",
+		Role:          "обычный пользователь",
 	}
 
 	if err := c.AuthServise.SignIn(ctx.Request.Context(), user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
+		fmt.Println(err)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (c *Controller) LoginHandler(ctx *gin.Context) {
 
 	ctx.SetCookie("access_token", accessToken, 900, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "localhost", false, true)
-
+	fmt.Println("Set access_token:", accessToken)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 	})
@@ -120,4 +120,48 @@ func (c *Controller) Verify(ctx *gin.Context) bool {
 		return true
 	}
 	return false
+}
+
+func (c *Controller) VerifyA(ctx *gin.Context) bool {
+	if good := c.Verify(ctx); !good {
+		return false
+	}
+
+	atoken, err := ctx.Cookie("access_token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return false
+	}
+
+	id, err := c.AuthServise.GetId(atoken)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return false
+	}
+
+	good := c.AuthServise.CheckAdmin(context.Background(), id)
+	return good
+}
+
+func (c *Controller) VerifyW(ctx *gin.Context) bool {
+	if good := c.Verify(ctx); !good {
+		return false
+	}
+
+	atoken, err := ctx.Cookie("access_token")
+	if err != nil {
+		fmt.Println(4, err)
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return false
+	}
+
+	id, err := c.AuthServise.GetId(atoken)
+	if err != nil {
+		fmt.Println(5, err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return false
+	}
+
+	good := c.AuthServise.CheckWorker(context.Background(), id)
+	return good
 }

@@ -10,14 +10,20 @@ import (
 type ProductService interface {
 	Create(ctx context.Context, p structs.Product) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.Product, error)
+	GetByName(ctx context.Context, name string) (structs.Product, error)
+	GetByArticule(ctx context.Context, art string) (structs.Product, error)
 	GetByCategory(ctx context.Context, category string) ([]structs.Product, error)
+	GetByBrand(ctx context.Context, brand string) ([]structs.Product, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type ProductRepository interface {
 	Create(ctx context.Context, p structs.Product) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.Product, error)
+	GetByName(ctx context.Context, name string) (structs.Product, error)
+	GetByArticule(ctx context.Context, art string) (structs.Product, error)
 	GetByCategory(ctx context.Context, category string) ([]structs.Product, error)
+	GetByBrand(ctx context.Context, brand string) ([]structs.Product, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 type Service struct {
@@ -41,8 +47,32 @@ func (s *Service) GetById(ctx context.Context, id uuid.UUID) (structs.Product, e
 	return p, nil
 }
 
+func (s *Service) GetByName(ctx context.Context, name string) (structs.Product, error) {
+	p, err := s.rep.GetByName(ctx, name)
+	if err != nil {
+		return structs.Product{}, err
+	}
+	return p, nil
+}
+
+func (s *Service) GetByArticule(ctx context.Context, art string) (structs.Product, error) {
+	p, err := s.rep.GetByArticule(ctx, art)
+	if err != nil {
+		return structs.Product{}, err
+	}
+	return p, nil
+}
+
 func (s *Service) GetByCategory(ctx context.Context, category string) ([]structs.Product, error) {
 	p, err := s.rep.GetByCategory(ctx, category)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
+}
+
+func (s *Service) GetByBrand(ctx context.Context, brand string) ([]structs.Product, error) {
+	p, err := s.rep.GetByBrand(ctx, brand)
 	if err != nil {
 		return nil, err
 	}

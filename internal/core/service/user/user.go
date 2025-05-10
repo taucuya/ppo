@@ -31,8 +31,8 @@ type Service struct {
 	bsk UsrBasket
 }
 
-func New(rep UserRepository) *Service {
-	return &Service{rep: rep}
+func New(rep UserRepository, bsk UsrBasket) *Service {
+	return &Service{rep: rep, bsk: bsk}
 }
 
 func (s *Service) Create(ctx context.Context, u structs.User) error {

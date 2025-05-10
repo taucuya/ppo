@@ -109,17 +109,17 @@ func (mr *MockBasketServiceMockRecorder) GetItems(ctx, id_basket interface{}) *g
 }
 
 // UpdateItemAmount mocks base method.
-func (m *MockBasketService) UpdateItemAmount(ctx context.Context, id uuid.UUID, amount int) error {
+func (m *MockBasketService) UpdateItemAmount(ctx context.Context, user_id, product_id uuid.UUID, amount int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateItemAmount", ctx, id, amount)
+	ret := m.ctrl.Call(m, "UpdateItemAmount", ctx, user_id, product_id, amount)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateItemAmount indicates an expected call of UpdateItemAmount.
-func (mr *MockBasketServiceMockRecorder) UpdateItemAmount(ctx, id, amount interface{}) *gomock.Call {
+func (mr *MockBasketServiceMockRecorder) UpdateItemAmount(ctx, user_id, product_id, amount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItemAmount", reflect.TypeOf((*MockBasketService)(nil).UpdateItemAmount), ctx, id, amount)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItemAmount", reflect.TypeOf((*MockBasketService)(nil).UpdateItemAmount), ctx, user_id, product_id, amount)
 }
 
 // MockBasketRepository is a mock of BasketRepository interface.
@@ -233,15 +233,15 @@ func (mr *MockBasketRepositoryMockRecorder) GetItems(ctx, id_basket interface{})
 }
 
 // UpdateItemAmount mocks base method.
-func (m *MockBasketRepository) UpdateItemAmount(ctx context.Context, id uuid.UUID, amount int) error {
+func (m *MockBasketRepository) UpdateItemAmount(ctx context.Context, basket_id, product_id uuid.UUID, amount int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateItemAmount", ctx, id, amount)
+	ret := m.ctrl.Call(m, "UpdateItemAmount", ctx, basket_id, product_id, amount)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateItemAmount indicates an expected call of UpdateItemAmount.
-func (mr *MockBasketRepositoryMockRecorder) UpdateItemAmount(ctx, id, amount interface{}) *gomock.Call {
+func (mr *MockBasketRepositoryMockRecorder) UpdateItemAmount(ctx, basket_id, product_id, amount interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItemAmount", reflect.TypeOf((*MockBasketRepository)(nil).UpdateItemAmount), ctx, id, amount)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateItemAmount", reflect.TypeOf((*MockBasketRepository)(nil).UpdateItemAmount), ctx, basket_id, product_id, amount)
 }

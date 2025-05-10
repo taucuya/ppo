@@ -2,6 +2,7 @@ package basket
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/taucuya/ppo/internal/core/structs"
@@ -12,8 +13,8 @@ type BasketService interface {
 	GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error)
 	GetItems(ctx context.Context, id_basket uuid.UUID) ([]structs.BasketItem, error)
 	AddItem(ctx context.Context, i structs.BasketItem) error
-	DeleteItem(ctx context.Context, id uuid.UUID) error
-	UpdateItemAmount(ctx context.Context, id uuid.UUID, amount int) error
+	DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.UUID) error
+	UpdateItemAmount(ctx context.Context, user_id uuid.UUID, product_id uuid.UUID, amount int) error
 }
 
 type BasketRepository interface {
@@ -22,8 +23,8 @@ type BasketRepository interface {
 	GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error)
 	GetItems(ctx context.Context, id_basket uuid.UUID) ([]structs.BasketItem, error)
 	AddItem(ctx context.Context, i structs.BasketItem) error
-	DeleteItem(ctx context.Context, id uuid.UUID) error
-	UpdateItemAmount(ctx context.Context, id uuid.UUID, amount int) error
+	DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.UUID) error
+	UpdateItemAmount(ctx context.Context, basket_id uuid.UUID, product_id uuid.UUID, amount int) error
 }
 
 type Service struct {
@@ -41,6 +42,7 @@ func (s *Service) Create(ctx context.Context, b structs.Basket) error {
 
 func (s *Service) GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error) {
 	bid, err := s.rep.GetBIdByUId(ctx, id)
+	fmt.Println(bid)
 	if err != nil {
 		return structs.Basket{}, err
 	}
@@ -59,17 +61,32 @@ func (s *Service) GetItems(ctx context.Context, id_user uuid.UUID) ([]structs.Ba
 	return arr, nil
 }
 
-func (s *Service) AddItem(ctx context.Context, i structs.BasketItem) error {
-	err := s.rep.AddItem(ctx, i)
+func (s *Service) AddItem(ctx context.Context, i structs.BasketItem, id uuid.UUID) error {
+	bid, err := s.rep.GetBIdByUId(ctx, id)
+	if err != nil {
+		return err
+	}
+	i.IdBasket = bid
+	err = s.rep.AddItem(ctx, i)
 	return err
 }
 
-func (s *Service) DeleteItem(ctx context.Context, id uuid.UUID) error {
-	err := s.rep.DeleteItem(ctx, id)
+func (s *Service) DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.UUID) error {
+	bid, err := s.rep.GetBIdByUId(ctx, id)
+	if err != nil {
+		return err
+	}
+	err = s.rep.DeleteItem(ctx, bid, product_id)
 	return err
 }
 
-func (s *Service) UpdateItemAmount(ctx context.Context, id uuid.UUID, amount int) error {
-	err := s.rep.UpdateItemAmount(ctx, id, amount)
+func (s *Service) UpdateItemAmount(ctx context.Context, id uuid.UUID, product_id uuid.UUID, amount int) error {
+	bid, err := s.rep.GetBIdByUId(ctx, id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	err = s.rep.UpdateItemAmount(ctx, bid, product_id, amount)
+	fmt.Println(err)
 	return err
 }

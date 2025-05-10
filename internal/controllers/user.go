@@ -4,10 +4,14 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	email := ctx.Query("email")
 	if email == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email parameter is required"})
@@ -27,23 +31,33 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 	})
 }
 
-func (c *Controller) GetUserByIdHandler(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
-		return
-	}
+// func (c *Controller) GetUserByIdHandler(ctx *gin.Context) {
+// 	good := c.VerifyA(ctx)
+// 	if !good {
+// 		return
+// 	}
 
-	user, err := c.UserService.GetById(ctx, id)
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
+// 	id, err := uuid.Parse(ctx.Param("id"))
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+// 		return
+// 	}
 
-	ctx.JSON(http.StatusOK, user)
-}
+// 	user, err := c.UserService.GetById(ctx, id)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+// 		return
+// 	}
+
+// 	ctx.JSON(http.StatusOK, user)
+// }
 
 func (c *Controller) GetUserByPhoneHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	phone := ctx.Query("phone")
 	if phone == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Phone parameter is required"})

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mockgen -source=service/auth/auth.go -destination=mock_structs/auth_mock.go -package=auth_mock
+mockgen -source=service/auth/auth.go -destination=mock_structs/auth_mock.go -package=mock_structs
 mockgen -source=service/user/user.go -destination=mock_structs/user_mock.go -package=mock_structs
 mockgen -source=service/basket/basket.go -destination=mock_structs/basket_mock.go -package=mock_structs
 mockgen -source=service/brand/brand.go -destination=mock_structs/brand_mock.go -package=mock_structs

@@ -14,11 +14,10 @@ type OrderItem struct {
 }
 
 type Order struct {
-	Id       uuid.UUID `db:"id"`
-	Date     time.Time `db:"date"`
-	IdUser   uuid.UUID `db:"id_user"`
-	Address  string    `db:"address"`
-	Status   string    `db:"status"`
-	Price    float64   `db:"price"`
-	IdWorker uuid.UUID `db:"id_worker"`
+	Id      uuid.UUID `db:"id"`
+	Date    time.Time `db:"date"`
+	IdUser  uuid.UUID `db:"id_user"`
+	Address string    `db:"address"`
+	Status  string    `db:"status"`
+	Price   float64   `db:"price"`
 }

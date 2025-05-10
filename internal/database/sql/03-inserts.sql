@@ -1,93 +1,102 @@
--- вставляем пользователей
+-- Вставляем пользователей с новыми ролями
+-- Вставляем пользователей с хешированными паролями (bcrypt)
 INSERT INTO "user" (name, date_of_birth, mail, password, phone, address, status, role) VALUES
-('Иван Иванов', '1990-05-15', 'ivan@example.com', 'password123', '+79161234567', 'ул. Ленина, 10', 'active', 'customer'),
-('Петр Петров', '1985-08-20', 'petr@example.com', 'password456', '+79162345678', 'ул. Пушкина, 5', 'active', 'customer'),
-('Анна Сидорова', '1995-02-10', 'anna@example.com', 'password789', '+79163456789', 'пр. Мира, 15', 'active', 'customer'),
-('Мария Кузнецова', '1988-11-30', 'maria@example.com', 'password012', '+79164567890', 'ул. Гагарина, 3', 'active', 'customer'),
-('Алексей Смирнов', '1992-07-25', 'alex@example.com', 'password345', '+79165678901', 'ул. Кирова, 7', 'active', 'customer'),
-('Елена Волкова', '1993-04-18', 'elena@example.com', 'password678', '+79166789012', 'ул. Советская, 22', 'active', 'customer'),
-('Дмитрий Федоров', '1987-09-05', 'dmitry@example.com', 'password901', '+79167890123', 'ул. Садовая, 14', 'active', 'customer'),
-('Ольга Морозова', '1991-12-12', 'olga@example.com', 'password234', '+79168901234', 'ул. Лесная, 8', 'active', 'customer'),
-('Сергей Николаев', '1989-06-28', 'sergey@example.com', 'password567', '+79169012345', 'пр. Победы, 17', 'active', 'customer'),
-('Наталья Павлова', '1994-03-08', 'natalya@example.com', 'password890', '+79160123456', 'ул. Цветочная, 9', 'active', 'customer');
+-- Обычные пользователи (пароль: user123)
+('Анна Смирнова', '1990-05-15', 'anna.smirnova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79161234567', 'ул. Ленина, 10', 'active', 'обычный пользователь'),
+('Елена Кузнецова', '1985-08-20', 'elena.kuznetsova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79162345678', 'ул. Пушкина, 5', 'active', 'обычный пользователь'),
+('Мария Иванова', '1995-02-10', 'maria.ivanova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79163456789', 'пр. Мира, 15', 'active', 'обычный пользователь'),
+('Ольга Петрова', '1988-11-30', 'olga.petrova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79164567890', 'ул. Гагарина, 3', 'active', 'обычный пользователь'),
+('Ирина Соколова', '1992-07-25', 'irina.sokolova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79165678901', 'ул. Кирова, 7', 'active', 'обычный пользователь'),
+('Наталья Волкова', '1993-04-18', 'natalia.volkova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79166789012', 'ул. Советская, 22', 'active', 'обычный пользователь'),
+('Виктория Федорова', '1987-09-05', 'victoria.fedorova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79167890123', 'ул. Садовая, 14', 'active', 'обычный пользователь'),
+('Юлия Морозова', '1991-12-12', 'julia.morozova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79168901234', 'ул. Лесная, 8', 'active', 'обычный пользователь'),
+('Александра Николаева', '1989-06-28', 'alexandra.nikolaeva@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79169012345', 'пр. Победы, 17', 'active', 'обычный пользователь'),
+('Екатерина Павлова', '1994-03-08', 'ekaterina.pavlova@example.com', '$2a$10$hNf8wXJLsL5W5X3d6p1rE.9zJ9uY1V8bQ1kQk6Z7m3vW2d7X1lJ5K', '+79160123456', 'ул. Цветочная, 9', 'active', 'обычный пользователь'),
 
--- вставляем бренды
-insert into brand (name, description, price_category) values
-('nike', 'американский производитель спортивной одежды', 'premium'),
-('adidas', 'немецкий производитель спортивной одежды', 'premium'),
-('puma', 'немецкий производитель спортивной одежды', 'medium'),
-('reebok', 'производитель спортивной одежды', 'medium'),
-('under armour', 'американский бренд спортивной одежды', 'premium'),
-('new balance', 'американский производитель обуви', 'medium'),
-('asics', 'японский производитель спортивной обуви', 'medium'),
-('fila', 'итальянский спортивный бренд', 'economy'),
-('decathlon', 'французский производитель спортивных товаров', 'economy'),
-('columbia', 'американский производитель outdoor-одежды', 'premium');
+-- Администратор (пароль: admin123)
+('Алексей Администратор', '1980-01-01', 'admin@cosmetics.ru', '$2a$10$hgdzX0MIbqxmHuMT76vEx.HVN2cNM7DSW2cIKJhkKBJP0ImJRZ9VO', '+79150000001', 'ул. Центральная, 1', 'active', 'админ'),
 
--- вставляем продукты
-insert into product (name, description, price, category, amount, id_brand, pic_link, art) values
-('кроссовки air max', 'кроссовки для бега с технологией air', 12000.00, 'обувь', 15, (select id from brand where name = 'nike'), '/images/airmax.jpg', 'art001'),
-('футболка спортивная', 'дышащая футболка для тренировок', 2500.00, 'одежда', 50, (select id from brand where name = 'adidas'), '/images/t-shirt.jpg', 'art002'),
-('шорты беговые', 'легкие шорты с карманом для телефона', 3500.00, 'одежда', 30, (select id from brand where name = 'puma'), '/images/shorts.jpg', 'art003'),
-('кепка бейсболка', 'кепка с защитой от солнца', 1800.00, 'аксессуары', 25, (select id from brand where name = 'reebok'), '/images/cap.jpg', 'art004'),
-('рюкзак спортивный', 'рюкзак с отделением для ноутбука', 4500.00, 'аксессуары', 20, (select id from brand where name = 'under armour'), '/images/backpack.jpg', 'art005'),
-('носки спортивные', 'носки с анатомической поддержкой', 800.00, 'аксессуары', 100, (select id from brand where name = 'new balance'), '/images/socks.jpg', 'art006'),
-('леггинсы женские', 'леггинсы с высокой талией', 4200.00, 'одежда', 35, (select id from brand where name = 'asics'), '/images/leggings.jpg', 'art007'),
-('куртка ветровка', 'ветровка с мембраной', 7500.00, 'одежда', 18, (select id from brand where name = 'fila'), '/images/jacket.jpg', 'art008'),
-('перчатки для бега', 'перчатки для бега в холодную погоду', 2200.00, 'аксессуары', 40, (select id from brand where name = 'decathlon'), '/images/gloves.jpg', 'art009'),
-('очки спортивные', 'очки с защитой от ультрафиолета', 3800.00, 'аксессуары', 22, (select id from brand where name = 'columbia'), '/images/glasses.jpg', 'art010');
+-- Работники склада (пароль: worker123)
+('Иван Складской', '1985-03-15', 'worker1@cosmetics.ru', '$2a$10$hgdzX0MIbqxmHuMT76vEx.HVN2cNM7DSW2cIKJhkKBJP0ImJRZ9VO', '+79150000002', 'ул. Складская, 5', 'active', 'работник склада'),
+('Петр Складской', '1988-07-20', 'worker2@cosmetics.ru', '$2a$10$hgdzX0MIbqxmHuMT76vEx.HVN2cNM7DSW2cIKJhkKBJP0ImJRZ9VO', '+79150000003', 'ул. Складская, 10', 'active', 'работник склада'),
+('Сергей Складской', '1990-11-30', 'worker3@cosmetics.ru', '$2a$10$hgdzX0MIbqxmHuMT76vEx.HVN2cNM7DSW2cIKJhkKBJP0ImJRZ9VO', '+79150000004', 'ул. Складская, 15', 'active', 'работник склада');
 
--- вставляем корзины
-insert into basket (id_user, date) 
-select id, now() - (random() * 30 || ' days')::interval 
-from "user" limit 10;
+-- Вставляем бренды с новыми категориями
+INSERT INTO brand (name, description, price_category) VALUES
+('L''Oreal', 'Французский косметический бренд премиум-класса', 'люкс'),
+('Estée Lauder', 'Американский люксовый бренд косметики', 'люкс'),
+('Maybelline', 'Бюджетный бренд декоративной косметики', 'бюджет'),
+('Nivea', 'Немецкий бренд по уходу за кожей', 'средний сегмент'),
+('Garnier', 'Французский бренд косметики для ухода', 'средний сегмент'),
+('Clinique', 'Американский бренд гипоаллергенной косметики', 'люкс'),
+('Revlon', 'Международный бренд декоративной косметики', 'средний сегмент'),
+('The Ordinary', 'Канадский бренд уходовой косметики', 'средний сегмент'),
+('La Roche-Posay', 'Французская аптечная косметика', 'люкс'),
+('NYX', 'Бренд профессиональной декоративной косметики', 'средний сегмент');
 
--- вставляем работников
-WITH ranked_users AS (
-  SELECT id, row_number() OVER () as rn FROM "user" LIMIT 10
-)
+INSERT INTO product (name, description, price, category, amount, id_brand, pic_link, art) VALUES
+('Тональный крем True Match', 'Тональный крем с SPF 30, 30 мл', 2500.00, 'декоративная', 15, (SELECT id FROM brand WHERE name = 'L''Oreal'), '/images/foundation.jpg', 'LOR-TM-001'),
+('Тушь для ресниц Lash Sensational', 'Объемная тушь для ресниц', 1200.00, 'декоративная', 50, (SELECT id FROM brand WHERE name = 'Maybelline'), '/images/mascara.jpg', 'MAY-LS-002'),
+('Увлажняющий крем Soft', 'Крем для лица с гиалуроновой кислотой, 50 мл', 1800.00, 'уход', 30, (SELECT id FROM brand WHERE name = 'Nivea'), '/images/moisturizer.jpg', 'NIV-SF-003'),
+('Помада Super Lustrous', 'Стойкая матовая помада, 4.5 г', 1500.00, 'декоративная', 25, (SELECT id FROM brand WHERE name = 'Revlon'), '/images/lipstick.jpg', 'REV-SL-004'),
+('Сыворотка Vitamin C', 'Сыворотка с витамином С, 30 мл', 3500.00, 'уход', 20, (SELECT id FROM brand WHERE name = 'The Ordinary'), '/images/serum.jpg', 'ORD-VC-005'),
+('Очищающий гель Pure Active', 'Гель для умывания для проблемной кожи', 900.00, 'уход', 100, (SELECT id FROM brand WHERE name = 'Garnier'), '/images/cleanser.jpg', 'GAR-PA-006'),
+('Тени для век Ultimate', 'Палетка теней, 12 оттенков', 2800.00, 'декоративная', 35, (SELECT id FROM brand WHERE name = 'NYX'), '/images/eyeshadow.jpg', 'NYX-UL-007'),
+('Солнцезащитный крем Anthelios', 'Крем с SPF 50, 50 мл', 2200.00, 'уход', 18, (SELECT id FROM brand WHERE name = 'La Roche-Posay'), '/images/sunscreen.jpg', 'LRP-AN-008'),
+('Духи Beautiful', 'Цветочный аромат, 50 мл', 6500.00, 'парфюмерия', 40, (SELECT id FROM brand WHERE name = 'Estée Lauder'), '/images/perfume.jpg', 'EST-BF-009'),
+('Крем для рук Deep Comfort', 'Интенсивный уход за сухой кожей рук', 800.00, 'уход', 22, (SELECT id FROM brand WHERE name = 'Clinique'), '/images/handcream.jpg', 'CLI-DC-010');
+
+
+-- Вставляем 4 работника (1 админ и 3 работника склада)
 INSERT INTO worker (id_user, job_title)
-SELECT id,
-  CASE rn
-    WHEN 1 THEN 'менеджер'
-    WHEN 2 THEN 'администратор'
-    WHEN 3 THEN 'курьер'
-    WHEN 4 THEN 'маркетолог'
-    WHEN 5 THEN 'аналитик'
-    WHEN 6 THEN 'директор'
-    WHEN 7 THEN 'бухгалтер'
-    WHEN 8 THEN 'hr-специалист'
-    WHEN 9 THEN 'логист'
-    WHEN 10 THEN 'контент-менеджер'
+SELECT id, 
+  CASE 
+    WHEN mail = 'admin@cosmetics.ru' THEN 'admin'
+    ELSE 'worker'
   END
-FROM ranked_users;
+FROM "user" 
+WHERE role IN ('админ', 'работник склада');
 
-
--- вставляем заказы
+-- Вставляем заказы с новыми статусами
 WITH ranked_users AS (
-  SELECT id, address, row_number() OVER () as rn FROM "user" LIMIT 10
-),
-worker_list AS (
-  SELECT id, row_number() OVER () as rn FROM worker
+  SELECT id, address, row_number() OVER () as rn FROM "user" WHERE role = 'обычный пользователь' LIMIT 10
 )
-INSERT INTO "order" (date, id_user, address, status, price, id_worker)
+INSERT INTO "order" (date, id_user, address, status, price)
 SELECT 
   now() - (random() * 90 || ' days')::interval,
   u.id,
   u.address,
-  CASE (u.rn % 4)
-    WHEN 0 THEN 'completed'
-    WHEN 1 THEN 'processing'
-    WHEN 2 THEN 'shipped'
-    WHEN 3 THEN 'cancelled'
+  CASE (u.rn % 5)
+    WHEN 0 THEN 'некорректный'
+    WHEN 1 THEN 'непринятый'
+    WHEN 2 THEN 'принятый'
+    WHEN 3 THEN 'собранный'
+    WHEN 4 THEN 'отданный'
   END,
-  (random() * 10000 + 1000)::numeric(10,2),
+  (random() * 10000 + 1000)::numeric(10,2)
+FROM ranked_users u;
+
+WITH target_orders AS (
+  SELECT id FROM "order" WHERE status IN ('принятый', 'собранный', 'отданный')
+),
+target_workers AS (
+  SELECT id, row_number() OVER () as rn FROM worker WHERE job_title = 'работник склада'
+),
+numbered_orders AS (
+  SELECT id, row_number() OVER () as rn FROM target_orders
+)
+
+INSERT INTO order_worker (id_order, id_worker)
+SELECT 
+  o.id,
   w.id
-FROM ranked_users u
-JOIN worker_list w ON w.rn = ((u.rn - 1) % 10 + 1);
+FROM numbered_orders o
+JOIN target_workers w ON (o.rn % (SELECT COUNT(*) FROM target_workers)) + 1 = w.rn;
 
+INSERT INTO basket (id_user, date) 
+SELECT id, now() - (random() * 30 || ' days')::interval 
+FROM "user" LIMIT 10;
 
--- вставляем элементы корзины
 WITH basket_list AS (
   SELECT id, row_number() OVER () as rn FROM basket LIMIT 10
 ),
@@ -106,8 +115,7 @@ FROM series s
 JOIN basket_list b ON b.rn = s.i
 JOIN product_list p ON p.rn = s.i;
 
-
--- вставляем элементы заказа
+-- Вставляем элементы заказа
 WITH order_list AS (
   SELECT id, row_number() OVER () as rn FROM "order" LIMIT 10
 ),
@@ -126,8 +134,7 @@ FROM series s
 JOIN order_list o ON o.rn = s.i
 JOIN product_list p ON p.rn = s.i;
 
-
--- вставляем отзывы
+-- Вставляем отзывы с валидными рейтингами
 WITH product_list AS (
   SELECT id, row_number() OVER () as rn FROM product LIMIT 10
 ),
@@ -143,19 +150,13 @@ SELECT
   u.id,
   (random() * 4 + 1)::int,
   CASE (s.i % 5)
-    WHEN 0 THEN 'отличный товар, всем рекомендую!'
-    WHEN 1 THEN 'хорошее качество за свои деньги'
-    WHEN 2 THEN 'не совсем то, что ожидал'
-    WHEN 3 THEN 'пока не понял, как пользоваться'
-    WHEN 4 THEN 'лучшее, что я покупал за последнее время'
+    WHEN 0 THEN 'Отличный продукт, всем рекомендую!'
+    WHEN 1 THEN 'Хорошее качество за свои деньги'
+    WHEN 2 THEN 'Не совсем то, что ожидала'
+    WHEN 3 THEN 'Пока не поняла, как правильно использовать'
+    WHEN 4 THEN 'Лучшее, что я покупала за последнее время'
   END,
   now() - (random() * 180 || ' days')::interval
 FROM series s
 JOIN product_list p ON p.rn = s.i
 JOIN user_list u ON u.rn = s.i;
-
-
--- вставляем пустые токены
-insert into token (rtoken) values 
-(null), (null), (null), (null), (null), 
-(null), (null), (null), (null), (null);

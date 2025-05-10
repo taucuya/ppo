@@ -14,11 +14,10 @@ type OrderItem struct {
 }
 
 type Order struct {
-	Id       uuid.UUID
-	Date     time.Time
-	IdUser   uuid.UUID
-	Address  string
-	Status   string
-	Price    float64
-	IdWorker uuid.UUID
+	Id      uuid.UUID
+	Date    time.Time
+	IdUser  uuid.UUID
+	Address string
+	Status  string
+	Price   float64
 }

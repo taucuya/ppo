@@ -7,3 +7,8 @@ type Worker struct {
 	IdUser   uuid.UUID
 	JobTitle string
 }
+
+type WorkersOrders struct {
+	IdOrder  uuid.UUID
+	IdWorker uuid.UUID
+}

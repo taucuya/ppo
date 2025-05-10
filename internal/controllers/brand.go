@@ -10,6 +10,11 @@ import (
 )
 
 func (c *Controller) CreateBrandHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	var input struct {
 		Name          string `json:"name"`
 		Description   string `json:"description"`
@@ -34,6 +39,11 @@ func (c *Controller) CreateBrandHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand ID format"})
@@ -50,6 +60,11 @@ func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 
 	if err != nil {
@@ -65,6 +80,11 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {
+	good := c.Verify(ctx)
+	if !good {
+		return
+	}
+
 	category := ctx.Param("cat")
 
 	res, err := c.BrandService.GetAllBrandsInCategory(ctx, category)

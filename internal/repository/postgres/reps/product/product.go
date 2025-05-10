@@ -46,6 +46,49 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Produ
 		return structs.Product{}, fmt.Errorf("failed to get product: %w", err)
 	}
 	pr := structs.Product{
+		Id:          p.Id,
+		Name:        p.Name,
+		Description: p.Description,
+		Price:       p.Price,
+		Category:    p.Category,
+		Amount:      p.Amount,
+		IdBrand:     p.IdBrand,
+		PicLink:     p.PicLink,
+		Articule:    p.Articule,
+	}
+	return pr, nil
+}
+
+func (rep *Repository) GetByName(ctx context.Context, name string) (structs.Product, error) {
+	var p rep_structs.Product
+	err := rep.db.GetContext(ctx, &p,
+		`select * from product where name = $1`, name)
+	if err != nil {
+		return structs.Product{}, fmt.Errorf("failed to get product: %w", err)
+	}
+	pr := structs.Product{
+		Id:          p.Id,
+		Name:        p.Name,
+		Description: p.Description,
+		Price:       p.Price,
+		Category:    p.Category,
+		Amount:      p.Amount,
+		IdBrand:     p.IdBrand,
+		PicLink:     p.PicLink,
+		Articule:    p.Articule,
+	}
+	return pr, nil
+}
+
+func (rep *Repository) GetByArticule(ctx context.Context, art string) (structs.Product, error) {
+	var p rep_structs.Product
+	err := rep.db.GetContext(ctx, &p,
+		`select * from product where art = $1`, art)
+	if err != nil {
+		return structs.Product{}, fmt.Errorf("failed to get product: %w", err)
+	}
+	pr := structs.Product{
+		Id:          p.Id,
 		Name:        p.Name,
 		Description: p.Description,
 		Price:       p.Price,
@@ -61,6 +104,31 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Produ
 func (rep *Repository) GetByCategory(ctx context.Context, category string) ([]structs.Product, error) {
 	var ps []rep_structs.Product
 	if err := rep.db.SelectContext(ctx, &ps, `select * from product where category = $1`, category); err != nil {
+		return nil, err
+	}
+
+	var products []structs.Product
+
+	for _, v := range ps {
+		products = append(products, structs.Product{
+			Id:          v.Id,
+			Name:        v.Name,
+			Description: v.Description,
+			Price:       v.Price,
+			Category:    v.Category,
+			Amount:      v.Amount,
+			IdBrand:     v.IdBrand,
+			PicLink:     v.PicLink,
+			Articule:    v.Articule,
+		})
+	}
+	return products, nil
+}
+
+func (rep *Repository) GetByBrand(ctx context.Context, brand string) ([]structs.Product, error) {
+	var ps []rep_structs.Product
+	if err := rep.db.SelectContext(ctx, &ps, `select * from product where id_brand in
+	 (select id from brand where name = $1)`, brand); err != nil {
 		return nil, err
 	}
 

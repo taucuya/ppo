@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -16,12 +17,16 @@ type AuthService interface {
 	LogOut(ctx context.Context, id uuid.UUID) error
 	VerifyAToken(ctx context.Context, token string) error
 	VerifyRToken(ctx context.Context, token string) (uuid.UUID, error)
+	CheckAdmin(ctx context.Context, id uuid.UUID) bool
+	CheckWorker(ctx context.Context, id uuid.UUID) bool
 	RefreshToken(ctx context.Context, atoken string, rtoken string) (string, error)
 }
 
 type AuthRepository interface {
 	CreateToken(ctx context.Context, id uuid.UUID, rtoken string) error
 	VerifyToken(ctx context.Context, token string) (uuid.UUID, error)
+	CheckAdmin(ctx context.Context, id uuid.UUID) bool
+	CheckWorker(ctx context.Context, id uuid.UUID) bool
 	DeleteToken(ctx context.Context, id uuid.UUID) error
 }
 
@@ -34,6 +39,7 @@ type AuthProvider interface {
 	GenToken(ctx context.Context, id uuid.UUID) (atoken string, rtoken string, err error)
 	VerifyToken(ctx context.Context, token string) (bool, error)
 	RefreshToken(ctx context.Context, atoken string, rtoken string) (string, error)
+	ExtractUserID(tokenStr string) (uuid.UUID, error)
 }
 
 type Service struct {
@@ -48,23 +54,26 @@ func New(prov AuthProvider, rep AuthRepository, usr AuthUser) *Service {
 
 func (s *Service) SignIn(ctx context.Context, u structs.User) error {
 	return s.usr.Create(ctx, u)
-
 }
 
 func (s *Service) LogIn(ctx context.Context, mail string, password string) (atoken string, rtoken string, err error) {
 	u, err := s.usr.GetByMail(ctx, mail)
 	if err != nil {
+		fmt.Println(err)
 		return "", "", err
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
+		fmt.Println(err)
 		return "", "", err
 	}
 	atoken, rtoken, err = s.prov.GenToken(ctx, u.Id)
 	if err != nil {
+		fmt.Println(err)
 		return "", "", err
 	}
 	err = s.rep.CreateToken(ctx, u.Id, rtoken)
 	if err != nil {
+		fmt.Println(err)
 		return "", "", err
 	}
 	return atoken, rtoken, err
@@ -129,4 +138,19 @@ func (s *Service) VerifyTokens(ctx context.Context, atoken string, rtoken string
 	}
 
 	return newAccessToken, accessValid, refreshValid, nil
+}
+
+func (s *Service) CheckAdmin(ctx context.Context, id uuid.UUID) bool {
+	good := s.rep.CheckAdmin(ctx, id)
+	return good
+}
+
+func (s *Service) CheckWorker(ctx context.Context, id uuid.UUID) bool {
+	good := s.rep.CheckWorker(ctx, id)
+	return good
+}
+
+func (s *Service) GetId(token string) (uuid.UUID, error) {
+	id, err := s.prov.ExtractUserID(token)
+	return id, err
 }

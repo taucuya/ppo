@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,32 +11,42 @@ import (
 )
 
 func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
+	good := c.Verify(ctx)
+	fmt.Println(good)
+	if !good {
+		return
+	}
+
 	var input struct {
-		IdProduct string `json:"id_product"`
-		IdUser    string `json:"id_user"`
-		Rating    int    `json:"rating"`
-		Text      string `json:"r_text"`
+		Rating int    `json:"rating"`
+		Text   string `json:"r_text"`
 	}
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	id_prd, err := uuid.Parse(input.IdProduct)
+	id_prd, err := uuid.Parse(ctx.Param("id_product"))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID format"})
 		return
 	}
 
-	id_usr, err := uuid.Parse(input.IdUser)
+	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return
+	}
+
+	id, err := c.AuthServise.GetId(atoken)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
 	r := structs.Review{
 		IdProduct: id_prd,
-		IdUser:    id_usr,
+		IdUser:    id,
 		Rating:    input.Rating,
 		Text:      input.Text,
 		Date:      time.Now(),
@@ -50,6 +61,11 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
+	good := c.Verify(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid review ID format"})
@@ -66,6 +82,11 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

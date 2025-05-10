@@ -75,6 +75,7 @@ func (rep *Repository) ReviewsForProduct(ctx context.Context, id_product uuid.UU
 	var r []structs.Review
 	for _, v := range rws {
 		r = append(r, structs.Review{
+			Id:        v.Id,
 			IdProduct: v.IdProduct,
 			IdUser:    v.IdUser,
 			Rating:    v.Rating,

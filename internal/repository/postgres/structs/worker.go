@@ -7,3 +7,8 @@ type Worker struct {
 	IdUser   uuid.UUID `db:"id_user"`
 	JobTitle string    `db:"job_title"`
 }
+
+type WorkersOrders struct {
+	IdOrder  uuid.UUID `db:"id_order"`
+	IdWorker uuid.UUID `db:"id_worker"`
+}

@@ -26,7 +26,6 @@ func (rep *Repository) Create(ctx context.Context, u structs.User) (uuid.UUID, e
 	}
 
 	usr := rep_struct.User{
-		Id:            u.Id,
 		Name:          u.Name,
 		Date_of_birth: u.Date_of_birth,
 		Mail:          u.Mail,
@@ -37,16 +36,26 @@ func (rep *Repository) Create(ctx context.Context, u structs.User) (uuid.UUID, e
 		Role:          u.Role,
 	}
 	var id uuid.UUID
-	err = rep.db.GetContext(ctx, &id,
-		`insert into "user" 
+	query := `
+		insert into "user" 
 		(name, date_of_birth, mail, password, phone, address, status, role) 
-		values (:name, :date_of_birth, :mail, :password, :phone, :address, :status, :role) 
-		returning id`, usr)
+		values ($1, $2, $3, $4, $5, $6, $7, $8) 
+		returning id`
+
+	err = rep.db.GetContext(ctx, &id, query,
+		usr.Name,
+		usr.Date_of_birth,
+		usr.Mail,
+		usr.Password,
+		usr.Phone,
+		usr.Address,
+		usr.Status,
+		usr.Role,
+	)
 
 	if err != nil {
 		return uuid.UUID{}, err
 	}
-	fmt.Println(err)
 	return id, err
 }
 

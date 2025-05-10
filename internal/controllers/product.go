@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,6 +11,11 @@ import (
 )
 
 func (c *Controller) CreateProductHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	var input struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
@@ -27,12 +33,14 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 
 	pr, err := strconv.ParseFloat(input.Price, 64)
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	id_brnd, err := uuid.Parse(input.IdBrand)
 	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
 		return
 	}
@@ -49,6 +57,7 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	}
 
 	if err := c.ProductService.Create(ctx, p); err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -56,23 +65,55 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Product created"})
 }
 
-func (c *Controller) GetProductByIdHandler(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID format"})
+func (c *Controller) GetProductHandler(ctx *gin.Context) {
+	good := c.Verify(ctx)
+	if !good {
 		return
 	}
 
-	product, err := c.ProductService.GetById(ctx, id)
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
-		return
+	if id := ctx.Query("id"); id != "" {
+		pid, err := uuid.Parse(id)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID format"})
+			return
+		}
+
+		product, err := c.ProductService.GetById(ctx, pid)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, product)
+	}
+	// if name := ctx.Query("name"); name != "" {
+	// 	product, err := c.ProductService.GetByName(ctx, name)
+	// 	if err != nil {
+	// 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+	// 		return
+	// 	}
+
+	// 	ctx.JSON(http.StatusOK, product)
+	// }
+	if art := ctx.Query("art"); art != "" {
+		product, err := c.ProductService.GetByArticule(ctx, art)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, product)
 	}
 
-	ctx.JSON(http.StatusOK, product)
+	ctx.JSON(http.StatusBadRequest, gin.H{"error": "No valid query parameter provided"})
 }
 
 func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -90,6 +131,17 @@ func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
 	category := ctx.Param("category")
 	products, err := c.ProductService.GetByCategory(ctx, category)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, products)
+}
+
+func (c *Controller) GetProductsByBrandHandler(ctx *gin.Context) {
+	brand := ctx.Param("brand")
+	products, err := c.ProductService.GetByBrand(ctx, brand)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

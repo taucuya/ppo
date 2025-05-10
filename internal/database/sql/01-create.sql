@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS product CASCADE;
 DROP TABLE IF EXISTS brand CASCADE;
 DROP TABLE IF EXISTS "user" CASCADE;
 DROP TABLE IF EXISTS token CASCADE;
+DROP TABLE IF EXISTS order_worker CASCADE;
 
 create table if not exists "user" (
     id uuid primary key default uuid_generate_v4(),
@@ -68,9 +69,17 @@ create table if not exists "order" (
     id_user uuid,
     address text,
     status varchar(50),
-    price decimal(10,2),
-    id_worker uuid
+    price decimal(10,2)
 );
+
+CREATE TABLE IF NOT EXISTS order_worker (
+    id_order UUID,
+    id_worker UUID,
+    PRIMARY KEY (id_order, id_worker),
+    CONSTRAINT fk_order FOREIGN KEY (id_order) REFERENCES "order"(id) ON DELETE SET NULL,
+    CONSTRAINT fk_worker FOREIGN KEY (id_worker) REFERENCES worker(id) ON DELETE SET NULL
+);
+
 
 create table if not exists order_item (
     id uuid primary key default uuid_generate_v4(),

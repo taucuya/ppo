@@ -64,8 +64,6 @@ func main() {
 		"/home/taya/Desktop/ppoft/src/internal/database/sql/03-inserts.sql",
 	})
 
-	fmt.Println(err)
-
 	key := []byte(uuid.New().String())
 
 	ar := auth_rep.New(db)
@@ -78,9 +76,9 @@ func main() {
 	ur := user_rep.New(db)
 	wr := worker_rep.New(db)
 
-	us := user.New(ur)
-	as := auth.New(ap, ar, us)
 	bas := basket.New(bar)
+	us := user.New(ur, bas)
+	as := auth.New(ap, ar, us)
 	brs := brand.New(brr)
 	oss := order.New(or)
 	ps := product.New(pr)
@@ -88,9 +86,9 @@ func main() {
 	ws := worker.New(wr)
 
 	c := controller.Controller{
+		BasketService:  *bas,
 		UserService:    *us,
 		AuthServise:    *as,
-		BasketService:  *bas,
 		BrandService:   *brs,
 		OrderService:   *oss,
 		ProductService: *ps,
@@ -110,9 +108,10 @@ func main() {
 
 		basket := api.Group("/basket")
 		{
-			basket.GET("/:id/items", c.GetBasketItemsHandler)
+			basket.GET("/items", c.GetBasketItemsHandler)
 			basket.POST("", c.AddBasketItemHandler)
-			basket.DELETE("/:id", c.DeleteBasketItemHandler)
+			basket.GET("", c.GetBasketByIdHandler)
+			basket.DELETE("", c.DeleteBasketItemHandler)
 			basket.PUT("", c.UpdateBasketItemAmountHandler)
 		}
 
@@ -120,13 +119,16 @@ func main() {
 		{
 			brand.POST("", c.CreateBrandHandler)
 			brand.DELETE("/:id", c.DeleteBrandHandler)
-			brand.GET("/:cat", c.GetAllBrandsInCategoryHander)
+			brand.GET("/:id", c.GetBrandByIdHandler)
+			brand.GET("/category/:cat", c.GetAllBrandsInCategoryHander)
 		}
 
 		order := api.Group("/order")
 		{
 			order.POST("", c.CreateOrderHandler)
 			order.GET("/:id/items", c.GetOrderItemsHandler)
+			order.GET("/freeorders", c.GetFreeOrdersHandler)
+			order.GET("/:id", c.GetOrderByIdHandler)
 			order.PUT("/:id/status", c.ChangeOrderStatusHandler)
 			order.DELETE("/:id", c.DeleteOrderHandler)
 			order.PUT("/:id", c.AcceptOrderHandler)
@@ -136,19 +138,23 @@ func main() {
 		{
 			product.POST("", c.CreateProductHandler)
 			product.DELETE("/:id", c.DeleteProductHandler)
-			product.GET("/:category", c.GetProductsByCategoryHandler)
+			product.GET("/", c.GetProductHandler)
+			product.GET("/category/:category", c.GetProductsByCategoryHandler)
+			product.GET("/brand/:brand", c.GetProductsByBrandHandler)
 			product.GET("/reviews/:id", c.GetReviewsForProductHandler)
 		}
 
 		review := api.Group("/review")
 		{
-			review.POST("", c.CreateReviewHandler)
+			review.POST("product/:id_product", c.CreateReviewHandler)
+			review.GET("/:id", c.GetReviewByIdHandler)
 			review.DELETE("/:id", c.DeleteReviewHandler)
 		}
 
 		user := api.Group("/user")
 		{
 			user.GET("/email", c.GetUserByEmailHandler)
+			// user.GET("/:id", c.GetUserByIdHandler)
 			user.GET("/phone", c.GetUserByPhoneHandler)
 		}
 
@@ -156,8 +162,10 @@ func main() {
 		{
 			worker.POST("", c.CreateWorkerHandler)
 			worker.GET("", c.GetAllWorkersHandler)
+			worker.POST("/accept", c.AcceptOrderHandler)
 			worker.GET("/:id", c.GetWorkerByIdHandler)
 			worker.DELETE("/:id", c.DeleteWorkerHandler)
+			worker.GET("/orders", c.GetWorkerOrders)
 		}
 	}
 

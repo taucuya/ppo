@@ -25,6 +25,18 @@ func (rep *Repository) CreateToken(ctx context.Context, id uuid.UUID, rtoken str
 	}
 }
 
+func (rep *Repository) CheckAdmin(ctx context.Context, id uuid.UUID) bool {
+	var wid uuid.UUID
+	err := rep.db.GetContext(ctx, &wid, `select id from worker where id_user = $1 and job_title = $2`, id, "admin")
+	return err == nil
+}
+
+func (rep *Repository) CheckWorker(ctx context.Context, id uuid.UUID) bool {
+	var wid uuid.UUID
+	err := rep.db.GetContext(ctx, &wid, `select id from worker where id_user = $1 and job_title = $2`, id, "worker")
+	return err == nil
+}
+
 func (rep *Repository) VerifyToken(ctx context.Context, token string) (uuid.UUID, error) {
 	var id uuid.UUID
 	err := rep.db.GetContext(ctx, &id, "select id from token where rtoken = $1", token)

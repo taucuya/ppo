@@ -21,18 +21,17 @@ func New(db *sqlx.DB) *Repository {
 func (rep *Repository) Create(ctx context.Context, o structs.Order) error {
 	var id uuid.UUID
 	ord := rep_structs.Order{
-		Date:     o.Date,
-		IdUser:   o.IdUser,
-		Address:  o.Address,
-		Status:   o.Status,
-		Price:    o.Price,
-		IdWorker: o.IdWorker,
+		Date:    o.Date,
+		IdUser:  o.IdUser,
+		Address: o.Address,
+		Status:  o.Status,
+		Price:   o.Price,
 	}
 	err := rep.db.QueryRowContext(ctx, `
-		insert into "order" (date, id_user, address, status, price, id_worker) 
-		values ($1, $2, $3, $4, $5, $6) 
+		insert into "order" (date, id_user, address, status, price) 
+		values ($1, $2, $3, $4, $5) 
 		returning id`,
-		ord.Date, ord.IdUser, ord.Address, ord.Status, ord.Price, ord.IdWorker).Scan(&id)
+		ord.Date, ord.IdUser, ord.Address, ord.Status, ord.Price).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -46,6 +45,20 @@ func (rep *Repository) Create(ctx context.Context, o structs.Order) error {
 	if err != nil {
 		return err
 	}
+
+	var sm float64
+	err = rep.db.GetContext(ctx, &sm, `select sum(p.price * b.amount) as total_price from basket_item b
+			join product p on b.id_product = p.id where b.id_basket = $1;`, basket_id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = rep.db.ExecContext(ctx, `update "order" set price = $1 where id = $2`, sm, id)
+	if err != nil {
+		return err
+	}
+
 	for _, item := range items {
 		_, err := rep.db.ExecContext(ctx,
 			"insert into order_item (id_product, id_order, amount) values ($1, $2, $3)",
@@ -64,12 +77,11 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Order
 		return structs.Order{}, fmt.Errorf("failed to get order: %w", err)
 	}
 	ord := structs.Order{
-		Date:     o.Date,
-		IdUser:   o.IdUser,
-		Address:  o.Address,
-		Status:   o.Status,
-		Price:    o.Price,
-		IdWorker: o.IdWorker,
+		Date:    o.Date,
+		IdUser:  o.IdUser,
+		Address: o.Address,
+		Status:  o.Status,
+		Price:   o.Price,
 	}
 	return ord, nil
 }
@@ -90,6 +102,26 @@ func (rep *Repository) GetItems(ctx context.Context, id uuid.UUID) ([]structs.Or
 		})
 	}
 	return itms, nil
+}
+
+func (rep *Repository) GetFreeOrders(ctx context.Context) ([]structs.Order, error) {
+	var orders []rep_structs.Order
+	err := rep.db.SelectContext(ctx, &orders, `select * from "order" where status = $1`, "непринятый")
+	if err != nil {
+		return nil, err
+	}
+	var ords []structs.Order
+	for _, v := range orders {
+		ords = append(ords, structs.Order{
+			Id:      v.Id,
+			Date:    v.Date,
+			IdUser:  v.IdUser,
+			Address: v.Address,
+			Status:  v.Status,
+			Price:   v.Price,
+		})
+	}
+	return ords, nil
 }
 
 func (rep *Repository) GetStatus(ctx context.Context, id uuid.UUID) (string, error) {

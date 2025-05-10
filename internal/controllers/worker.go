@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,11 @@ import (
 )
 
 func (c *Controller) CreateWorkerHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	var input struct {
 		IdUser   uuid.UUID `json:"id_user"`
 		JobTitle string    `json:"job_title"`
@@ -33,6 +39,11 @@ func (c *Controller) CreateWorkerHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) DeleteWorkerHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid worker ID format"})
@@ -48,6 +59,11 @@ func (c *Controller) DeleteWorkerHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetWorkerByIdHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid worker ID format"})
@@ -63,7 +79,41 @@ func (c *Controller) GetWorkerByIdHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, worker)
 }
 
+func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
+	good := c.VerifyW(ctx)
+	if !good {
+		return
+	}
+
+	atoken, err := ctx.Cookie("access_token")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return
+	}
+
+	id, err := c.AuthServise.GetId(atoken)
+	if err != nil {
+		fmt.Println(1, err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+
+	worker, err := c.WorkerService.GetOrders(ctx, id)
+	if err != nil {
+		fmt.Println(2, err)
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Orders not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, worker)
+}
+
 func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
 	workers, err := c.WorkerService.GetAllWorkers(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -74,27 +124,35 @@ func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) AcceptOrderHandler(ctx *gin.Context) {
-	var input struct {
-		WorkerID string `json:"id_worker"`
-	}
-
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	good := c.VerifyW(ctx)
+	if !good {
 		return
 	}
-	orderID, err := uuid.Parse(ctx.Param("id"))
+
+	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID format"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
-	workerID, err := uuid.Parse(input.WorkerID)
+	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid worker ID format"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
 		return
 	}
 
-	if err := c.WorkerService.AcceptOrder(ctx, orderID, workerID); err != nil {
+	orderID := ctx.Query("order_id")
+	if orderID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email parameter is required"})
+		return
+	}
+
+	id_ord, err := uuid.Parse(orderID)
+	if err != nil {
+		return
+	}
+
+	if err := c.WorkerService.AcceptOrder(ctx, id_ord, id); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -39,8 +39,9 @@ func (rep *Repository) GetBIdByUId(ctx context.Context, id uuid.UUID) (uuid.UUID
 }
 
 func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error) {
-	var b structs.Basket
+	var b rep_structs.Basket
 	err := rep.db.GetContext(ctx, &b, "select * from basket where id = $1", id)
+	fmt.Println(err)
 	if err != nil {
 		return structs.Basket{}, fmt.Errorf("failed to scan basket: %w", err)
 	} else {
@@ -85,11 +86,23 @@ func (rep *Repository) AddItem(ctx context.Context, i structs.BasketItem) error 
 	}
 
 	var item rep_structs.BasketItem
+	var am int
+	if err := rep.db.GetContext(ctx, &am, `select amount from product where id = $1`, i.IdProduct); err != nil {
+		return err
+	}
+	if am < i.Amount {
+		return fmt.Errorf(`not enouth products on warehouse`)
+	}
 
-	err := rep.db.GetContext(ctx, &item, `select * from basket_item where id_basket = $1
+	_, err := rep.db.ExecContext(ctx, `update product set amount = $1 where id = $2`, am-i.Amount, i.IdProduct)
+	if err != nil {
+		return err
+	}
+
+	err = rep.db.GetContext(ctx, &item, `select * from basket_item where id_basket = $1
 	 and id_product = $2`, i.IdBasket, i.IdProduct)
 	if err != sql.ErrNoRows {
-		err = rep.UpdateItemAmount(ctx, item.Id, item.Amount+it.Amount)
+		err = rep.UpdateItemAmount(ctx, i.IdBasket, i.IdProduct, item.Amount+it.Amount)
 	} else {
 		_, err = rep.db.NamedExecContext(ctx, `insert into basket_item (id_product, id_basket, amount) 
 		values (:id_product, :id_basket, :amount)`, it)
@@ -97,8 +110,8 @@ func (rep *Repository) AddItem(ctx context.Context, i structs.BasketItem) error 
 	return err
 }
 
-func (rep *Repository) DeleteItem(ctx context.Context, id uuid.UUID) error {
-	result, err := rep.db.ExecContext(ctx, "delete from basket_item where id = $1", id)
+func (rep *Repository) DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.UUID) error {
+	result, err := rep.db.ExecContext(ctx, "delete from basket_item where id_product = $1 and id_basket = $2", product_id, id)
 	if err != nil {
 		return err
 	}
@@ -115,7 +128,7 @@ func (rep *Repository) DeleteItem(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (rep *Repository) UpdateItemAmount(ctx context.Context, id uuid.UUID, amount int) error {
-	_, err := rep.db.ExecContext(ctx, "update basket_item set amount = $1 where id = $2", amount, id)
+func (rep *Repository) UpdateItemAmount(ctx context.Context, basket_id uuid.UUID, product_id uuid.UUID, amount int) error {
+	_, err := rep.db.ExecContext(ctx, "update basket_item set amount = $1 where id_product = $2 and id_basket = $3", amount, product_id, basket_id)
 	return err
 }

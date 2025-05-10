@@ -64,6 +64,21 @@ func (mr *MockProductServiceMockRecorder) Delete(ctx, id interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductService)(nil).Delete), ctx, id)
 }
 
+// GetByArticule mocks base method.
+func (m *MockProductService) GetByArticule(ctx context.Context, art string) (structs.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByArticule", ctx, art)
+	ret0, _ := ret[0].(structs.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByArticule indicates an expected call of GetByArticule.
+func (mr *MockProductServiceMockRecorder) GetByArticule(ctx, art interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArticule", reflect.TypeOf((*MockProductService)(nil).GetByArticule), ctx, art)
+}
+
 // GetByCategory mocks base method.
 func (m *MockProductService) GetByCategory(ctx context.Context, category string) ([]structs.Product, error) {
 	m.ctrl.T.Helper()
@@ -92,6 +107,21 @@ func (m *MockProductService) GetById(ctx context.Context, id uuid.UUID) (structs
 func (mr *MockProductServiceMockRecorder) GetById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockProductService)(nil).GetById), ctx, id)
+}
+
+// GetByName mocks base method.
+func (m *MockProductService) GetByName(ctx context.Context, name string) (structs.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByName", ctx, name)
+	ret0, _ := ret[0].(structs.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByName indicates an expected call of GetByName.
+func (mr *MockProductServiceMockRecorder) GetByName(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockProductService)(nil).GetByName), ctx, name)
 }
 
 // MockProductRepository is a mock of ProductRepository interface.
@@ -145,6 +175,21 @@ func (mr *MockProductRepositoryMockRecorder) Delete(ctx, id interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProductRepository)(nil).Delete), ctx, id)
 }
 
+// GetByArticule mocks base method.
+func (m *MockProductRepository) GetByArticule(ctx context.Context, art string) (structs.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByArticule", ctx, art)
+	ret0, _ := ret[0].(structs.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByArticule indicates an expected call of GetByArticule.
+func (mr *MockProductRepositoryMockRecorder) GetByArticule(ctx, art interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArticule", reflect.TypeOf((*MockProductRepository)(nil).GetByArticule), ctx, art)
+}
+
 // GetByCategory mocks base method.
 func (m *MockProductRepository) GetByCategory(ctx context.Context, category string) ([]structs.Product, error) {
 	m.ctrl.T.Helper()
@@ -173,4 +218,19 @@ func (m *MockProductRepository) GetById(ctx context.Context, id uuid.UUID) (stru
 func (mr *MockProductRepositoryMockRecorder) GetById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockProductRepository)(nil).GetById), ctx, id)
+}
+
+// GetByName mocks base method.
+func (m *MockProductRepository) GetByName(ctx context.Context, name string) (structs.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByName", ctx, name)
+	ret0, _ := ret[0].(structs.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByName indicates an expected call of GetByName.
+func (mr *MockProductRepositoryMockRecorder) GetByName(ctx, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByName", reflect.TypeOf((*MockProductRepository)(nil).GetByName), ctx, name)
 }

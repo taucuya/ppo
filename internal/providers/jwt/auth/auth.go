@@ -111,3 +111,18 @@ func (p *Provider) RefreshToken(ctx context.Context, atoken string, rtoken strin
 
 	return newAccessToken, nil
 }
+
+func (p *Provider) ExtractUserID(tokenStr string) (uuid.UUID, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(tokenStr, jwt.MapClaims{})
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if idStr, ok := claims["id"].(string); ok {
+			return uuid.Parse(idStr)
+		}
+	}
+
+	return uuid.Nil, jwt.ErrTokenMalformed
+}
