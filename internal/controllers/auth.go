@@ -71,7 +71,7 @@ func (c *Controller) LoginHandler(ctx *gin.Context) {
 
 	ctx.SetCookie("access_token", accessToken, 900, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "localhost", false, true)
-	fmt.Println("Set access_token:", accessToken)
+	// fmt.Println("Set access_token:", accessToken)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 	})

@@ -24,11 +24,22 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"id":            user.Id,
-		"name":          user.Name,
-		"date_of_birth": user.Date_of_birth.Format("2006-01-02"),
-	})
+	ctx.JSON(http.StatusOK, user)
+}
+
+func (c *Controller) GetAllUsersHandler(ctx *gin.Context) {
+	good := c.VerifyA(ctx)
+	if !good {
+		return
+	}
+
+	user, err := c.UserService.GetAllUsers(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
 }
 
 // func (c *Controller) GetUserByIdHandler(ctx *gin.Context) {
@@ -70,9 +81,5 @@ func (c *Controller) GetUserByPhoneHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"id":            user.Id,
-		"name":          user.Name,
-		"date_of_birth": user.Date_of_birth.Format("2006-01-02"),
-	})
+	ctx.JSON(http.StatusOK, user)
 }

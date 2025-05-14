@@ -2,13 +2,13 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	client_auth "github.com/taucuya/ppo/ui_tech/auth"
 	client_basket "github.com/taucuya/ppo/ui_tech/basket"
 	client_brand "github.com/taucuya/ppo/ui_tech/brand"
@@ -31,11 +31,123 @@ var client = &http.Client{
 	Jar: mustCookieJar(),
 }
 
+func printWelcome() {
+	cyan := color.New(color.FgCyan).Add(color.Bold)
+	yellow := color.New(color.FgYellow)
+	client := color.New(color.FgGreen)
+	worker := color.New(color.FgBlue)
+	admin := color.New(color.FgRed)
+	white := color.New(color.FgWhite)
+
+	cyan.Println("\n╔════════════════════════════════════════════╗")
+	cyan.Println("║           WELCOME TO VIRTUAL' CLI          ║")
+	cyan.Println("╚════════════════════════════════════════════╝")
+
+	white.Println("\nAvailable commands:")
+
+	yellow.Println("\n  [ Auth ]")
+	client.Printf("  %-20s", "signup")
+	white.Println("- Register new account")
+	client.Printf("  %-20s", "login")
+	white.Println("- Log into your account")
+	client.Printf("  %-20s", "logout")
+	white.Println("- Log out from current account")
+
+	yellow.Println("\n  [ User ]")
+	admin.Printf("  %-20s", "get-user-email")
+	white.Println("- Get user by email")
+	admin.Printf("  %-20s", "get-user-phone")
+	white.Println("- Get user by phone")
+	admin.Printf("  %-20s", "get-all-user")
+	white.Println("- Get all users")
+
+	yellow.Println("\n  [ Basket ]")
+	admin.Printf("  %-20s", "get-basket")
+	white.Println("- View your basket")
+	client.Printf("  %-20s", "get-basket-items")
+	white.Println("- View items in your basket")
+	client.Printf("  %-20s", "add-to-basket")
+	white.Println("- Add product to basket")
+	client.Printf("  %-20s", "delete-from-basket")
+	white.Println("- Remove product from basket")
+	client.Printf("  %-20s", "update-item-amount")
+	white.Println("- Change product quantity in basket")
+
+	yellow.Println("\n  [ Brand ]")
+	admin.Printf("  %-20s", "create-brand")
+	white.Println("- Add new brand")
+	client.Printf("  %-20s", "get-brands-category")
+	white.Println("- Get brands by category")
+	admin.Printf("  %-20s", "get-brand")
+	white.Println("- Get brand by its id")
+	admin.Printf("  %-20s", "delete-brand")
+	white.Println("- Delete brand from brand list")
+
+	yellow.Println("\n  [ Products ]")
+	admin.Printf("  %-20s", "create-product")
+	white.Println("- Add new product (admin)")
+	admin.Printf("  %-20s", "delete-product")
+	white.Println("- Remove product (admin)")
+	client.Printf("  %-20s", "get-product")
+	white.Println("- View product details")
+	client.Printf("  %-20s", "get-products-brand")
+	white.Println("- List products by brand")
+	client.Printf("  %-20s", "get-products-category")
+	white.Println("- List products by category")
+
+	yellow.Println("\n  [ Orders ]")
+	client.Printf("  %-20s", "create-order")
+	white.Println("- Create order from basket")
+	admin.Printf("  %-20s", "get-order")
+	white.Println("- View order details")
+	client.Printf("  %-20s", "get-order-items")
+	white.Println("- View items in order")
+	worker.Printf("  %-20s", "get-free-orders")
+	white.Println("- List available orders (worker)")
+	worker.Printf("  %-20s", "change-order-status")
+	white.Println("- Update order status (admin/worker)")
+	admin.Printf("  %-20s", "delete-order")
+	white.Println("- Cancel order")
+
+	yellow.Println("\n  [ Reviews ]")
+	client.Printf("  %-20s", "create-review")
+	white.Println("- Add review for product")
+	admin.Printf("  %-20s", "get-review")
+	white.Println("- View review details")
+	client.Printf("  %-20s", "get-reviews-product")
+	white.Println("- List reviews for product")
+	admin.Printf("  %-20s", "delete-review")
+	white.Println("- Remove review")
+
+	yellow.Println("\n  [ Workers ]")
+	admin.Printf("  %-20s", "create-worker")
+	white.Println("- Add worker (admin)")
+	admin.Printf("  %-20s", "delete-worker")
+	white.Println("- Remove worker (admin)")
+	admin.Printf("  %-20s", "get-worker-id")
+	white.Println("- View worker details")
+	admin.Printf("  %-20s", "get-workers")
+	white.Println("- List client workers")
+	worker.Printf("  %-20s", "accept-order")
+	white.Println("- Take order for delivery")
+	worker.Printf("  %-20s", "get-my-order")
+	white.Println("- View your assigned orders")
+
+	yellow.Println("\n  [ System ]")
+	client.Printf("  %-20s", "exit")
+	white.Println("- Quit the application")
+
+	color.New(color.FgHiBlack).Println("\nType a command and press Enter. For most commands you'll be prompted for additional input.")
+}
+
 func main() {
+	color.New(color.FgHiBlue).Println("Initializing PPO Shop CLI...")
+
 	reader := bufio.NewReader(os.Stdin)
+	printWelcome()
 
 	for {
-		fmt.Print("> ")
+		color.New(color.FgCyan).Print("\n> ")
 		cmdLine, _ := reader.ReadString('\n')
 		cmd := strings.TrimSpace(cmdLine)
 
@@ -50,7 +162,11 @@ func main() {
 			client_auth.Logout(client)
 
 		case cmd == "exit":
+			color.New(color.FgHiMagenta).Println("Goodbye!")
 			return
+
+		case cmd == "help":
+			printWelcome()
 
 		case strings.HasPrefix(cmd, "get-basket-items"):
 			client_basket.GetBasketItems(client)
@@ -130,6 +246,9 @@ func main() {
 		case strings.HasPrefix(cmd, "get-user-phone"):
 			client_user.GetUserByPhone(client, reader)
 
+		case strings.HasPrefix(cmd, "get-all-user"):
+			client_user.GetAllUsers(client, reader)
+
 		case strings.HasPrefix(cmd, "create-worker"):
 			client_worker.CreateWorker(client, reader)
 
@@ -149,7 +268,7 @@ func main() {
 			client_worker.GetWorkerOrders(client)
 
 		default:
-			fmt.Println("Unknown command")
+			color.New(color.FgRed).Println("Unknown command. Type 'help' to see available commands.")
 		}
 	}
 }

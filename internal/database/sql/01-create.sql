@@ -1,16 +1,16 @@
 create extension if not exists "uuid-ossp";
 
-DROP TABLE IF EXISTS order_item CASCADE;
-DROP TABLE IF EXISTS "order" CASCADE;
-DROP TABLE IF EXISTS review CASCADE;
-DROP TABLE IF EXISTS basket_item CASCADE;
-DROP TABLE IF EXISTS basket CASCADE;
-DROP TABLE IF EXISTS worker CASCADE;
-DROP TABLE IF EXISTS product CASCADE;
-DROP TABLE IF EXISTS brand CASCADE;
-DROP TABLE IF EXISTS "user" CASCADE;
-DROP TABLE IF EXISTS token CASCADE;
-DROP TABLE IF EXISTS order_worker CASCADE;
+drop table if exists order_item cascade;
+drop table if exists "order" cascade;
+drop table if exists review cascade;
+drop table if exists basket_item cascade;
+drop table if exists basket cascade;
+drop table if exists worker cascade;
+drop table if exists product cascade;
+drop table if exists brand cascade;
+drop table if exists "user" cascade;
+drop table if exists token cascade;
+drop table if exists order_worker cascade;
 
 create table if not exists "user" (
     id uuid primary key default uuid_generate_v4(),
@@ -24,12 +24,12 @@ create table if not exists "user" (
     role varchar(50)
 );
 
-CREATE TABLE IF NOT EXISTS brand (
-    id uuid NOT NULL DEFAULT uuid_generate_v4(),
-    name varchar(255) NOT NULL,
+create table if not exists brand (
+    id uuid not null default uuid_generate_v4(),
+    name varchar(255) not null,
     description text,
     price_category varchar(50),
-    CONSTRAINT brand_pkey PRIMARY KEY (id)
+    constraint brand_pkey primary key (id)
 );
 
 create table if not exists product (
@@ -72,14 +72,13 @@ create table if not exists "order" (
     price decimal(10,2)
 );
 
-CREATE TABLE IF NOT EXISTS order_worker (
-    id_order UUID,
-    id_worker UUID,
-    PRIMARY KEY (id_order, id_worker),
-    CONSTRAINT fk_order FOREIGN KEY (id_order) REFERENCES "order"(id) ON DELETE SET NULL,
-    CONSTRAINT fk_worker FOREIGN KEY (id_worker) REFERENCES worker(id) ON DELETE SET NULL
+create table if not exists order_worker (
+    id_order uuid,
+    id_worker uuid,
+    primary key (id_order, id_worker),
+    constraint fk_order foreign key (id_order) references "order"(id) on delete set null,
+    constraint fk_worker foreign key (id_worker) references worker(id) on delete set null
 );
-
 
 create table if not exists order_item (
     id uuid primary key default uuid_generate_v4(),

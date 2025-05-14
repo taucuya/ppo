@@ -35,7 +35,6 @@ add constraint "worker_user_unique" unique ("id_user");
 -- ORDER
 alter table "order"
 alter column "date" set default current_timestamp,
-alter column "price" set not null,
 add constraint "fk_order_user" foreign key ("id_user") references "user"("id") on delete cascade;
 
 --ORDER-ITEM

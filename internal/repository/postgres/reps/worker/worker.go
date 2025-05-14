@@ -105,17 +105,17 @@ func (rep *Repository) GetAllWorkers(ctx context.Context) ([]structs.Worker, err
 	return w, nil
 }
 
-func (rep *Repository) AcceptOrder(ctx context.Context, id_order uuid.UUID, id uuid.UUID) error {
-	var wid uuid.UUID
-	if err := rep.db.GetContext(ctx, &wid, `select id from worker where id_user = $1`, id); err != nil {
-		return err
-	}
+func (rep *Repository) AcceptOrder(ctx context.Context, id_order uuid.UUID, id_user uuid.UUID) error {
+	// var wid uuid.UUID
+	// if err := rep.db.GetContext(ctx, &wid, `select id from worker where id_user = $1`, id_user); err != nil {
+	// 	return err
+	// }
 
-	_, err := rep.db.ExecContext(ctx, `insert into order_worker (id_order, id_worker) values ($1, $2)`, id_order, wid)
-	if err != nil {
-		return err
-	}
-	// в курсовой это делает триггер
-	_, err = rep.db.ExecContext(ctx, `update "order" set status = $1 where id = $2`, "принятый", id_order)
+	_, err := rep.db.ExecContext(ctx, `insert into order_worker (id_order, id_worker) values ($1, $2)`, id_order, id_user)
+	// if err != nil {
 	return err
+	// }
+
+	// _, err = rep.db.ExecContext(ctx, `update "order" set status = $1 where id = $2`, "принятый", id_order)
+	// return err
 }

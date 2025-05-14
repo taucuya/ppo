@@ -70,7 +70,6 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.User,
 		Name:          u.Name,
 		Date_of_birth: u.Date_of_birth,
 		Mail:          u.Mail,
-		Password:      u.Password,
 		Phone:         u.Phone,
 		Address:       u.Address,
 		Status:        u.Status,
@@ -96,6 +95,29 @@ func (rep *Repository) GetByMail(ctx context.Context, mail string) (structs.User
 		Status:        u.Status,
 		Role:          u.Role,
 	}
+	return usr, nil
+}
+
+func (rep *Repository) GetAllUsers(ctx context.Context) ([]structs.User, error) {
+	var u []rep_struct.User
+	err := rep.db.SelectContext(ctx, &u, "select * from \"user\" where role = $1", "обычный пользователь")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by mail: %w", err)
+	}
+	var usr []structs.User
+	for _, v := range u {
+		usr = append(usr, structs.User{
+			Id:            v.Id,
+			Name:          v.Name,
+			Date_of_birth: v.Date_of_birth,
+			Mail:          v.Mail,
+			Phone:         v.Phone,
+			Address:       v.Address,
+			Status:        v.Status,
+			Role:          v.Role,
+		})
+	}
+
 	return usr, nil
 }
 

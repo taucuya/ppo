@@ -21,52 +21,66 @@ func New(db *sqlx.DB) *Repository {
 func (rep *Repository) Create(ctx context.Context, o structs.Order) error {
 	var id uuid.UUID
 	ord := rep_structs.Order{
-		Date:    o.Date,
+		// Date:    o.Date,
 		IdUser:  o.IdUser,
 		Address: o.Address,
 		Status:  o.Status,
-		Price:   o.Price,
+		// Price:   o.Price,
 	}
 	err := rep.db.QueryRowContext(ctx, `
-		insert into "order" (date, id_user, address, status, price) 
-		values ($1, $2, $3, $4, $5) 
+		insert into "order" (id_user, address, status) 
+		values ($1, $2, $3) 
 		returning id`,
-		ord.Date, ord.IdUser, ord.Address, ord.Status, ord.Price).Scan(&id)
-	if err != nil {
-		return err
-	}
-	var basket_id uuid.UUID
-	var items []rep_structs.BasketItem
-	err = rep.db.GetContext(ctx, &basket_id, "select id from basket where id_user = $1", o.IdUser)
-	if err != nil {
-		return err
-	}
-	err = rep.db.SelectContext(ctx, &items, "select * from basket_item where id_basket = $1", basket_id)
-	if err != nil {
-		return err
-	}
+		ord.IdUser, ord.Address, ord.Status).Scan(&id)
+	// if err != nil {
+	// 	return err
+	// }
+	// var basket_id uuid.UUID
+	// var items []rep_structs.BasketItem
+	// err = rep.db.GetContext(ctx, &basket_id, "select id from basket where id_user = $1", o.IdUser)
+	// if err != nil {
+	// 	return err
+	// }
+	// err = rep.db.SelectContext(ctx, &items, "select * from basket_item where id_basket = $1", basket_id)
+	// if err != nil {
+	// 	return err
+	// }
+	// for _, v := range items {
+	// 	var am int
+	// 	if err := rep.db.GetContext(ctx, &am, `select amount from product where id = $1`, v.IdProduct); err != nil {
+	// 		return err
+	// 	}
+	// 	if am < v.Amount {
+	// 		return fmt.Errorf(`not enouth products on warehouse`)
+	// 	}
 
-	var sm float64
-	err = rep.db.GetContext(ctx, &sm, `select sum(p.price * b.amount) as total_price from basket_item b
-			join product p on b.id_product = p.id where b.id_basket = $1;`, basket_id)
+	// 	_, err := rep.db.ExecContext(ctx, `update product set amount = $1 where id = $2`, am - v.Amount,v.IdProduct)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	if err != nil {
-		return err
-	}
+	// var sm float64
+	// err = rep.db.GetContext(ctx, &sm, `select sum(p.price * b.amount) as total_price from basket_item b
+	// 		join product p on b.id_product = p.id where b.id_basket = $1;`, basket_id)
 
-	_, err = rep.db.ExecContext(ctx, `update "order" set price = $1 where id = $2`, sm, id)
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	for _, item := range items {
-		_, err := rep.db.ExecContext(ctx,
-			"insert into order_item (id_product, id_order, amount) values ($1, $2, $3)",
-			item.IdProduct, id, item.Amount)
-		if err != nil {
-			return err
-		}
-	}
+	// _, err = rep.db.ExecContext(ctx, `update "order" set price = $1 where id = $2`, sm, id)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// for _, item := range items {
+	// 	_, err := rep.db.ExecContext(ctx,
+	// 		"insert into order_item (id_product, id_order, amount) values ($1, $2, $3)",
+	// 		item.IdProduct, id, item.Amount)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 	return err
 }
 

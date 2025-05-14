@@ -5,9 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Signup(client *http.Client, reader *bufio.Reader) {
@@ -83,7 +86,38 @@ func Login(client *http.Client, reader *bufio.Reader) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("✅", "Logged in!")
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("❌ Failed to read response body:", err)
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		var errorResponse gin.H
+		if err := json.Unmarshal(responseBody, &errorResponse); err != nil {
+			fmt.Printf("❌ Login failed (status %d), and failed to parse error response: %v\n", resp.StatusCode, err)
+			return
+		}
+		fmt.Printf("❌ Login failed: %v (status %d)\n", errorResponse["error"], resp.StatusCode)
+		return
+	}
+
+	cookies := resp.Cookies()
+	var gotAccessToken, gotRefreshToken bool
+	for _, cookie := range cookies {
+		if cookie.Name == "access_token" {
+			gotAccessToken = true
+		}
+		if cookie.Name == "refresh_token" {
+			gotRefreshToken = true
+		}
+	}
+
+	if gotAccessToken && gotRefreshToken {
+		fmt.Println("✅ Logged in successfully!")
+	} else {
+		fmt.Println("✅ Login successful but tokens not set in cookies")
+	}
 }
 
 func Logout(client *http.Client) {

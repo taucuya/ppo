@@ -55,10 +55,9 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
-	goodW := c.VerifyW(ctx)
-	goodA := c.VerifyA(ctx)
+	good := c.Verify(ctx)
 
-	if !goodW && !goodA {
+	if !good {
 		return
 	}
 

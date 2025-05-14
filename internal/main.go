@@ -58,10 +58,12 @@ func main() {
 		panic("failed to connect to test database: " + err.Error())
 	}
 
-	err = runSQLScripts(db, []string{
+	_ = runSQLScripts(db, []string{
 		"/home/taya/Desktop/ppoft/src/internal/database/sql/01-create.sql",
 		"/home/taya/Desktop/ppoft/src/internal/database/sql/02-constraints.sql",
 		"/home/taya/Desktop/ppoft/src/internal/database/sql/03-inserts.sql",
+		"/home/taya/Desktop/ppoft/src/internal/database/sql/trigger_accept.sql",
+		"/home/taya/Desktop/ppoft/src/internal/database/sql/trigger_order.sql",
 	})
 
 	key := []byte(uuid.New().String())
@@ -154,7 +156,7 @@ func main() {
 		user := api.Group("/user")
 		{
 			user.GET("/email", c.GetUserByEmailHandler)
-			// user.GET("/:id", c.GetUserByIdHandler)
+			user.GET("/users", c.GetAllUsersHandler)
 			user.GET("/phone", c.GetUserByPhoneHandler)
 		}
 

@@ -83,20 +83,8 @@ func (rep *Repository) AddItem(ctx context.Context, i structs.BasketItem) error 
 	}
 
 	var item rep_structs.BasketItem
-	var am int
-	if err := rep.db.GetContext(ctx, &am, `select amount from product where id = $1`, i.IdProduct); err != nil {
-		return err
-	}
-	if am < i.Amount {
-		return fmt.Errorf(`not enouth products on warehouse`)
-	}
 
-	_, err := rep.db.ExecContext(ctx, `update product set amount = $1 where id = $2`, am-i.Amount, i.IdProduct)
-	if err != nil {
-		return err
-	}
-
-	err = rep.db.GetContext(ctx, &item, `select * from basket_item where id_basket = $1
+	err := rep.db.GetContext(ctx, &item, `select * from basket_item where id_basket = $1
 	 and id_product = $2`, i.IdBasket, i.IdProduct)
 	if err != sql.ErrNoRows {
 		err = rep.UpdateItemAmount(ctx, i.IdBasket, i.IdProduct, item.Amount+it.Amount)

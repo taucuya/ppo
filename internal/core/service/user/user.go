@@ -12,6 +12,7 @@ type UserService interface {
 	Create(ctx context.Context, u structs.User) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.User, error)
 	GetByMail(ctx context.Context, mail string) (structs.User, error)
+	GetAllUsers(ctx context.Context) ([]structs.User, error)
 	GetByPhone(ctx context.Context, phone string) (structs.User, error)
 }
 
@@ -19,6 +20,7 @@ type UserRepository interface {
 	Create(ctx context.Context, u structs.User) (uuid.UUID, error)
 	GetById(ctx context.Context, id uuid.UUID) (structs.User, error)
 	GetByMail(ctx context.Context, mail string) (structs.User, error)
+	GetAllUsers(ctx context.Context) ([]structs.User, error)
 	GetByPhone(ctx context.Context, phone string) (structs.User, error)
 }
 
@@ -61,6 +63,14 @@ func (s *Service) GetByMail(ctx context.Context, mail string) (structs.User, err
 	u, err := s.rep.GetByMail(ctx, mail)
 	if err != nil {
 		return structs.User{}, err
+	}
+	return u, nil
+}
+
+func (s *Service) GetAllUsers(ctx context.Context) ([]structs.User, error) {
+	u, err := s.rep.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
 	}
 	return u, nil
 }
