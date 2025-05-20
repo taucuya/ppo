@@ -12,6 +12,7 @@ import (
 	client_auth "github.com/taucuya/ppo/ui_tech/auth"
 	client_basket "github.com/taucuya/ppo/ui_tech/basket"
 	client_brand "github.com/taucuya/ppo/ui_tech/brand"
+	client_favourites "github.com/taucuya/ppo/ui_tech/favourites"
 	client_order "github.com/taucuya/ppo/ui_tech/order"
 	client_product "github.com/taucuya/ppo/ui_tech/product"
 	client_review "github.com/taucuya/ppo/ui_tech/review"
@@ -72,6 +73,14 @@ func printWelcome() {
 	white.Println("- Remove product from basket")
 	client.Printf("  %-20s", "update-item-amount")
 	white.Println("- Change product quantity in basket")
+
+	yellow.Println("\n  [ Favourites ]")
+	client.Printf("  %-20s", "get-favourites-items")
+	white.Println("- View items in your favourites")
+	client.Printf("  %-20s", "add-to-favourites")
+	white.Println("- Add product to favourites")
+	client.Printf("  %-20s", "delete-from-favourites")
+	white.Println("- Remove product from favourites")
 
 	yellow.Println("\n  [ Brand ]")
 	admin.Printf("  %-20s", "create-brand")
@@ -182,6 +191,15 @@ func main() {
 
 		case strings.HasPrefix(cmd, "update-item-amount"):
 			client_basket.UpdateItemAmount(client, reader)
+
+		case strings.HasPrefix(cmd, "get-favourites-items"):
+			client_favourites.GetFavouritesItems(client)
+
+		case strings.HasPrefix(cmd, "add-to-favourites"):
+			client_favourites.AddToFavourites(client, reader)
+
+		case strings.HasPrefix(cmd, "delete-from-favourites"):
+			client_favourites.DeleteFromFavourites(client, reader)
 
 		case strings.HasPrefix(cmd, "create-brand"):
 			client_brand.CreateBrand(client, reader)

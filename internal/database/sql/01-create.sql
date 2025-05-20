@@ -5,6 +5,8 @@ drop table if exists "order" cascade;
 drop table if exists review cascade;
 drop table if exists basket_item cascade;
 drop table if exists basket cascade;
+drop table if exists favourites_item cascade;
+drop table if exists favourites cascade;
 drop table if exists worker cascade;
 drop table if exists product cascade;
 drop table if exists brand cascade;
@@ -55,6 +57,17 @@ create table if not exists basket_item (
     id_basket uuid,
     id_product uuid,
     amount int
+);
+
+create table if not exists favourites (
+    id uuid primary key default uuid_generate_v4(),
+    id_user uuid
+);
+
+create table if not exists favourites_item (
+    id uuid primary key default uuid_generate_v4(),
+    id_favourites uuid,
+    id_product uuid
 );
 
 create table if not exists worker (

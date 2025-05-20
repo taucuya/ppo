@@ -28,13 +28,18 @@ type UsrBasket interface {
 	Create(ctx context.Context, u structs.Basket) error
 }
 
+type UsrFavourites interface {
+	Create(ctx context.Context, u structs.Favourites) error
+}
+
 type Service struct {
 	rep UserRepository
 	bsk UsrBasket
+	fav UsrFavourites
 }
 
-func New(rep UserRepository, bsk UsrBasket) *Service {
-	return &Service{rep: rep, bsk: bsk}
+func New(rep UserRepository, bsk UsrBasket, fav UsrFavourites) *Service {
+	return &Service{rep: rep, bsk: bsk, fav: fav}
 }
 
 func (s *Service) Create(ctx context.Context, u structs.User) error {
@@ -47,6 +52,16 @@ func (s *Service) Create(ctx context.Context, u structs.User) error {
 		Date:   time.Now(),
 	}
 	err = s.bsk.Create(ctx, basket)
+	if err != nil {
+		return err
+	}
+	favourites := structs.Favourites{
+		IdUser: id,
+	}
+	err = s.fav.Create(ctx, favourites)
+	if err != nil {
+		return err
+	}
 
 	return err
 }

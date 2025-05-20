@@ -27,6 +27,15 @@ alter table "basket_item"
 add constraint "fk_basket_item_basket" foreign key ("id_basket") references "basket"("id") on delete cascade,
 add constraint "fk_basket_item_product" foreign key ("id_product") references "product"("id") on delete cascade;
 
+-- FAVOURITES
+alter table "favourites"
+add constraint "fk_favourites_user" foreign key ("id_user") references "user"("id") on delete cascade;
+
+-- FAVOURITES-ITEM
+alter table "favourites_item"
+add constraint "fk_favourites_item_favourites" foreign key ("id_favourites") references "favourites"("id") on delete cascade,
+add constraint "fk_favourites_item_product" foreign key ("id_product") references "product"("id") on delete cascade;
+
 -- WORKER
 alter table "worker"
 add constraint "fk_worker_user" foreign key ("id_user") references "user"("id") on delete cascade,

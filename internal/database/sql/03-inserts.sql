@@ -160,3 +160,28 @@ SELECT
 FROM series s
 JOIN product_list p ON p.rn = s.i
 JOIN user_list u ON u.rn = s.i;
+
+-- Вставляем избранные списки для первых 5 пользователей
+INSERT INTO favourites (id_user)
+SELECT id
+FROM "user"
+WHERE role = 'обычный пользователь'
+LIMIT 5;
+
+-- Для каждого избранного списка добавим по 2 случайных продукта
+WITH favourites_list AS (
+    SELECT id, row_number() OVER () as rn FROM favourites
+),
+product_list AS (
+    SELECT id, row_number() OVER () as rn FROM product
+),
+series AS (
+    SELECT generate_series(1, 10) as i
+)
+INSERT INTO favourites_item (id_favourites, id_product)
+SELECT 
+    f.id,
+    p.id
+FROM series s
+JOIN favourites_list f ON f.rn = ((s.i - 1) / 2) + 1  -- по 2 товара на избранное
+JOIN product_list p ON p.rn = s.i;

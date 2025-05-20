@@ -7,18 +7,20 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	controller "github.com/taucuya/ppo/internal/controllers"
 	"github.com/taucuya/ppo/internal/core/service/auth"
 	"github.com/taucuya/ppo/internal/core/service/basket"
 	"github.com/taucuya/ppo/internal/core/service/brand"
+	"github.com/taucuya/ppo/internal/core/service/favourites"
 	"github.com/taucuya/ppo/internal/core/service/order"
 	"github.com/taucuya/ppo/internal/core/service/product"
 	"github.com/taucuya/ppo/internal/core/service/review"
@@ -28,6 +30,7 @@ import (
 	auth_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/auth"
 	basket_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/basket"
 	brand_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/brand"
+	favourites_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/favourites"
 	order_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/order"
 	product_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/product"
 	review_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/review"
@@ -50,8 +53,25 @@ func runSQLScripts(db *sqlx.DB, scripts []string) error {
 	return nil
 }
 
+func loadEnv() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("Файл .env не найден, используются переменные окружения")
+	}
+}
+
 func main() {
-	dsn := "postgres://test_user:test_password@localhost:5433/test_db?sslmode=disable"
+
+	loadEnv()
+	dsn := os.Getenv("DB_DSN")
+	key := []byte(os.Getenv("JWT_SECRET"))
+	acstime, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_LIFETIME_MINUTES"))
+	if err != nil {
+		return
+	}
+	reftime, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_LIFETIME_DAYS"))
+	if err != nil {
+		return
+	}
 
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
@@ -66,8 +86,6 @@ func main() {
 		"/home/taya/Desktop/ppoft/src/internal/database/sql/trigger_order.sql",
 	})
 
-	key := []byte(uuid.New().String())
-
 	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Cant open log file: %v", err)
@@ -78,9 +96,10 @@ func main() {
 	gin.DefaultWriter = logFile
 
 	ar := auth_rep.New(db)
-	ap := auth_prov.New(key, time.Duration(15*time.Minute), time.Duration(7*24*time.Hour))
+	ap := auth_prov.New(key, time.Duration(time.Duration(acstime)*time.Minute), time.Duration(time.Duration(reftime)*24*time.Hour))
 	bar := basket_rep.New(db)
 	brr := brand_rep.New(db)
+	fr := favourites_rep.New(db)
 	or := order_rep.New(db)
 	pr := product_rep.New(db)
 	rr := review_rep.New(db)
@@ -88,7 +107,8 @@ func main() {
 	wr := worker_rep.New(db)
 
 	bas := basket.New(bar)
-	us := user.New(ur, bas)
+	fs := favourites.New(fr)
+	us := user.New(ur, bas, fs)
 	as := auth.New(ap, ar, us)
 	brs := brand.New(brr)
 	oss := order.New(or)
@@ -97,14 +117,15 @@ func main() {
 	ws := worker.New(wr)
 
 	c := controller.Controller{
-		BasketService:  *bas,
-		UserService:    *us,
-		AuthServise:    *as,
-		BrandService:   *brs,
-		OrderService:   *oss,
-		ProductService: *ps,
-		ReviewService:  *rs,
-		WorkerService:  *ws,
+		BasketService:     *bas,
+		UserService:       *us,
+		AuthServise:       *as,
+		BrandService:      *brs,
+		FavouritesService: *fs,
+		OrderService:      *oss,
+		ProductService:    *ps,
+		ReviewService:     *rs,
+		WorkerService:     *ws,
 	}
 
 	router := gin.New()
@@ -136,6 +157,13 @@ func main() {
 			brand.DELETE("/:id", c.DeleteBrandHandler)
 			brand.GET("/:id", c.GetBrandByIdHandler)
 			brand.GET("/category/:cat", c.GetAllBrandsInCategoryHander)
+		}
+
+		favourites := api.Group("/favourites")
+		{
+			favourites.GET("/items", c.GetFavouritesHandler)
+			favourites.POST("", c.AddFavouritesItemHandler)
+			favourites.DELETE("", c.DeleteFavouritesItemHandler)
 		}
 
 		order := api.Group("/order")
