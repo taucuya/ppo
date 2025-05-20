@@ -68,6 +68,15 @@ func main() {
 
 	key := []byte(uuid.New().String())
 
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Cant open log file: %v", err)
+	}
+
+	log.SetOutput(logFile)
+
+	gin.DefaultWriter = logFile
+
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(15*time.Minute), time.Duration(7*24*time.Hour))
 	bar := basket_rep.New(db)
@@ -98,7 +107,11 @@ func main() {
 		WorkerService:  *ws,
 	}
 
-	router := gin.Default()
+	router := gin.New()
+
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
 	api := router.Group("/api/v1")
 	{
 		auth := api.Group("/auth")

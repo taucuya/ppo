@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -27,20 +27,21 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 		Articule    string `json:"articule"`
 	}
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	pr, err := strconv.ParseFloat(input.Price, 64)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("[ERROR] Cant parse product price: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	id_brnd, err := uuid.Parse(input.IdBrand)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("[ERROR] Cant parse brand id: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
 		return
 	}
@@ -57,7 +58,7 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	}
 
 	if err := c.ProductService.Create(ctx, p); err != nil {
-		fmt.Println(err)
+		log.Printf("[ERROR] Cant create product: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,12 +75,14 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 	if id := ctx.Query("id"); id != "" {
 		pid, err := uuid.Parse(id)
 		if err != nil {
+			log.Printf("[ERROR] Cant parse product id: %v", err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product ID format"})
 			return
 		}
 
 		product, err := c.ProductService.GetById(ctx, pid)
 		if err != nil {
+			log.Printf("[ERROR] Cant get product by id: %v", err)
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 			return
 		}
@@ -98,6 +101,7 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 	if art := ctx.Query("art"); art != "" {
 		product, err := c.ProductService.GetByArticule(ctx, art)
 		if err != nil {
+			log.Printf("[ERROR] Cant get product by articule: %v", err)
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 			return
 		}
@@ -116,11 +120,13 @@ func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
+		log.Printf("[ERROR] Cant parse product id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := c.ProductService.Delete(ctx, id); err != nil {
+		log.Printf("[ERROR] Cant delete product by id: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -132,6 +138,7 @@ func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
 	category := ctx.Param("category")
 	products, err := c.ProductService.GetByCategory(ctx, category)
 	if err != nil {
+		log.Printf("[ERROR] Cant get products by category: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -143,6 +150,7 @@ func (c *Controller) GetProductsByBrandHandler(ctx *gin.Context) {
 	brand := ctx.Param("brand")
 	products, err := c.ProductService.GetByBrand(ctx, brand)
 	if err != nil {
+		log.Printf("[ERROR] Cant get products by brand: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -153,12 +161,14 @@ func (c *Controller) GetProductsByBrandHandler(ctx *gin.Context) {
 func (c *Controller) GetReviewsForProductHandler(ctx *gin.Context) {
 	productID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
+		log.Printf("[ERROR] Cant parse product id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	reviews, err := c.ReviewService.ReviewsForProduct(ctx, productID)
 	if err != nil {
+		log.Printf("[ERROR] Cant get reviews for product: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

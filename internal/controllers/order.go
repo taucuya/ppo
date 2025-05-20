@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -19,12 +20,14 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
@@ -34,6 +37,7 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -47,6 +51,7 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 	}
 
 	if err = c.OrderService.Create(ctx, o); err != nil {
+		log.Printf("[ERROR] Cant create order: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -61,15 +66,16 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 		return
 	}
 
-	idStr := ctx.Param("id")
-	id, err := uuid.Parse(idStr)
+	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
+		log.Printf("[ERROR] Cant parse order id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	items, err := c.OrderService.GetItems(ctx, id)
 	if err != nil {
+		log.Printf("[ERROR] Cant get order items: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -88,6 +94,7 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 
 	ords, err := c.OrderService.GetFreeOrders(ctx)
 	if err != nil {
+		log.Printf("[ERROR] Cant get free orders: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -105,12 +112,14 @@ func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
+		log.Printf("[ERROR] Cant parse order id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID format"})
 		return
 	}
 
 	order, err := c.OrderService.GetById(ctx, id)
 	if err != nil {
+		log.Printf("[ERROR] Cant get order by id: %v", err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
 		return
 	}
@@ -132,17 +141,20 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 
 	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
+		log.Printf("[ERROR] Cant parse order id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil || input.Status == "" {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err = c.OrderService.ChangeOrderStatus(ctx, id, input.Status)
 	if err != nil {
+		log.Printf("[ERROR] Cant change order status: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -156,14 +168,15 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 		return
 	}
 
-	idStr := ctx.Param("id")
-	id, err := uuid.Parse(idStr)
+	id, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
+		log.Printf("[ERROR] Cant parse order id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := c.OrderService.Delete(ctx, id); err != nil {
+		log.Printf("[ERROR] Cant delete order by id: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

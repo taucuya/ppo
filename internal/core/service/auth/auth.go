@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -59,22 +58,18 @@ func (s *Service) SignIn(ctx context.Context, u structs.User) error {
 func (s *Service) LogIn(ctx context.Context, mail string, password string) (atoken string, rtoken string, err error) {
 	u, err := s.usr.GetByMail(ctx, mail)
 	if err != nil {
-		// fmt.Println(err, 1)
 		return "", "", err
 	}
-	fmt.Println("|", u.Password, "|", password, "|")
+
 	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
-		// fmt.Println(err, 2)
 		return "", "", err
 	}
 	atoken, rtoken, err = s.prov.GenToken(ctx, u.Id)
 	if err != nil {
-		// fmt.Println(err, 3)
 		return "", "", err
 	}
 	err = s.rep.CreateToken(ctx, u.Id, rtoken)
 	if err != nil {
-		// fmt.Println(err, 4)
 		return "", "", err
 	}
 	return atoken, rtoken, err

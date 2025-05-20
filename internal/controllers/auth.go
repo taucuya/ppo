@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,12 +21,15 @@ func (c *Controller) SignupHandler(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	t, err := time.Parse("2006-01-02", input.DateOfBirth)
 	if err != nil {
+		log.Printf("[ERROR] Cant parse date: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -42,8 +45,8 @@ func (c *Controller) SignupHandler(ctx *gin.Context) {
 	}
 
 	if err := c.AuthServise.SignIn(ctx.Request.Context(), user); err != nil {
+		log.Printf("[ERROR] Cant signup: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
-		fmt.Println(err)
 		return
 	}
 
@@ -59,19 +62,20 @@ func (c *Controller) LoginHandler(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	accessToken, refreshToken, err := c.AuthServise.LogIn(ctx.Request.Context(), input.Email, input.Password)
 	if err != nil {
+		log.Printf("[ERROR] Cant login: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
 	ctx.SetCookie("access_token", accessToken, 900, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "localhost", false, true)
-	// fmt.Println("Set access_token:", accessToken)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 	})
@@ -82,16 +86,19 @@ func (c *Controller) LogoutHandler(ctx *gin.Context) {
 		Rt string `json:"refresh_token" binding:"required"`
 	}
 	if err := ctx.ShouldBindJSON(&refreshToken); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if refreshToken.Rt == "" {
+		log.Printf("[ERROR] Bad refresh token.")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Refresh token required"})
 		return
 	}
 
 	if err := c.AuthServise.LogOut(ctx.Request.Context(), refreshToken.Rt); err != nil {
+		log.Printf("[ERROR] Cant logout: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Logout failed"})
 		return
 	}
@@ -102,12 +109,14 @@ func (c *Controller) LogoutHandler(ctx *gin.Context) {
 func (c *Controller) Verify(ctx *gin.Context) bool {
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return false
 	}
 
 	rtoken, err := ctx.Cookie("refresh_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get refresh token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "refresh token missing"})
 		return false
 	}
@@ -129,12 +138,14 @@ func (c *Controller) VerifyA(ctx *gin.Context) bool {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return false
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return false
 	}
@@ -150,14 +161,14 @@ func (c *Controller) VerifyW(ctx *gin.Context) bool {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
-		fmt.Println(4, err)
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return false
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
-		fmt.Println(5, err)
+		log.Printf("[ERROR] Cant get id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return false
 	}

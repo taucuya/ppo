@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,18 +18,21 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
 
 	items, err := c.BasketService.GetItems(ctx.Request.Context(), id)
 	if err != nil {
+		log.Printf("[ERROR] Cant get basket items: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get items"})
 		return
 	}
@@ -44,12 +48,14 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid basket ID format"})
 		return
 	}
@@ -57,6 +63,7 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 	basket, err := c.BasketService.GetById(ctx, id)
 	fmt.Println(err)
 	if err != nil {
+		log.Printf("[ERROR] Cant get basket: %v", err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Basket not found"})
 		return
 	}
@@ -72,12 +79,14 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
@@ -88,12 +97,14 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	idProduct, err := uuid.Parse(input.IdProduct)
 	if err != nil {
+		log.Printf("[ERROR] Cant get product id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id_product"})
 		return
 	}
@@ -104,6 +115,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	}
 
 	if err := c.BasketService.AddItem(ctx.Request.Context(), item, id); err != nil {
+		log.Printf("[ERROR] Cant add item to basket: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add item"})
 		return
 	}
@@ -119,12 +131,14 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
@@ -134,11 +148,13 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := c.BasketService.DeleteItem(ctx.Request.Context(), id, input.ProductID); err != nil {
+		log.Printf("[ERROR] Cant delete item from basket: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
 		return
 	}
@@ -154,12 +170,14 @@ func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
 
 	id, err := c.AuthServise.GetId(atoken)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
@@ -170,11 +188,13 @@ func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
+		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := c.BasketService.UpdateItemAmount(ctx.Request.Context(), id, input.ProductID, input.Amount); err != nil {
+		log.Printf("[ERROR] Cant update item in basket: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item amount"})
 		return
 	}

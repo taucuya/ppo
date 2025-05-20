@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 
 	user, err := c.UserService.GetByMail(ctx, email)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user by mail: %v", err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -35,6 +37,7 @@ func (c *Controller) GetAllUsersHandler(ctx *gin.Context) {
 
 	user, err := c.UserService.GetAllUsers(ctx)
 	if err != nil {
+		log.Printf("[ERROR] Cant get all users: %v", err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -77,6 +80,7 @@ func (c *Controller) GetUserByPhoneHandler(ctx *gin.Context) {
 
 	user, err := c.UserService.GetByPhone(ctx, phone)
 	if err != nil {
+		log.Printf("[ERROR] Cant get user by phone: %v", err)
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
