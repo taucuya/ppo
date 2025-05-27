@@ -61,7 +61,6 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 
 	var input struct {
 		IdProduct string `json:"id_product"`
-		Amount    int    `json:"amount"`
 	}
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
