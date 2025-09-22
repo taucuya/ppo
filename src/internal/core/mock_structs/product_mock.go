@@ -79,6 +79,21 @@ func (mr *MockProductServiceMockRecorder) GetByArticule(ctx, art interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArticule", reflect.TypeOf((*MockProductService)(nil).GetByArticule), ctx, art)
 }
 
+// GetByBrand mocks base method.
+func (m *MockProductService) GetByBrand(ctx context.Context, brand string) ([]structs.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByBrand", ctx, brand)
+	ret0, _ := ret[0].([]structs.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByBrand indicates an expected call of GetByBrand.
+func (mr *MockProductServiceMockRecorder) GetByBrand(ctx, brand interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByBrand", reflect.TypeOf((*MockProductService)(nil).GetByBrand), ctx, brand)
+}
+
 // GetByCategory mocks base method.
 func (m *MockProductService) GetByCategory(ctx context.Context, category string) ([]structs.Product, error) {
 	m.ctrl.T.Helper()
@@ -188,6 +203,21 @@ func (m *MockProductRepository) GetByArticule(ctx context.Context, art string) (
 func (mr *MockProductRepositoryMockRecorder) GetByArticule(ctx, art interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByArticule", reflect.TypeOf((*MockProductRepository)(nil).GetByArticule), ctx, art)
+}
+
+// GetByBrand mocks base method.
+func (m *MockProductRepository) GetByBrand(ctx context.Context, brand string) ([]structs.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByBrand", ctx, brand)
+	ret0, _ := ret[0].([]structs.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByBrand indicates an expected call of GetByBrand.
+func (mr *MockProductRepositoryMockRecorder) GetByBrand(ctx, brand interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByBrand", reflect.TypeOf((*MockProductRepository)(nil).GetByBrand), ctx, brand)
 }
 
 // GetByCategory mocks base method.

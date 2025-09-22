@@ -108,6 +108,21 @@ func (mr *MockWorkerServiceMockRecorder) GetById(ctx, id interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockWorkerService)(nil).GetById), ctx, id)
 }
 
+// GetOrders mocks base method.
+func (m *MockWorkerService) GetOrders(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrders", ctx, id)
+	ret0, _ := ret[0].([]structs.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrders indicates an expected call of GetOrders.
+func (mr *MockWorkerServiceMockRecorder) GetOrders(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrders", reflect.TypeOf((*MockWorkerService)(nil).GetOrders), ctx, id)
+}
+
 // MockWorkerRepository is a mock of WorkerRepository interface.
 type MockWorkerRepository struct {
 	ctrl     *gomock.Controller
@@ -201,4 +216,19 @@ func (m *MockWorkerRepository) GetById(ctx context.Context, id uuid.UUID) (struc
 func (mr *MockWorkerRepositoryMockRecorder) GetById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockWorkerRepository)(nil).GetById), ctx, id)
+}
+
+// GetOrders mocks base method.
+func (m *MockWorkerRepository) GetOrders(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrders", ctx, id)
+	ret0, _ := ret[0].([]structs.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrders indicates an expected call of GetOrders.
+func (mr *MockWorkerRepositoryMockRecorder) GetOrders(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrders", reflect.TypeOf((*MockWorkerRepository)(nil).GetOrders), ctx, id)
 }

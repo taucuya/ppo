@@ -93,6 +93,21 @@ func (mr *MockOrderServiceMockRecorder) GetById(ctx, id interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockOrderService)(nil).GetById), ctx, id)
 }
 
+// GetFreeOrders mocks base method.
+func (m *MockOrderService) GetFreeOrders(ctx context.Context) ([]structs.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFreeOrders", ctx)
+	ret0, _ := ret[0].([]structs.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFreeOrders indicates an expected call of GetFreeOrders.
+func (mr *MockOrderServiceMockRecorder) GetFreeOrders(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFreeOrders", reflect.TypeOf((*MockOrderService)(nil).GetFreeOrders), ctx)
+}
+
 // GetItems mocks base method.
 func (m *MockOrderService) GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error) {
 	m.ctrl.T.Helper()
@@ -187,6 +202,21 @@ func (m *MockOrderRepository) GetById(ctx context.Context, id uuid.UUID) (struct
 func (mr *MockOrderRepositoryMockRecorder) GetById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockOrderRepository)(nil).GetById), ctx, id)
+}
+
+// GetFreeOrders mocks base method.
+func (m *MockOrderRepository) GetFreeOrders(ctx context.Context) ([]structs.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFreeOrders", ctx)
+	ret0, _ := ret[0].([]structs.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFreeOrders indicates an expected call of GetFreeOrders.
+func (mr *MockOrderRepositoryMockRecorder) GetFreeOrders(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFreeOrders", reflect.TypeOf((*MockOrderRepository)(nil).GetFreeOrders), ctx)
 }
 
 // GetItems mocks base method.

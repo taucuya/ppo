@@ -1,137 +1,310 @@
 package product
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"testing"
+import (
+	"testing"
 
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/taucuya/ppo/internal/core/mock_structs"
-// 	"github.com/taucuya/ppo/internal/core/structs"
-// )
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/taucuya/ppo/internal/core/mock_structs"
+	"github.com/taucuya/ppo/internal/core/structs"
+)
 
-// var testError = errors.New("test error")
+func TestCreate_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// func TestCreate(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	testProduct := fixture.productBuilder.Build()
 
-// 	mockRepo := mock_structs.NewMockProductRepository(ctrl)
-// 	service := New(mockRepo)
+	tests := []struct {
+		name        string
+		product     structs.Product
+		setupMocks  func(*mock_structs.MockProductRepository, structs.Product)
+		expectedErr error
+	}{
+		{
+			name:    "successful creation",
+			product: testProduct,
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, product structs.Product) {
+				mockRepo.EXPECT().Create(fixture.ctx, product).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:    "repository error",
+			product: testProduct,
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, product structs.Product) {
+				mockRepo.EXPECT().Create(fixture.ctx, product).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// 	testProduct := structs.Product{
-// 		Id:          structs.GenId(),
-// 		Name:        "Test Product",
-// 		Description: "Test Description",
-// 		Price:       99.99,
-// 		Category:    "Test Category",
-// 		Amount:      10,
-// 		IdBrand:     structs.GenId(),
-// 		PicLink:     "http://example.com/image.jpg",
-// 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, tt.product)
 
-// 	t.Run("successful creation", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			Create(gomock.Any(), testProduct).
-// 			Return(nil).
-// 			Times(1)
+			err := service.Create(fixture.ctx, tt.product)
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 		err := service.Create(context.Background(), testProduct)
-// 		if err != nil {
-// 			t.Errorf("Create() unexpected error = %v", err)
-// 		}
-// 	})
+func TestGetById_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			Create(gomock.Any(), testProduct).
-// 			Return(testError).
-// 			Times(1)
+	testProduct := fixture.productBuilder.Build()
 
-// 		err := service.Create(context.Background(), testProduct)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("Create() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockProductRepository, structs.Product)
+		expectedRet structs.Product
+		expectedErr error
+	}{
+		{
+			name: "successful get by id",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, product structs.Product) {
+				mockRepo.EXPECT().GetById(fixture.ctx, product.Id).Return(product, nil)
+			},
+			expectedRet: testProduct,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, product structs.Product) {
+				mockRepo.EXPECT().GetById(fixture.ctx, product.Id).Return(structs.Product{}, errTest)
+			},
+			expectedRet: structs.Product{},
+			expectedErr: errTest,
+		},
+	}
 
-// func TestGetById(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testProduct)
 
-// 	mockRepo := mock_structs.NewMockProductRepository(ctrl)
-// 	service := New(mockRepo)
+			ret, err := service.GetById(fixture.ctx, testProduct.Id)
 
-// 	testID := structs.GenId()
-// 	testProduct := structs.Product{
-// 		Id:          testID,
-// 		Name:        "Test Product",
-// 		Description: "Test Description",
-// 		Price:       99.99,
-// 		Category:    "Test Category",
-// 		Amount:      10,
-// 		IdBrand:     structs.GenId(),
-// 		PicLink:     "http://example.com/image.jpg",
-// 	}
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	t.Run("successful get", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			GetById(gomock.Any(), testID).
-// 			Return(testProduct, nil).
-// 			Times(1)
+func TestGetByArticule_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 		got, err := service.GetById(context.Background(), testID)
-// 		if err != nil {
-// 			t.Errorf("GetById() unexpected error = %v", err)
-// 		}
-// 		if got != testProduct {
-// 			t.Errorf("GetById() = %v, want %v", got, testProduct)
-// 		}
-// 	})
+	testProduct := fixture.productBuilder.WithArticule("UNIQUE123").Build()
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			GetById(gomock.Any(), testID).
-// 			Return(structs.Product{}, testError).
-// 			Times(1)
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockProductRepository, structs.Product)
+		expectedRet structs.Product
+		expectedErr error
+	}{
+		{
+			name: "successful get by articule",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, product structs.Product) {
+				mockRepo.EXPECT().GetByArticule(fixture.ctx, product.Articule).Return(product, nil)
+			},
+			expectedRet: testProduct,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, product structs.Product) {
+				mockRepo.EXPECT().GetByArticule(fixture.ctx, product.Articule).Return(structs.Product{}, errTest)
+			},
+			expectedRet: structs.Product{},
+			expectedErr: errTest,
+		},
+	}
 
-// 		_, err := service.GetById(context.Background(), testID)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("GetById() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testProduct)
 
-// func TestDelete(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+			ret, err := service.GetByArticule(fixture.ctx, testProduct.Articule)
 
-// 	mockRepo := mock_structs.NewMockProductRepository(ctrl)
-// 	service := New(mockRepo)
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	productID := structs.GenId()
+func TestGetByCategory_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	t.Run("successful delete", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			Delete(gomock.Any(), productID).
-// 			Return(nil).
-// 			Times(1)
+	category := "electronics"
+	testProducts := []structs.Product{
+		fixture.productBuilder.WithCategory(category).Build(),
+		fixture.productBuilder.WithCategory(category).WithName("Product 2").Build(),
+	}
 
-// 		err := service.Delete(context.Background(), productID)
-// 		if err != nil {
-// 			t.Errorf("Delete() unexpected error = %v", err)
-// 		}
-// 	})
+	tests := []struct {
+		name        string
+		category    string
+		setupMocks  func(*mock_structs.MockProductRepository, string, []structs.Product)
+		expectedRet []structs.Product
+		expectedErr error
+	}{
+		{
+			name:     "successful get by category",
+			category: category,
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, category string, products []structs.Product) {
+				mockRepo.EXPECT().GetByCategory(fixture.ctx, category).Return(products, nil)
+			},
+			expectedRet: testProducts,
+			expectedErr: nil,
+		},
+		{
+			name:     "empty category",
+			category: "nonexistent",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, category string, products []structs.Product) {
+				mockRepo.EXPECT().GetByCategory(fixture.ctx, category).Return([]structs.Product{}, nil)
+			},
+			expectedRet: []structs.Product{},
+			expectedErr: nil,
+		},
+		{
+			name:     "repository error",
+			category: category,
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, category string, products []structs.Product) {
+				mockRepo.EXPECT().GetByCategory(fixture.ctx, category).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
 
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			Delete(gomock.Any(), productID).
-// 			Return(testError).
-// 			Times(1)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, tt.category, testProducts)
 
-// 		err := service.Delete(context.Background(), productID)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("Delete() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+			ret, err := service.GetByCategory(fixture.ctx, tt.category)
+
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
+
+func TestGetByBrand_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
+
+	brand := "TestBrand"
+	brandId := structs.GenId()
+	testProducts := []structs.Product{
+		fixture.productBuilder.WithIdBrand(brandId).Build(),
+		fixture.productBuilder.WithIdBrand(brandId).WithName("Product 2").Build(),
+	}
+
+	tests := []struct {
+		name        string
+		brand       string
+		setupMocks  func(*mock_structs.MockProductRepository, string, []structs.Product)
+		expectedRet []structs.Product
+		expectedErr error
+	}{
+		{
+			name:  "successful get by brand",
+			brand: brand,
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, brand string, products []structs.Product) {
+				mockRepo.EXPECT().GetByBrand(fixture.ctx, brand).Return(products, nil)
+			},
+			expectedRet: testProducts,
+			expectedErr: nil,
+		},
+		{
+			name:  "empty brand",
+			brand: "SomeBrand",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, brand string, products []structs.Product) {
+				mockRepo.EXPECT().GetByBrand(fixture.ctx, brand).Return([]structs.Product{}, nil)
+			},
+			expectedRet: []structs.Product{},
+			expectedErr: nil,
+		},
+		{
+			name:  "repository error",
+			brand: brand,
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, brand string, products []structs.Product) {
+				mockRepo.EXPECT().GetByBrand(fixture.ctx, brand).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, tt.brand, testProducts)
+
+			ret, err := service.GetByBrand(fixture.ctx, tt.brand)
+
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
+
+func TestDelete_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
+
+	testProduct := fixture.productBuilder.Build()
+
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockProductRepository, uuid.UUID)
+		expectedErr error
+	}{
+		{
+			name: "successful delete",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, productID uuid.UUID) {
+				mockRepo.EXPECT().Delete(fixture.ctx, productID).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockProductRepository, productID uuid.UUID) {
+				mockRepo.EXPECT().Delete(fixture.ctx, productID).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testProduct.Id)
+
+			err := service.Delete(fixture.ctx, testProduct.Id)
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}

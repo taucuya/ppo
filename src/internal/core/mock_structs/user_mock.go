@@ -50,6 +50,21 @@ func (mr *MockUserServiceMockRecorder) Create(ctx, u interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserService)(nil).Create), ctx, u)
 }
 
+// GetAllUsers mocks base method.
+func (m *MockUserService) GetAllUsers(ctx context.Context) ([]structs.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllUsers", ctx)
+	ret0, _ := ret[0].([]structs.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllUsers indicates an expected call of GetAllUsers.
+func (mr *MockUserServiceMockRecorder) GetAllUsers(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockUserService)(nil).GetAllUsers), ctx)
+}
+
 // GetById mocks base method.
 func (m *MockUserService) GetById(ctx context.Context, id uuid.UUID) (structs.User, error) {
 	m.ctrl.T.Helper()
@@ -133,6 +148,21 @@ func (mr *MockUserRepositoryMockRecorder) Create(ctx, u interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserRepository)(nil).Create), ctx, u)
 }
 
+// GetAllUsers mocks base method.
+func (m *MockUserRepository) GetAllUsers(ctx context.Context) ([]structs.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllUsers", ctx)
+	ret0, _ := ret[0].([]structs.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllUsers indicates an expected call of GetAllUsers.
+func (mr *MockUserRepositoryMockRecorder) GetAllUsers(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllUsers", reflect.TypeOf((*MockUserRepository)(nil).GetAllUsers), ctx)
+}
+
 // GetById mocks base method.
 func (m *MockUserRepository) GetById(ctx context.Context, id uuid.UUID) (structs.User, error) {
 	m.ctrl.T.Helper()
@@ -213,4 +243,41 @@ func (m *MockUsrBasket) Create(ctx context.Context, u structs.Basket) error {
 func (mr *MockUsrBasketMockRecorder) Create(ctx, u interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUsrBasket)(nil).Create), ctx, u)
+}
+
+// MockUsrFavourites is a mock of UsrFavourites interface.
+type MockUsrFavourites struct {
+	ctrl     *gomock.Controller
+	recorder *MockUsrFavouritesMockRecorder
+}
+
+// MockUsrFavouritesMockRecorder is the mock recorder for MockUsrFavourites.
+type MockUsrFavouritesMockRecorder struct {
+	mock *MockUsrFavourites
+}
+
+// NewMockUsrFavourites creates a new mock instance.
+func NewMockUsrFavourites(ctrl *gomock.Controller) *MockUsrFavourites {
+	mock := &MockUsrFavourites{ctrl: ctrl}
+	mock.recorder = &MockUsrFavouritesMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUsrFavourites) EXPECT() *MockUsrFavouritesMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockUsrFavourites) Create(ctx context.Context, u structs.Favourites) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, u)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockUsrFavouritesMockRecorder) Create(ctx, u interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUsrFavourites)(nil).Create), ctx, u)
 }

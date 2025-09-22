@@ -1,144 +1,276 @@
 package user
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"testing"
+import (
+	"context"
+	"testing"
 
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/taucuya/ppo/internal/core/mock_structs"
-// 	"github.com/taucuya/ppo/internal/core/structs"
-// )
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/taucuya/ppo/internal/core/mock_structs"
+	"github.com/taucuya/ppo/internal/core/structs"
+)
 
-// var testError = errors.New("test error")
+func TestCreate_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
+	defer fixture.Cleanup()
 
-// func TestCreate(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	testUser := fixture.userBuilder.Build()
 
-// 	mockRepo := mock_structs.NewMockUserRepository(ctrl)
-// 	service := New(mockRepo, mock_structs.NewMockBasketRepository())
-// 	testUser := structs.User{
-// 		Id:       structs.GenId(),
-// 		Name:     "Test User",
-// 		Mail:     "test@example.com",
-// 		Password: "securepassword",
-// 		Phone:    "1234567890",
-// 		Address:  "Test Address",
-// 	}
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockUserRepository, *mock_structs.MockUsrBasket, *mock_structs.MockUsrFavourites, uuid.UUID)
+		expectedErr error
+	}{
+		{
+			name: "successful creation",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, mockBasket *mock_structs.MockUsrBasket, mockFav *mock_structs.MockUsrFavourites, userID uuid.UUID) {
+				mockRepo.EXPECT().Create(fixture.ctx, testUser).Return(userID, nil)
 
-// 	t.Run("successful creation", func(t *testing.T) {
-// 		mockRepo.EXPECT().Create(gomock.Any(), testUser).Return(nil).Times(1)
+				mockBasket.EXPECT().Create(fixture.ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, basket structs.Basket) error {
+					assert.Equal(t, userID, basket.IdUser)
+					return nil
+				})
 
-// 		err := service.Create(context.Background(), testUser)
-// 		if err != nil {
-// 			t.Errorf("Create() unexpected error = %v", err)
-// 		}
-// 	})
+				mockFav.EXPECT().Create(fixture.ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, fav structs.Favourites) error {
+					assert.Equal(t, userID, fav.IdUser)
+					return nil
+				})
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error on user creation",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, mockBasket *mock_structs.MockUsrBasket, mockFav *mock_structs.MockUsrFavourites, userID uuid.UUID) {
+				mockRepo.EXPECT().Create(fixture.ctx, testUser).Return(uuid.Nil, errTest)
+			},
+			expectedErr: errTest,
+		},
+		{
+			name: "repository error on basket creation",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, mockBasket *mock_structs.MockUsrBasket, mockFav *mock_structs.MockUsrFavourites, userID uuid.UUID) {
+				mockRepo.EXPECT().Create(fixture.ctx, testUser).Return(userID, nil)
+				mockBasket.EXPECT().Create(fixture.ctx, gomock.Any()).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+		{
+			name: "repository error on favourites creation",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, mockBasket *mock_structs.MockUsrBasket, mockFav *mock_structs.MockUsrFavourites, userID uuid.UUID) {
+				mockRepo.EXPECT().Create(fixture.ctx, testUser).Return(userID, nil)
+				mockBasket.EXPECT().Create(fixture.ctx, gomock.Any()).Return(nil)
+				mockFav.EXPECT().Create(fixture.ctx, gomock.Any()).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().Create(gomock.Any(), testUser).Return(testError).Times(1)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo, mockBasket, mockFav := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, mockBasket, mockFav, testUser.Id)
 
-// 		err := service.Create(context.Background(), testUser)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("Create() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+			err := service.Create(fixture.ctx, testUser)
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+}
 
-// func TestGetById(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+func TestGetById_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	mockRepo := mock_structs.NewMockUserRepository(ctrl)
-// 	service := New(mockRepo, mock_structs.NewMockBasketRepository())
-// 	testID := structs.GenId()
-// 	testUser := structs.User{
-// 		Id: testID, Name: "Test User", Mail: "test@example.com", Phone: "1234567890",
-// 	}
+	testUser := fixture.userBuilder.Build()
 
-// 	t.Run("successful get", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetById(gomock.Any(), testID).Return(testUser, nil).Times(1)
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockUserRepository, structs.User)
+		expectedRet structs.User
+		expectedErr error
+	}{
+		{
+			name: "successful get by id",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, user structs.User) {
+				mockRepo.EXPECT().GetById(fixture.ctx, user.Id).Return(user, nil)
+			},
+			expectedRet: testUser,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, user structs.User) {
+				mockRepo.EXPECT().GetById(fixture.ctx, user.Id).Return(structs.User{}, errTest)
+			},
+			expectedRet: structs.User{},
+			expectedErr: errTest,
+		},
+	}
 
-// 		got, err := service.GetById(context.Background(), testID)
-// 		if err != nil {
-// 			t.Errorf("GetById() unexpected error = %v", err)
-// 		}
-// 		if got != testUser {
-// 			t.Errorf("GetById() = %v, want %v", got, testUser)
-// 		}
-// 	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo, _, _ := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testUser)
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetById(gomock.Any(), testID).Return(structs.User{}, testError).Times(1)
+			ret, err := service.GetById(fixture.ctx, testUser.Id)
 
-// 		_, err := service.GetById(context.Background(), testID)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("GetById() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// func TestGetByMail(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+func TestGetByMail_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	mockRepo := mock_structs.NewMockUserRepository(ctrl)
-// 	service := New(mockRepo, mock_structs.NewMockBasketRepository())
+	testUser := fixture.userBuilder.WithMail("test@example.com").Build()
 
-// 	mail := "test@example.com"
-// 	testUser := structs.User{Mail: mail, Name: "Test User", Phone: "1234567890"}
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockUserRepository, structs.User)
+		expectedRet structs.User
+		expectedErr error
+	}{
+		{
+			name: "successful get by mail",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, user structs.User) {
+				mockRepo.EXPECT().GetByMail(fixture.ctx, user.Mail).Return(user, nil)
+			},
+			expectedRet: testUser,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, user structs.User) {
+				mockRepo.EXPECT().GetByMail(fixture.ctx, user.Mail).Return(structs.User{}, errTest)
+			},
+			expectedRet: structs.User{},
+			expectedErr: errTest,
+		},
+	}
 
-// 	t.Run("successful get", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetByMail(gomock.Any(), mail).Return(testUser, nil).Times(1)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo, _, _ := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testUser)
 
-// 		got, err := service.GetByMail(context.Background(), mail)
-// 		if err != nil {
-// 			t.Errorf("GetByMail() unexpected error = %v", err)
-// 		}
-// 		if got != testUser {
-// 			t.Errorf("GetByMail() = %v, want %v", got, testUser)
-// 		}
-// 	})
+			ret, err := service.GetByMail(fixture.ctx, testUser.Mail)
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetByMail(gomock.Any(), mail).Return(structs.User{}, testError).Times(1)
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 		_, err := service.GetByMail(context.Background(), mail)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("GetByMail() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+func TestGetAllUsers_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// func TestGetByPhone(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	testUsers := []structs.User{
+		fixture.userBuilder.WithName("User 1").Build(),
+		fixture.userBuilder.WithName("User 2").WithMail("user2@example.com").Build(),
+	}
 
-// 	mockRepo := mock_structs.NewMockUserRepository(ctrl)
-// 	service := New(mockRepo, mock_structs.NewMockBasketRepository())
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockUserRepository, []structs.User)
+		expectedRet []structs.User
+		expectedErr error
+	}{
+		{
+			name: "successful get all users",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, users []structs.User) {
+				mockRepo.EXPECT().GetAllUsers(fixture.ctx).Return(users, nil)
+			},
+			expectedRet: testUsers,
+			expectedErr: nil,
+		},
+		{
+			name: "empty list",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, users []structs.User) {
+				mockRepo.EXPECT().GetAllUsers(fixture.ctx).Return([]structs.User{}, nil)
+			},
+			expectedRet: []structs.User{},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, users []structs.User) {
+				mockRepo.EXPECT().GetAllUsers(fixture.ctx).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
 
-// 	phone := "1234567890"
-// 	testUser := structs.User{Phone: phone, Name: "Test User", Mail: "test@example.com"}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo, _, _ := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testUsers)
 
-// 	t.Run("successful get", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetByPhone(gomock.Any(), phone).Return(testUser, nil).Times(1)
+			ret, err := service.GetAllUsers(fixture.ctx)
 
-// 		got, err := service.GetByPhone(context.Background(), phone)
-// 		if err != nil {
-// 			t.Errorf("GetByPhone() unexpected error = %v", err)
-// 		}
-// 		if got != testUser {
-// 			t.Errorf("GetByPhone() = %v, want %v", got, testUser)
-// 		}
-// 	})
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetByPhone(gomock.Any(), phone).Return(structs.User{}, testError).Times(1)
+func TestGetByPhone_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 		_, err := service.GetByPhone(context.Background(), phone)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("GetByPhone() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	testUser := fixture.userBuilder.WithPhone("+1234567890").Build()
+
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockUserRepository, structs.User)
+		expectedRet structs.User
+		expectedErr error
+	}{
+		{
+			name: "successful get by phone",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, user structs.User) {
+				mockRepo.EXPECT().GetByPhone(fixture.ctx, user.Phone).Return(user, nil)
+			},
+			expectedRet: testUser,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockUserRepository, user structs.User) {
+				mockRepo.EXPECT().GetByPhone(fixture.ctx, user.Phone).Return(structs.User{}, errTest)
+			},
+			expectedRet: structs.User{},
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo, _, _ := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, testUser)
+
+			ret, err := service.GetByPhone(fixture.ctx, testUser.Phone)
+
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}

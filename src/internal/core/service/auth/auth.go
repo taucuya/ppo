@@ -11,11 +11,9 @@ import (
 )
 
 type AuthService interface {
-	SignIn(ctx context.Context, u structs.User) error
+	SignUp(ctx context.Context, u structs.User) error
 	LogIn(ctx context.Context, mail string, password string) (atoken string, rtoken string, err error)
 	LogOut(ctx context.Context, id uuid.UUID) error
-	VerifyAToken(ctx context.Context, token string) error
-	VerifyRToken(ctx context.Context, token string) (uuid.UUID, error)
 	CheckAdmin(ctx context.Context, id uuid.UUID) bool
 	CheckWorker(ctx context.Context, id uuid.UUID) bool
 	RefreshToken(ctx context.Context, atoken string, rtoken string) (string, error)
@@ -51,7 +49,7 @@ func New(prov AuthProvider, rep AuthRepository, usr AuthUser) *Service {
 	return &Service{prov: prov, rep: rep, usr: usr}
 }
 
-func (s *Service) SignIn(ctx context.Context, u structs.User) error {
+func (s *Service) SignUp(ctx context.Context, u structs.User) error {
 	return s.usr.Create(ctx, u)
 }
 
@@ -76,7 +74,7 @@ func (s *Service) LogIn(ctx context.Context, mail string, password string) (atok
 }
 
 func (s *Service) LogOut(ctx context.Context, rtoken string) error {
-	id, _, err := s.VerifyRToken(ctx, rtoken)
+	id, _, err := s.verifyRToken(ctx, rtoken)
 	if err != nil {
 		return err
 	}
@@ -84,7 +82,7 @@ func (s *Service) LogOut(ctx context.Context, rtoken string) error {
 	return err
 }
 
-func (s *Service) VerifyAToken(ctx context.Context, token string) (bool, error) {
+func (s *Service) verifyAToken(ctx context.Context, token string) (bool, error) {
 	valid, err := s.prov.VerifyToken(ctx, token)
 	if err != nil {
 		return false, err
@@ -92,7 +90,7 @@ func (s *Service) VerifyAToken(ctx context.Context, token string) (bool, error) 
 	return valid, nil
 }
 
-func (s *Service) VerifyRToken(ctx context.Context, token string) (uuid.UUID, bool, error) {
+func (s *Service) verifyRToken(ctx context.Context, token string) (uuid.UUID, bool, error) {
 	valid, err := s.prov.VerifyToken(ctx, token)
 	if err != nil {
 		return uuid.UUID{}, false, err
@@ -115,12 +113,12 @@ func (s *Service) RefreshToken(ctx context.Context, atoken string, rtoken string
 }
 
 func (s *Service) VerifyTokens(ctx context.Context, atoken string, rtoken string) (string, bool, bool, error) {
-	accessValid, err := s.VerifyAToken(ctx, atoken)
+	accessValid, err := s.verifyAToken(ctx, atoken)
 	if err != nil && !errors.Is(err, jwt.ErrTokenExpired) {
 		return ``, false, false, err
 	}
 
-	_, refreshValid, err := s.VerifyRToken(ctx, rtoken)
+	_, refreshValid, err := s.verifyRToken(ctx, rtoken)
 	if err != nil {
 		return ``, accessValid, false, err
 	}

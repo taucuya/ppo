@@ -1,399 +1,340 @@
 package order
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"reflect"
-// 	"testing"
-// 	"time"
+import (
+	"testing"
 
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/google/uuid"
-// 	"github.com/taucuya/ppo/internal/core/mock_structs"
-// 	"github.com/taucuya/ppo/internal/core/structs"
-// )
+	"github.com/stretchr/testify/assert"
+	"github.com/taucuya/ppo/internal/core/mock_structs"
+	"github.com/taucuya/ppo/internal/core/structs"
+)
 
-// var testError = errors.New("test error")
+func TestCreate_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// func TestCreate(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedErr error
+	}{
+		{
+			name: "successful creation",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().Create(fixture.ctx, fixture.order).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().Create(fixture.ctx, fixture.order).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// 	mockRepo := mock_structs.NewMockOrderRepository(ctrl)
-// 	service := New(mockRepo)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// 	now := time.Now()
-// 	testDate := time.Date(
-// 		now.Year(),
-// 		now.Month(),
-// 		now.Day(),
-// 		0, 0, 0, 0,
-// 		time.UTC,
-// 	)
+			err := service.Create(fixture.ctx, fixture.order)
 
-// 	testOrder := structs.Order{
-// 		Id:       structs.GenId(),
-// 		Date:     testDate,
-// 		IdUser:   structs.GenId(),
-// 		Address:  "Test Address",
-// 		Status:   "pending",
-// 		Price:    100.50,
-// 		IdWorker: structs.GenId(),
-// 	}
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	tests := []struct {
-// 		name    string
-// 		order   structs.Order
-// 		mock    func()
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name:  "successful creation",
-// 			order: testOrder,
-// 			mock: func() {
-// 				mockRepo.EXPECT().Create(gomock.Any(), testOrder).Return(nil)
-// 			},
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name:  "repository error",
-// 			order: testOrder,
-// 			mock: func() {
-// 				mockRepo.EXPECT().Create(gomock.Any(), testOrder).Return(testError)
-// 			},
-// 			wantErr: true,
-// 		},
-// 	}
+func TestGetById_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tt.mock()
-// 			err := service.Create(context.Background(), tt.order)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 			if tt.wantErr && !errors.Is(err, testError) {
-// 				t.Errorf("Expected testError, got %v", err)
-// 			}
-// 		})
-// 	}
-// }
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedRet structs.Order
+		expectedErr error
+	}{
+		{
+			name: "successful get",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.order.Id).Return(fixture.order, nil)
+			},
+			expectedRet: fixture.order,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.order.Id).Return(structs.Order{}, errTest)
+			},
+			expectedRet: structs.Order{},
+			expectedErr: errTest,
+		},
+	}
 
-// func TestGetById(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// 	mockRepo := mock_structs.NewMockOrderRepository(ctrl)
-// 	service := New(mockRepo)
+			ret, err := service.GetById(fixture.ctx, fixture.order.Id)
 
-// 	now := time.Now()
-// 	testDate := time.Date(
-// 		now.Year(),
-// 		now.Month(),
-// 		now.Day(),
-// 		0, 0, 0, 0,
-// 		time.UTC,
-// 	)
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	testID := structs.GenId()
-// 	testOrder := structs.Order{
-// 		Id:       testID,
-// 		Date:     testDate,
-// 		IdUser:   structs.GenId(),
-// 		Address:  "Test Address",
-// 		Status:   "pending",
-// 		Price:    100.50,
-// 		IdWorker: structs.GenId(),
-// 	}
+func TestGetItems_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	tests := []struct {
-// 		name    string
-// 		id      uuid.UUID
-// 		mock    func()
-// 		want    structs.Order
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "successful get",
-// 			id:   testID,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetById(gomock.Any(), testID).Return(testOrder, nil)
-// 			},
-// 			want:    testOrder,
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name: "not found",
-// 			id:   structs.GenId(),
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetById(gomock.Any(), gomock.Any()).Return(structs.Order{}, testError)
-// 			},
-// 			want:    structs.Order{},
-// 			wantErr: true,
-// 		},
-// 	}
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedRet []structs.OrderItem
+		expectedErr error
+	}{
+		{
+			name: "successful get items",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetItems(fixture.ctx, fixture.order.Id).Return(fixture.orderItems, nil)
+			},
+			expectedRet: fixture.orderItems,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetItems(fixture.ctx, fixture.order.Id).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tt.mock()
-// 			got, err := service.GetById(context.Background(), tt.id)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("GetById() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if tt.wantErr && !errors.Is(err, testError) {
-// 				t.Errorf("Expected testError, got %v", err)
-// 				return
-// 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("GetById() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// func TestGetItems(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+			ret, err := service.GetItems(fixture.ctx, fixture.order.Id)
 
-// 	mockRepo := mock_structs.NewMockOrderRepository(ctrl)
-// 	service := New(mockRepo)
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	orderID := structs.GenId()
-// 	productID := structs.GenId()
-// 	itemID := structs.GenId()
+func TestGetFreeOrders_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	testItems := []structs.OrderItem{
-// 		{
-// 			Id:        itemID,
-// 			IdProduct: productID,
-// 			IdOrder:   orderID,
-// 			Amount:    2,
-// 		},
-// 	}
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedRet []structs.Order
+		expectedErr error
+	}{
+		{
+			name: "successful get free orders",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetFreeOrders(fixture.ctx).Return(fixture.orders, nil)
+			},
+			expectedRet: fixture.orders,
+			expectedErr: nil,
+		},
+		{
+			name: "empty list",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetFreeOrders(fixture.ctx).Return([]structs.Order{}, nil)
+			},
+			expectedRet: []structs.Order{},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetFreeOrders(fixture.ctx).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
 
-// 	tests := []struct {
-// 		name    string
-// 		id      uuid.UUID
-// 		mock    func()
-// 		want    []structs.OrderItem
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "successful get items",
-// 			id:   orderID,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetItems(gomock.Any(), orderID).Return(testItems, nil)
-// 			},
-// 			want:    testItems,
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name: "empty order",
-// 			id:   orderID,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetItems(gomock.Any(), orderID).Return([]structs.OrderItem{}, nil)
-// 			},
-// 			want:    []structs.OrderItem{},
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name: "repository error",
-// 			id:   orderID,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetItems(gomock.Any(), orderID).Return(nil, testError)
-// 			},
-// 			want:    nil,
-// 			wantErr: true,
-// 		},
-// 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tt.mock()
-// 			got, err := service.GetItems(context.Background(), tt.id)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("GetItems() error = %v, wantErr %v", err, tt.wantErr)
-// 				return
-// 			}
-// 			if tt.wantErr && !errors.Is(err, testError) {
-// 				t.Errorf("Expected testError, got %v", err)
-// 				return
-// 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("GetItems() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
+			ret, err := service.GetFreeOrders(fixture.ctx)
 
-// func TestGetStatus(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	mockRepo := mock_structs.NewMockOrderRepository(ctrl)
-// 	service := New(mockRepo)
+func TestGetStatus_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	orderID := structs.GenId()
-// 	testStatus := "shipped"
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedRet string
+		expectedErr error
+	}{
+		{
+			name: "successful get status",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("pending", nil)
+			},
+			expectedRet: "pending",
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("", errTest)
+			},
+			expectedRet: "",
+			expectedErr: errTest,
+		},
+	}
 
-// 	t.Run("successful get status", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			GetStatus(gomock.Any(), orderID).
-// 			Return(testStatus, nil).
-// 			Times(1)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// 		got, err := service.GetStatus(context.Background(), orderID)
+			ret, err := service.GetStatus(fixture.ctx, fixture.order.Id)
 
-// 		if err != nil {
-// 			t.Errorf("GetStatus() unexpected error = %v", err)
-// 		}
-// 		if got != testStatus {
-// 			t.Errorf("GetStatus() = %v, want %v", got, testStatus)
-// 		}
-// 	})
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().
-// 			GetStatus(gomock.Any(), orderID).
-// 			Return("", testError).
-// 			Times(1)
+func TestChangeOrderStatus_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 		_, err := service.GetStatus(context.Background(), orderID)
+	tests := []struct {
+		name        string
+		status      string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedErr error
+	}{
+		{
+			name:   "successful status change",
+			status: "completed",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("pending", nil)
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.order.Id).Return(fixture.order, nil)
+				mockRepo.EXPECT().UpdateStatus(fixture.ctx, fixture.order.Id, "completed").Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:   "same status - no update needed",
+			status: "pending",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("pending", nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:   "error getting status",
+			status: "completed",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("", errTest)
+			},
+			expectedErr: errTest,
+		},
+		{
+			name:   "error getting order",
+			status: "completed",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("pending", nil)
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.order.Id).Return(structs.Order{}, errTest)
+			},
+			expectedErr: errTest,
+		},
+		{
+			name:   "error updating status",
+			status: "completed",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetStatus(fixture.ctx, fixture.order.Id).Return("pending", nil)
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.order.Id).Return(fixture.order, nil)
+				mockRepo.EXPECT().UpdateStatus(fixture.ctx, fixture.order.Id, "completed").Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("GetStatus() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// func TestChangeOrderStatus(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+			err := service.ChangeOrderStatus(fixture.ctx, fixture.order.Id, tt.status)
 
-// 	mockRepo := mock_structs.NewMockOrderRepository(ctrl)
-// 	service := New(mockRepo)
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	orderID := structs.GenId()
-// 	currentStatus := "processing"
-// 	newStatus := "shipped"
+func TestDelete_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	tests := []struct {
-// 		name      string
-// 		id        uuid.UUID
-// 		newStatus string
-// 		mock      func()
-// 		wantErr   bool
-// 	}{
-// 		{
-// 			name:      "successful status change",
-// 			id:        orderID,
-// 			newStatus: newStatus,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetStatus(gomock.Any(), orderID).Return(currentStatus, nil)
-// 				mockRepo.EXPECT().GetById(gomock.Any(), orderID).Return(structs.Order{}, nil)
-// 				mockRepo.EXPECT().UpdateStatus(gomock.Any(), orderID, newStatus).Return(nil)
-// 			},
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name:      "same status",
-// 			id:        orderID,
-// 			newStatus: currentStatus,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetStatus(gomock.Any(), orderID).Return(currentStatus, nil)
-// 			},
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name:      "get status error",
-// 			id:        orderID,
-// 			newStatus: newStatus,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetStatus(gomock.Any(), orderID).Return("", testError)
-// 			},
-// 			wantErr: true,
-// 		},
-// 		{
-// 			name:      "get order error",
-// 			id:        orderID,
-// 			newStatus: newStatus,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetStatus(gomock.Any(), orderID).Return(currentStatus, nil)
-// 				mockRepo.EXPECT().GetById(gomock.Any(), orderID).Return(structs.Order{}, testError)
-// 			},
-// 			wantErr: true,
-// 		},
-// 		{
-// 			name:      "update status error",
-// 			id:        orderID,
-// 			newStatus: newStatus,
-// 			mock: func() {
-// 				mockRepo.EXPECT().GetStatus(gomock.Any(), orderID).Return(currentStatus, nil)
-// 				mockRepo.EXPECT().GetById(gomock.Any(), orderID).Return(structs.Order{}, nil)
-// 				mockRepo.EXPECT().UpdateStatus(gomock.Any(), orderID, newStatus).Return(testError)
-// 			},
-// 			wantErr: true,
-// 		},
-// 	}
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedErr error
+	}{
+		{
+			name: "successful delete",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().Delete(fixture.ctx, fixture.order.Id).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().Delete(fixture.ctx, fixture.order.Id).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tt.mock()
-// 			err := service.ChangeOrderStatus(context.Background(), tt.id, tt.newStatus)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("ChangeOrderStatus() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 			if tt.wantErr && !errors.Is(err, testError) {
-// 				t.Errorf("Expected testError, got %v", err)
-// 			}
-// 		})
-// 	}
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
 
-// func TestDelete(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+			err := service.Delete(fixture.ctx, fixture.order.Id)
 
-// 	mockRepo := mock_structs.NewMockOrderRepository(ctrl)
-// 	service := New(mockRepo)
-
-// 	orderID := structs.GenId()
-
-// 	tests := []struct {
-// 		name    string
-// 		id      uuid.UUID
-// 		mock    func()
-// 		wantErr bool
-// 	}{
-// 		{
-// 			name: "successful delete",
-// 			id:   orderID,
-// 			mock: func() {
-// 				mockRepo.EXPECT().Delete(gomock.Any(), orderID).Return(nil)
-// 			},
-// 			wantErr: false,
-// 		},
-// 		{
-// 			name: "repository error",
-// 			id:   orderID,
-// 			mock: func() {
-// 				mockRepo.EXPECT().Delete(gomock.Any(), orderID).Return(testError)
-// 			},
-// 			wantErr: true,
-// 		},
-// 	}
-
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			tt.mock()
-// 			err := service.Delete(context.Background(), tt.id)
-// 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
-// 			}
-// 			if tt.wantErr && !errors.Is(err, testError) {
-// 				t.Errorf("Expected testError, got %v", err)
-// 			}
-// 		})
-// 	}
-// }
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}

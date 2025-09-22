@@ -1,253 +1,200 @@
 package brand
 
 import (
-	"context"
-	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 	"github.com/taucuya/ppo/internal/core/mock_structs"
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
-var testError = errors.New("test error")
-
-func TestCreate(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockRepo := mock_structs.NewMockBrandRepository(ctrl)
-	service := New(mockRepo)
-
-	testBrand := structs.Brand{
-		Id:            structs.GenId(),
-		Name:          "Test Brand",
-		Description:   "Test Description",
-		PriceCategory: "Premium",
-	}
+func TestCreate_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
 	tests := []struct {
-		name    string
-		brand   structs.Brand
-		mock    func()
-		wantErr bool
+		name        string
+		setupMocks  func(*mock_structs.MockBrandRepository)
+		expectedErr error
 	}{
 		{
-			name:  "successful creation",
-			brand: testBrand,
-			mock: func() {
-				mockRepo.EXPECT().Create(gomock.Any(), testBrand).Return(nil)
+			name: "successful creation",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().Create(fixture.ctx, fixture.brand).Return(nil)
 			},
-			wantErr: false,
-		},
-		{
-			name:  "repository error",
-			brand: testBrand,
-			mock: func() {
-				mockRepo.EXPECT().Create(gomock.Any(), testBrand).Return(testError)
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-			err := service.Create(context.Background(), tt.brand)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if tt.wantErr && !errors.Is(err, testError) {
-				t.Errorf("Expected testError, got %v", err)
-			}
-		})
-	}
-}
-
-func TestGetById(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockRepo := mock_structs.NewMockBrandRepository(ctrl)
-	service := New(mockRepo)
-
-	testID := structs.GenId()
-	testBrand := structs.Brand{
-		Id:            testID,
-		Name:          "Test Brand",
-		Description:   "Test Description",
-		PriceCategory: "Premium",
-	}
-
-	tests := []struct {
-		name    string
-		id      uuid.UUID
-		mock    func()
-		want    structs.Brand
-		wantErr bool
-	}{
-		{
-			name: "successful get",
-			id:   testID,
-			mock: func() {
-				mockRepo.EXPECT().GetById(gomock.Any(), testID).Return(testBrand, nil)
-			},
-			want:    testBrand,
-			wantErr: false,
-		},
-		{
-			name: "not found",
-			id:   structs.GenId(),
-			mock: func() {
-				mockRepo.EXPECT().GetById(gomock.Any(), gomock.Any()).Return(structs.Brand{}, testError)
-			},
-			want:    structs.Brand{},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-			got, err := service.GetById(context.Background(), tt.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetById() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantErr && !errors.Is(err, testError) {
-				t.Errorf("Expected testError, got %v", err)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("GetById() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDelete(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	mockRepo := mock_structs.NewMockBrandRepository(ctrl)
-	service := New(mockRepo)
-
-	testID := structs.GenId()
-
-	tests := []struct {
-		name    string
-		id      uuid.UUID
-		mock    func()
-		wantErr bool
-	}{
-		{
-			name: "successful delete",
-			id:   testID,
-			mock: func() {
-				mockRepo.EXPECT().Delete(gomock.Any(), testID).Return(nil)
-			},
-			wantErr: false,
+			expectedErr: nil,
 		},
 		{
 			name: "repository error",
-			id:   testID,
-			mock: func() {
-				mockRepo.EXPECT().Delete(gomock.Any(), testID).Return(testError)
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().Create(fixture.ctx, fixture.brand).Return(errTest)
 			},
-			wantErr: true,
+			expectedErr: errTest,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-			err := service.Delete(context.Background(), tt.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			if tt.wantErr && !errors.Is(err, testError) {
-				t.Errorf("Expected testError, got %v", err)
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
+
+			err := service.Create(fixture.ctx, fixture.brand)
+
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
+
+func TestGetById_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
+
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockBrandRepository)
+		expectedRet structs.Brand
+		expectedErr error
+	}{
+		{
+			name: "successful get",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.brand.Id).Return(fixture.brand, nil)
+			},
+			expectedRet: fixture.brand,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().GetById(fixture.ctx, fixture.brand.Id).Return(structs.Brand{}, errTest)
+			},
+			expectedRet: structs.Brand{},
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
+
+			ret, err := service.GetById(fixture.ctx, fixture.brand.Id)
+
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
 			}
 		})
 	}
+	fixture.Cleanup()
 }
 
-func TestGetAllBrands(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
+func TestDelete_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-	mockRepo := mock_structs.NewMockBrandRepository(ctrl)
-	service := New(mockRepo)
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockBrandRepository)
+		expectedErr error
+	}{
+		{
+			name: "successful delete",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().Delete(fixture.ctx, fixture.brand.Id).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().Delete(fixture.ctx, fixture.brand.Id).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
+
+			err := service.Delete(fixture.ctx, fixture.brand.Id)
+
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
+
+func TestGetAllBrandsInCategory_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
 	testBrands := []structs.Brand{
 		{
 			Id:            structs.GenId(),
 			Name:          "Brand 1",
-			Description:   "Desc 1",
-			PriceCategory: "Standard",
+			Description:   "Description 1",
+			PriceCategory: "Premium",
 		},
 		{
 			Id:            structs.GenId(),
 			Name:          "Brand 2",
-			Description:   "Desc 2",
+			Description:   "Description 2",
 			PriceCategory: "Premium",
 		},
 	}
 
 	tests := []struct {
-		name    string
-		mock    func()
-		want    []structs.Brand
-		wantErr bool
+		name        string
+		category    string
+		setupMocks  func(*mock_structs.MockBrandRepository)
+		expectedRet []structs.Brand
+		expectedErr error
 	}{
 		{
-			name: "successful get all",
-			mock: func() {
-				mockRepo.EXPECT().GetAllBrandsInCategory(gomock.Any(), testBrands[1].PriceCategory).Return(testBrands, nil)
+			name:     "successful get all brands in category",
+			category: "Premium",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().GetAllBrandsInCategory(fixture.ctx, "Premium").Return(testBrands, nil)
 			},
-			want:    testBrands,
-			wantErr: false,
+			expectedRet: testBrands,
+			expectedErr: nil,
 		},
 		{
-			name: "empty list",
-			mock: func() {
-				mockRepo.EXPECT().GetAllBrandsInCategory(gomock.Any(), "econom").Return([]structs.Brand{}, nil)
+			name:     "empty category",
+			category: "Economy",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().GetAllBrandsInCategory(fixture.ctx, "Economy").Return([]structs.Brand{}, nil)
 			},
-			want:    []structs.Brand{},
-			wantErr: false,
+			expectedRet: []structs.Brand{},
+			expectedErr: nil,
 		},
 		{
-			name: "repository error",
-			mock: func() {
-				mockRepo.EXPECT().GetAllBrandsInCategory(gomock.Any(), testBrands[2].PriceCategory).Return(nil, testError)
+			name:     "repository error",
+			category: "Premium",
+			setupMocks: func(mockRepo *mock_structs.MockBrandRepository) {
+				mockRepo.EXPECT().GetAllBrandsInCategory(fixture.ctx, "Premium").Return(nil, errTest)
 			},
-			want:    nil,
-			wantErr: true,
+			expectedRet: nil,
+			expectedErr: errTest,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.mock()
-			got, err := service.GetAllBrandsInCategory(context.Background(), testBrands[1].PriceCategory)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetAllBrands() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantErr && !errors.Is(err, testError) {
-				t.Errorf("Expected testError, got %v", err)
-				return
-			}
-			if len(got) != len(tt.want) {
-				t.Errorf("GetAllBrands() = %v, want %v", got, tt.want)
-			}
-			for i := range got {
-				if got[i] != tt.want[i] {
-					t.Errorf("GetAllBrands() = %v, want %v", got, tt.want)
-					break
-				}
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
+
+			ret, err := service.GetAllBrandsInCategory(fixture.ctx, tt.category)
+
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
 			}
 		})
 	}
+	fixture.Cleanup()
 }

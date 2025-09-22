@@ -65,17 +65,17 @@ func (mr *MockBasketServiceMockRecorder) Create(ctx, b interface{}) *gomock.Call
 }
 
 // DeleteItem mocks base method.
-func (m *MockBasketService) DeleteItem(ctx context.Context, id uuid.UUID) error {
+func (m *MockBasketService) DeleteItem(ctx context.Context, id, product_id uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteItem", ctx, id)
+	ret := m.ctrl.Call(m, "DeleteItem", ctx, id, product_id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteItem indicates an expected call of DeleteItem.
-func (mr *MockBasketServiceMockRecorder) DeleteItem(ctx, id interface{}) *gomock.Call {
+func (mr *MockBasketServiceMockRecorder) DeleteItem(ctx, id, product_id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteItem", reflect.TypeOf((*MockBasketService)(nil).DeleteItem), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteItem", reflect.TypeOf((*MockBasketService)(nil).DeleteItem), ctx, id, product_id)
 }
 
 // GetById mocks base method.
@@ -174,17 +174,17 @@ func (mr *MockBasketRepositoryMockRecorder) Create(ctx, b interface{}) *gomock.C
 }
 
 // DeleteItem mocks base method.
-func (m *MockBasketRepository) DeleteItem(ctx context.Context, id uuid.UUID) error {
+func (m *MockBasketRepository) DeleteItem(ctx context.Context, id, product_id uuid.UUID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteItem", ctx, id)
+	ret := m.ctrl.Call(m, "DeleteItem", ctx, id, product_id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteItem indicates an expected call of DeleteItem.
-func (mr *MockBasketRepositoryMockRecorder) DeleteItem(ctx, id interface{}) *gomock.Call {
+func (mr *MockBasketRepositoryMockRecorder) DeleteItem(ctx, id, product_id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteItem", reflect.TypeOf((*MockBasketRepository)(nil).DeleteItem), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteItem", reflect.TypeOf((*MockBasketRepository)(nil).DeleteItem), ctx, id, product_id)
 }
 
 // GetBIdByUId mocks base method.

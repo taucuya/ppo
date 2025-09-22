@@ -36,6 +36,34 @@ func (m *MockAuthService) EXPECT() *MockAuthServiceMockRecorder {
 	return m.recorder
 }
 
+// CheckAdmin mocks base method.
+func (m *MockAuthService) CheckAdmin(ctx context.Context, id uuid.UUID) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckAdmin", ctx, id)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// CheckAdmin indicates an expected call of CheckAdmin.
+func (mr *MockAuthServiceMockRecorder) CheckAdmin(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAdmin", reflect.TypeOf((*MockAuthService)(nil).CheckAdmin), ctx, id)
+}
+
+// CheckWorker mocks base method.
+func (m *MockAuthService) CheckWorker(ctx context.Context, id uuid.UUID) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckWorker", ctx, id)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// CheckWorker indicates an expected call of CheckWorker.
+func (mr *MockAuthServiceMockRecorder) CheckWorker(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckWorker", reflect.TypeOf((*MockAuthService)(nil).CheckWorker), ctx, id)
+}
+
 // LogIn mocks base method.
 func (m *MockAuthService) LogIn(ctx context.Context, mail, password string) (string, string, error) {
 	m.ctrl.T.Helper()
@@ -81,47 +109,18 @@ func (mr *MockAuthServiceMockRecorder) RefreshToken(ctx, atoken, rtoken interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockAuthService)(nil).RefreshToken), ctx, atoken, rtoken)
 }
 
-// SignIn mocks base method.
-func (m *MockAuthService) SignIn(ctx context.Context, u structs.User) error {
+// SignUp mocks base method.
+func (m *MockAuthService) SignUp(ctx context.Context, u structs.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SignIn", ctx, u)
+	ret := m.ctrl.Call(m, "SignUp", ctx, u)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SignIn indicates an expected call of SignIn.
-func (mr *MockAuthServiceMockRecorder) SignIn(ctx, u interface{}) *gomock.Call {
+// SignUp indicates an expected call of SignUp.
+func (mr *MockAuthServiceMockRecorder) SignUp(ctx, u interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignIn", reflect.TypeOf((*MockAuthService)(nil).SignIn), ctx, u)
-}
-
-// VerifyAToken mocks base method.
-func (m *MockAuthService) VerifyAToken(ctx context.Context, token string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyAToken", ctx, token)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// VerifyAToken indicates an expected call of VerifyAToken.
-func (mr *MockAuthServiceMockRecorder) VerifyAToken(ctx, token interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyAToken", reflect.TypeOf((*MockAuthService)(nil).VerifyAToken), ctx, token)
-}
-
-// VerifyRToken mocks base method.
-func (m *MockAuthService) VerifyRToken(ctx context.Context, token string) (uuid.UUID, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyRToken", ctx, token)
-	ret0, _ := ret[0].(uuid.UUID)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// VerifyRToken indicates an expected call of VerifyRToken.
-func (mr *MockAuthServiceMockRecorder) VerifyRToken(ctx, token interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyRToken", reflect.TypeOf((*MockAuthService)(nil).VerifyRToken), ctx, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignUp", reflect.TypeOf((*MockAuthService)(nil).SignUp), ctx, u)
 }
 
 // MockAuthRepository is a mock of AuthRepository interface.
@@ -145,6 +144,34 @@ func NewMockAuthRepository(ctrl *gomock.Controller) *MockAuthRepository {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockAuthRepository) EXPECT() *MockAuthRepositoryMockRecorder {
 	return m.recorder
+}
+
+// CheckAdmin mocks base method.
+func (m *MockAuthRepository) CheckAdmin(ctx context.Context, id uuid.UUID) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckAdmin", ctx, id)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// CheckAdmin indicates an expected call of CheckAdmin.
+func (mr *MockAuthRepositoryMockRecorder) CheckAdmin(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckAdmin", reflect.TypeOf((*MockAuthRepository)(nil).CheckAdmin), ctx, id)
+}
+
+// CheckWorker mocks base method.
+func (m *MockAuthRepository) CheckWorker(ctx context.Context, id uuid.UUID) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CheckWorker", ctx, id)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// CheckWorker indicates an expected call of CheckWorker.
+func (mr *MockAuthRepositoryMockRecorder) CheckWorker(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckWorker", reflect.TypeOf((*MockAuthRepository)(nil).CheckWorker), ctx, id)
 }
 
 // CreateToken mocks base method.

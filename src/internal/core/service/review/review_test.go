@@ -1,144 +1,197 @@
 package review
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"testing"
-// 	"time"
+import (
+	"testing"
 
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/taucuya/ppo/internal/core/mock_structs"
-// 	"github.com/taucuya/ppo/internal/core/structs"
-// )
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/taucuya/ppo/internal/core/mock_structs"
+	"github.com/taucuya/ppo/internal/core/structs"
+)
 
-// var testError = errors.New("test error")
+func TestCreate_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// func TestCreate(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	validReview := fixture.reviewMother.ValidReview()
 
-// 	mockRepo := mock_structs.NewMockReviewRepository(ctrl)
-// 	service := New(mockRepo)
+	tests := []struct {
+		name        string
+		review      structs.Review
+		setupMocks  func(*mock_structs.MockReviewRepository, structs.Review)
+		expectedErr error
+	}{
+		{
+			name:   "successful creation",
+			review: validReview,
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, review structs.Review) {
+				mockRepo.EXPECT().Create(fixture.ctx, review).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name:   "repository error",
+			review: validReview,
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, review structs.Review) {
+				mockRepo.EXPECT().Create(fixture.ctx, review).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// 	testReview := structs.Review{
-// 		Id:        structs.GenId(),
-// 		IdProduct: structs.GenId(),
-// 		IdUser:    structs.GenId(),
-// 		Rating:    5,
-// 		Text:      "Great product!",
-// 		Date:      time.Time{},
-// 	// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, tt.review)
 
-// 	t.Run("successful creation", func(t *testing.T) {
-// 		mockRepo.EXPECT().Create(gomock.Any(), testReview).Return(nil).Times(1)
+			err := service.Create(fixture.ctx, tt.review)
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 		err := service.Create(context.Background(), testReview)
-// 		if err != nil {
-// 			t.Errorf("Create() unexpected error = %v", err)
-// 		}
-// 	})
+func TestGetById_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().Create(gomock.Any(), testReview).Return(testError).Times(1)
+	validReview := fixture.reviewMother.ValidReview()
 
-// 		err := service.Create(context.Background(), testReview)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("Create() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockReviewRepository, structs.Review)
+		expectedRet structs.Review
+		expectedErr error
+	}{
+		{
+			name: "successful get by id",
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, review structs.Review) {
+				mockRepo.EXPECT().GetById(fixture.ctx, review.Id).Return(review, nil)
+			},
+			expectedRet: validReview,
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, review structs.Review) {
+				mockRepo.EXPECT().GetById(fixture.ctx, review.Id).Return(structs.Review{}, errTest)
+			},
+			expectedRet: structs.Review{},
+			expectedErr: errTest,
+		},
+	}
 
-// func TestGetById(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, validReview)
 
-// 	mockRepo := mock_structs.NewMockReviewRepository(ctrl)
-// 	service := New(mockRepo)
-// 	testID := structs.GenId()
-// 	testReview := structs.Review{
-// 		Id: testID, IdProduct: structs.GenId(), IdUser: structs.GenId(), Rating: 5, Text: "Nice", Date: time.Time{},
-// 	}
+			ret, err := service.GetById(fixture.ctx, validReview.Id)
 
-// 	t.Run("successful get", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetById(gomock.Any(), testID).Return(testReview, nil).Times(1)
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 		got, err := service.GetById(context.Background(), testID)
-// 		if err != nil {
-// 			t.Errorf("GetById() unexpected error = %v", err)
-// 		}
-// 		if got != testReview {
-// 			t.Errorf("GetById() = %v, want %v", got, testReview)
-// 		}
-// 	})
+func TestDelete_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		mockRepo.EXPECT().GetById(gomock.Any(), testID).Return(structs.Review{}, testError).Times(1)
+	validReview := fixture.reviewMother.ValidReview()
 
-// 		_, err := service.GetById(context.Background(), testID)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("GetById() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockReviewRepository, uuid.UUID)
+		expectedErr error
+	}{
+		{
+			name: "successful delete",
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, reviewID uuid.UUID) {
+				mockRepo.EXPECT().Delete(fixture.ctx, reviewID).Return(nil)
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, reviewID uuid.UUID) {
+				mockRepo.EXPECT().Delete(fixture.ctx, reviewID).Return(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
 
-// func TestDelete(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, validReview.Id)
 
-// 	mockRepo := mock_structs.NewMockReviewRepository(ctrl)
-// 	service := New(mockRepo)
-// 	reviewID := structs.GenId()
+			err := service.Delete(fixture.ctx, validReview.Id)
+			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
 
-// 	t.Run("successful delete", func(t *testing.T) {
-// 		mockRepo.EXPECT().Delete(gomock.Any(), reviewID).Return(nil).Times(1)
+func TestReviewsForProduct_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
 
-// 		err := service.Delete(context.Background(), reviewID)
-// 		if err != nil {
-// 			t.Errorf("Delete() unexpected error = %v", err)
-// 		}
-// 	})
+	productID := fixture.reviewMother.ValidReview().IdProduct
+	reviewsForProduct := fixture.reviewMother.ReviewsForProduct(productID)
+	emptyReviews := fixture.reviewMother.EmptyReviews()
 
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().Delete(gomock.Any(), reviewID).Return(testError).Times(1)
+	tests := []struct {
+		name        string
+		productID   uuid.UUID
+		setupMocks  func(*mock_structs.MockReviewRepository, uuid.UUID, []structs.Review)
+		expectedRet []structs.Review
+		expectedErr error
+	}{
+		{
+			name:      "successful get reviews for product",
+			productID: productID,
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, productID uuid.UUID, reviews []structs.Review) {
+				mockRepo.EXPECT().ReviewsForProduct(fixture.ctx, productID).Return(reviews, nil)
+			},
+			expectedRet: reviewsForProduct,
+			expectedErr: nil,
+		},
+		{
+			name:      "no reviews for product",
+			productID: uuid.MustParse("f6a7b8c9-c0d1-2345-fabc-678901234567"),
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, productID uuid.UUID, reviews []structs.Review) {
+				mockRepo.EXPECT().ReviewsForProduct(fixture.ctx, productID).Return(emptyReviews, nil)
+			},
+			expectedRet: emptyReviews,
+			expectedErr: nil,
+		},
+		{
+			name:      "repository error",
+			productID: productID,
+			setupMocks: func(mockRepo *mock_structs.MockReviewRepository, productID uuid.UUID, reviews []structs.Review) {
+				mockRepo.EXPECT().ReviewsForProduct(fixture.ctx, productID).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
 
-// 		err := service.Delete(context.Background(), reviewID)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("Delete() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo, tt.productID, tt.expectedRet)
 
-// func TestReviewsForProduct(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
+			ret, err := service.ReviewsForProduct(fixture.ctx, tt.productID)
 
-// 	mockRepo := mock_structs.NewMockReviewRepository(ctrl)
-// 	service := New(mockRepo)
-
-// 	productID := structs.GenId()
-// 	testReviews := []structs.Review{
-// 		{Id: structs.GenId(), IdProduct: productID, IdUser: structs.GenId(), Rating: 4, Text: "Good", Date: time.Time{}},
-// 		{Id: structs.GenId(), IdProduct: productID, IdUser: structs.GenId(), Rating: 5, Text: "Excellent", Date: time.Time{}},
-// 	}
-
-// 	t.Run("successful fetch", func(t *testing.T) {
-// 		mockRepo.EXPECT().ReviewsForProduct(gomock.Any(), productID).Return(testReviews, nil).Times(1)
-
-// 		got, err := service.ReviewsForProduct(context.Background(), productID)
-// 		if err != nil {
-// 			t.Errorf("ReviewsForProduct() unexpected error = %v", err)
-// 		}
-// 		if len(got) != len(testReviews) {
-// 			t.Errorf("ReviewsForProduct() = %v, want %v", got, testReviews)
-// 		}
-// 	})
-
-// 	t.Run("repository error", func(t *testing.T) {
-// 		mockRepo.EXPECT().ReviewsForProduct(gomock.Any(), productID).Return(nil, testError).Times(1)
-
-// 		_, err := service.ReviewsForProduct(context.Background(), productID)
-// 		if !errors.Is(err, testError) {
-// 			t.Errorf("ReviewsForProduct() error = %v, want %v", err, testError)
-// 		}
-// 	})
-// }
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}

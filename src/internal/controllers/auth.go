@@ -44,7 +44,7 @@ func (c *Controller) SignupHandler(ctx *gin.Context) {
 		Role:          "обычный пользователь",
 	}
 
-	if err := c.AuthServise.SignIn(ctx.Request.Context(), user); err != nil {
+	if err := c.AuthServise.SignUp(ctx.Request.Context(), user); err != nil {
 		log.Printf("[ERROR] Cant signup: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
 		return

@@ -2,7 +2,6 @@ package basket
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/taucuya/ppo/internal/core/structs"
@@ -42,7 +41,6 @@ func (s *Service) Create(ctx context.Context, b structs.Basket) error {
 
 func (s *Service) GetById(ctx context.Context, id uuid.UUID) (structs.Basket, error) {
 	bid, err := s.rep.GetBIdByUId(ctx, id)
-	fmt.Println(bid)
 	if err != nil {
 		return structs.Basket{}, err
 	}
@@ -83,10 +81,8 @@ func (s *Service) DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.
 func (s *Service) UpdateItemAmount(ctx context.Context, id uuid.UUID, product_id uuid.UUID, amount int) error {
 	bid, err := s.rep.GetBIdByUId(ctx, id)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	err = s.rep.UpdateItemAmount(ctx, bid, product_id, amount)
-	fmt.Println(err)
 	return err
 }
