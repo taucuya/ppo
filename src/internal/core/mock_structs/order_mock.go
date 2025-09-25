@@ -123,6 +123,21 @@ func (mr *MockOrderServiceMockRecorder) GetItems(ctx, id interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetItems", reflect.TypeOf((*MockOrderService)(nil).GetItems), ctx, id)
 }
 
+// GetOrdersByUser mocks base method.
+func (m *MockOrderService) GetOrdersByUser(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersByUser", ctx, id)
+	ret0, _ := ret[0].([]structs.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersByUser indicates an expected call of GetOrdersByUser.
+func (mr *MockOrderServiceMockRecorder) GetOrdersByUser(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersByUser", reflect.TypeOf((*MockOrderService)(nil).GetOrdersByUser), ctx, id)
+}
+
 // GetStatus mocks base method.
 func (m *MockOrderService) GetStatus(ctx context.Context, id uuid.UUID) (string, error) {
 	m.ctrl.T.Helper()
@@ -232,6 +247,21 @@ func (m *MockOrderRepository) GetItems(ctx context.Context, id uuid.UUID) ([]str
 func (mr *MockOrderRepositoryMockRecorder) GetItems(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetItems", reflect.TypeOf((*MockOrderRepository)(nil).GetItems), ctx, id)
+}
+
+// GetOrdersByUser mocks base method.
+func (m *MockOrderRepository) GetOrdersByUser(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrdersByUser", ctx, id)
+	ret0, _ := ret[0].([]structs.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersByUser indicates an expected call of GetOrdersByUser.
+func (mr *MockOrderRepositoryMockRecorder) GetOrdersByUser(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersByUser", reflect.TypeOf((*MockOrderRepository)(nil).GetOrdersByUser), ctx, id)
 }
 
 // GetStatus mocks base method.
