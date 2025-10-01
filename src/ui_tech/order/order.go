@@ -149,7 +149,7 @@ func GetFreeOrders(client *http.Client) {
 	}
 
 	if len(orders) == 0 {
-		fmt.Println("ℹ️  No free orders available.")
+		fmt.Println("ℹ️ No free orders available.")
 		return
 	}
 
@@ -235,5 +235,46 @@ func DeleteOrder(client *http.Client, reader *bufio.Reader) {
 		var errResp map[string]interface{}
 		json.NewDecoder(resp.Body).Decode(&errResp)
 		fmt.Println("❌ Error:", errResp["error"])
+	}
+}
+
+func GetOrdersByUser(client *http.Client) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/orders/", nil)
+	if err != nil {
+		fmt.Println("Failed to create request:", err)
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Request failed:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("❌ Failed to get orders. Status: %s\n", resp.Status)
+		return
+	}
+
+	var orders []map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&orders); err != nil {
+		fmt.Println("❌ Failed to decode response:", err)
+		return
+	}
+
+	if len(orders) == 0 {
+		fmt.Println("ℹ️ No orders available.")
+		return
+	}
+
+	fmt.Println("✅ User Orders:")
+	for i, order := range orders {
+		fmt.Printf("\nOrder #%d\n", i+1)
+		fmt.Printf("  ID:      %v\n", order["Id"])
+		fmt.Printf("  Status:  %v\n", order["Status"])
+		fmt.Printf("  Address: %v\n", order["Address"])
+		fmt.Printf("  Price:   %v\n", order["Price"])
+		fmt.Printf("  Date:    %v\n", order["Date"])
 	}
 }

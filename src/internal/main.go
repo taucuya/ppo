@@ -142,23 +142,23 @@ func main() {
 			auth.POST("/logout", c.LogoutHandler)
 		}
 
-		basket := api.Group("/basket")
+		basket := api.Group("/baskets")
 		{
 			basket.GET("/items", c.GetBasketItemsHandler)
-			basket.POST("", c.AddBasketItemHandler)
+			basket.POST("/items", c.AddBasketItemHandler)
 			basket.GET("", c.GetBasketByIdHandler)
-			basket.DELETE("", c.DeleteBasketItemHandler)
-			basket.PUT("", c.UpdateBasketItemAmountHandler)
+			basket.DELETE("/items", c.DeleteBasketItemHandler)
+			basket.PUT("/items", c.UpdateBasketItemAmountHandler)
 		}
 
-		brand := api.Group("/brand")
+		brand := api.Group("/brands")
 		{
 			brand.POST("", c.CreateBrandHandler)
 			brand.DELETE("/:id", c.DeleteBrandHandler)
 			brand.GET("/:id", c.GetBrandByIdHandler)
-			brand.GET("/category/:cat", c.GetAllBrandsInCategoryHander)
+			brand.GET("", c.GetAllBrandsInCategoryHander)
 		}
-
+		// HERE I STOPED
 		favourites := api.Group("/favourites")
 		{
 			favourites.GET("/items", c.GetFavouritesHandler)
@@ -166,7 +166,7 @@ func main() {
 			favourites.DELETE("", c.DeleteFavouritesItemHandler)
 		}
 
-		order := api.Group("/order")
+		order := api.Group("/orders")
 		{
 			order.POST("", c.CreateOrderHandler)
 			order.GET("/:id/items", c.GetOrderItemsHandler)
@@ -177,7 +177,7 @@ func main() {
 			order.PUT("/:id", c.AcceptOrderHandler)
 		}
 
-		product := api.Group("/product")
+		product := api.Group("/products")
 		{
 			product.POST("", c.CreateProductHandler)
 			product.DELETE("/:id", c.DeleteProductHandler)
@@ -187,21 +187,21 @@ func main() {
 			product.GET("/reviews/:id", c.GetReviewsForProductHandler)
 		}
 
-		review := api.Group("/review")
+		review := api.Group("/reviews")
 		{
 			review.POST("product/:id_product", c.CreateReviewHandler)
 			review.GET("/:id", c.GetReviewByIdHandler)
 			review.DELETE("/:id", c.DeleteReviewHandler)
 		}
 
-		user := api.Group("/user")
+		user := api.Group("/users")
 		{
 			user.GET("/email", c.GetUserByEmailHandler)
 			user.GET("/users", c.GetAllUsersHandler)
 			user.GET("/phone", c.GetUserByPhoneHandler)
 		}
 
-		worker := api.Group("/worker")
+		worker := api.Group("/workers")
 		{
 			worker.POST("", c.CreateWorkerHandler)
 			worker.GET("", c.GetAllWorkersHandler)

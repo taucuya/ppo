@@ -86,7 +86,7 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {
-	category := ctx.Param("cat")
+	category := ctx.Query("category")
 
 	res, err := c.BrandService.GetAllBrandsInCategory(ctx, category)
 	if err != nil {

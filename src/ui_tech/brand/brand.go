@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/google/uuid"
@@ -125,7 +126,12 @@ func GetBrandsByCategory(client *http.Client, reader *bufio.Reader) {
 	category, _ := reader.ReadString('\n')
 	category = strings.TrimSpace(category)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/brand/category/%s", category)
+	baseURL := "http://localhost:8080/api/v1/brands"
+	params := url.Values{}
+	params.Add("category", category)
+
+	url := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
 	resp, err := client.Get(url)
 	if err != nil {
 		fmt.Println("❌ Request failed:", err)
