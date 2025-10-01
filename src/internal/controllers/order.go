@@ -183,3 +183,33 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted"})
 }
+
+func (c *Controller) GetOrdersByUser(ctx *gin.Context) {
+	good := c.Verify(ctx)
+	if !good {
+		return
+	}
+
+	atoken, err := ctx.Cookie("access_token")
+	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return
+	}
+
+	id, err := c.AuthServise.GetId(atoken)
+	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+
+	user, err := c.OrderService.GetOrdersByUser(ctx, id)
+	if err != nil {
+		log.Printf("[ERROR] Cant get orders by user: %v", err)
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Orders not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
+}

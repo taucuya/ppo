@@ -6,10 +6,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
+	"github.com/stretchr/testify/require"
 	"github.com/taucuya/ppo/internal/core/mock_structs"
+	"github.com/taucuya/ppo/internal/core/service/basket"
+	"github.com/taucuya/ppo/internal/core/service/favourites"
 	"github.com/taucuya/ppo/internal/core/structs"
+	basket_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/basket"
+	favourites_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/favourites"
+	user_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/user"
 )
 
 var errTest = errors.New("test error")
@@ -122,17 +130,43 @@ type TestFixture struct {
 	favBuilder    *FavouritesBuilder
 }
 
-func NewTestFixture(t *testing.T) *TestFixture {
-	ctrl := gomock.NewController(t)
+type TestClassicFixture struct {
+	t             *testing.T
+	mock          sqlmock.Sqlmock
+	ctx           context.Context
+	db            *sqlx.DB
+	userBuilder   *UserBuilder
+	basketBuilder *BasketBuilder
+	favBuilder    *FavouritesBuilder
+}
 
+func NewTestFixture(t *testing.T) *TestFixture {
 	return &TestFixture{
 		t:             t,
-		ctrl:          ctrl,
+		ctrl:          gomock.NewController(t),
 		ctx:           context.Background(),
 		userBuilder:   NewUserBuilder(),
 		basketBuilder: NewBasketBuilder(),
 		favBuilder:    NewFavouritesBuilder(),
 	}
+}
+
+func NewTestClassicFixture(t *testing.T) *TestClassicFixture {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+
+	sqlxDB := sqlx.NewDb(db, "sqlmock")
+
+	return &TestClassicFixture{
+		t:             t,
+		mock:          mock,
+		ctx:           context.Background(),
+		db:            sqlxDB,
+		userBuilder:   NewUserBuilder(),
+		basketBuilder: NewBasketBuilder(),
+		favBuilder:    NewFavouritesBuilder(),
+	}
+
 }
 
 func (f *TestFixture) Cleanup() {
@@ -148,7 +182,32 @@ func (f *TestFixture) CreateServiceWithMocks() (*Service, *mock_structs.MockUser
 	return service, mockRepo, mockBasket, mockFav
 }
 
+func (f *TestClassicFixture) CreateClassicServiceWithMocks() (*Service, *user_rep.Repository, *basket.Service, *favourites.Service) {
+	userRepo := user_rep.New(f.db)
+	basketRepo := basket_rep.New(f.db)
+	favRepo := favourites_rep.New(f.db)
+	favourites := favourites.New(favRepo)
+	basket := basket.New(basketRepo)
+
+	service := New(userRepo, basket, favourites)
+	return service, userRepo, basket, favourites
+}
+
 func (f *TestFixture) AssertError(err error, expectedErr error) {
+	if expectedErr != nil {
+		if err == nil {
+			f.t.Error("Expected error, got nil")
+			return
+		}
+		if !errors.Is(err, expectedErr) && err.Error() != expectedErr.Error() {
+			f.t.Errorf("Expected error %v, got %v", expectedErr, err)
+		}
+	} else if err != nil {
+		f.t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+func (f *TestClassicFixture) AssertClassicError(err error, expectedErr error) {
 	if expectedErr != nil {
 		if err == nil {
 			f.t.Error("Expected error, got nil")

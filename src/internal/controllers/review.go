@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -13,7 +12,6 @@ import (
 
 func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
-	fmt.Println(good)
 	if !good {
 		return
 	}

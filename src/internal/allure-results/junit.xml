@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="382" failures="0" errors="0" time="1.010850">
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/controllers" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/core/mock_structs" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="29" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/core/service/auth" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestSignUp_AAA/successful_sign-up" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestSignUp_AAA/sign-up_error(repository)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestSignUp_AAA" time="0.060000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogIn_AAA/successful_login" time="0.060000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogIn_AAA/login_error_(user_not_found)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogIn_AAA/login_error_(wrong_password)" time="0.050000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogIn_AAA/login_error_(token_generation_error)" time="0.050000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogIn_AAA/login_error_(repository_error)" time="0.050000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogIn_AAA" time="0.270000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogOut_AAA/successful_logout" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogOut_AAA/logout_error_(token_verification_provider_error)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogOut_AAA/logout_error_(token_verification_repo_error)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogOut_AAA/logout_error_(repository_delete_token_error)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestLogOut_AAA" time="0.050000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestRefreshToken_AAA/successful_refresh" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestRefreshToken_AAA/refresh_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestRefreshToken_AAA" time="0.050000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestVerifyTokens_AAA/both_tokens_valid" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestVerifyTokens_AAA/access_expired,_refresh_valid_-_successful_refresh" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestVerifyTokens_AAA/refresh_token_invalid" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestVerifyTokens_AAA" time="0.050000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestCheckRoles_AAA/User_is_admin" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestCheckRoles_AAA/User_is_not_admin" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestCheckRoles_AAA/User_is_worker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestCheckRoles_AAA/User_is_not_worker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestCheckRoles_AAA" time="0.060000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestGetId_AAA/successful_ID_extraction" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestGetId_AAA/extraction_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/auth" name="TestGetId_AAA" time="0.060000"></testcase>
+	</testsuite>
+	<testsuite tests="16" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/core/service/basket" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetById_AAA/successful_get" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetById_AAA/error_get_(not_found_basket_by_user)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetById_AAA/error_get_(not_found_basket_by_basket_id)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetItems_AAA/successful_get_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetItems_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestGetItems_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestAddItem_AAA/successful_add" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestAddItem_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestAddItem_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestDeleteItem/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestDeleteItem/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestDeleteItem" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestUpdateItemAmount/successful_update" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestUpdateItemAmount/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/basket" name="TestUpdateItemAmount" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="13" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/core/service/brand" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestCreate_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetById_AAA/successful_get" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetById_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestDelete_AAA/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestDelete_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestDelete_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetAllBrandsInCategory_AAA/successful_get_all_brands_in_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetAllBrandsInCategory_AAA/empty_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetAllBrandsInCategory_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/brand" name="TestGetAllBrandsInCategory_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="18" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/core/service/favourites" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestCreate_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetById_AAA/successful_get" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetById_AAA/error_get_(not_found_favourites_id_by_user)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetById_AAA/error_get_(not_found_favourites_by_id)" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetItems_AAA/successful_get_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetItems_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestGetItems_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestAddItem_AAA/successful_add" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestAddItem_AAA/error_get_favourites_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestAddItem_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestAddItem_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestDeleteItem_AAA/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestDeleteItem_AAA/error_get_favourites_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestDeleteItem_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/favourites" name="TestDeleteItem_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="29" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/core/service/order" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestCreate_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetById_AAA/successful_get" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetById_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetItems_AAA/successful_get_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetItems_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetItems_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetFreeOrders_AAA/successful_get_free_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetFreeOrders_AAA/empty_list" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetFreeOrders_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetFreeOrders_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetOrdersByUser_AAA/successful_get_free_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetOrdersByUser_AAA/empty_list" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetOrdersByUser_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetOrdersByUser_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetStatus_AAA/successful_get_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetStatus_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestGetStatus_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestChangeOrderStatus_AAA/successful_status_change" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestChangeOrderStatus_AAA/same_status_-_no_update_needed" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestChangeOrderStatus_AAA/error_getting_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestChangeOrderStatus_AAA/error_getting_order" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestChangeOrderStatus_AAA/error_updating_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestChangeOrderStatus_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestDelete_AAA/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestDelete_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/order" name="TestDelete_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="20" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/core/service/product" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestCreate_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetById_AAA/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetById_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByArticule_AAA/successful_get_by_articule" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByArticule_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByArticule_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByCategory_AAA/successful_get_by_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByCategory_AAA/empty_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByCategory_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByCategory_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByBrand_AAA/successful_get_by_brand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByBrand_AAA/empty_brand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByBrand_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestGetByBrand_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestDelete_AAA/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestDelete_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/product" name="TestDelete_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="13" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/core/service/review" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestCreate_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestGetById_AAA/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestGetById_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestDelete_AAA/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestDelete_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestDelete_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestReviewsForProduct_AAA/successful_get_reviews_for_product" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestReviewsForProduct_AAA/no_reviews_for_product" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestReviewsForProduct_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/review" name="TestReviewsForProduct_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="23" failures="0" time="0.371000" name="github.com/taucuya/ppo/internal/core/service/user" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestCreate_AAA/repository_error_on_user_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestCreate_AAA/repository_error_on_basket_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestCreate_AAA/repository_error_on_favourites_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestClassicCreate_AAA/successful_creation" time="0.120000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestClassicCreate_AAA/repository_error_on_user_creation" time="0.080000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestClassicCreate_AAA/repository_error_on_basket_creation" time="0.080000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestClassicCreate_AAA/repository_error_on_favourites_creation" time="0.080000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestClassicCreate_AAA" time="0.360000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetById_AAA/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetById_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetByMail_AAA/successful_get_by_mail" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetByMail_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetByMail_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetAllUsers_AAA/successful_get_all_users" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetAllUsers_AAA/empty_list" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetAllUsers_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetAllUsers_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetByPhone_AAA/successful_get_by_phone" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetByPhone_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/user" name="TestGetByPhone_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="20" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/core/service/worker" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestCreate_AAA/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestCreate_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestCreate_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetById_AAA/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetById_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetById_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestDelete_AAA/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestDelete_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestDelete_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetAllWorkers_AAA/successful_get_all_workers" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetAllWorkers_AAA/empty_list" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetAllWorkers_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetAllWorkers_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetOrders_AAA/successful_get_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetOrders_AAA/empty_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetOrders_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestGetOrders_AAA" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestAcceptOrder_AAA/successful_accept_order" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestAcceptOrder_AAA/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/core/service/worker" name="TestAcceptOrder_AAA" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/core/structs" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/providers/jwt/auth" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/repository/postgres/mocks" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="18" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCreateToken/successful_token_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCreateToken/token_creation_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCreateToken" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckAdmin/user_is_admin" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckAdmin/user_is_not_admin" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckAdmin/database_error_when_checking_admin" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckAdmin" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckWorker/user_is_worker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckWorker/user_is_not_worker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckWorker/database_error_when_checking_worker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestCheckWorker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestVerifyToken/successful_token_verification" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestVerifyToken/token_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestVerifyToken/database_error_when_verifying_token" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestVerifyToken" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestDeleteToken/successful_token_deletion" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestDeleteToken/database_error_when_deleting_token" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/auth" name="TestDeleteToken" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="27" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestCreate/successful_basket_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestCreate/basket_creation_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetBIdByUId/successful_get_basket_ID_by_user_ID" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetBIdByUId/basket_not_found_for_user" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetBIdByUId/database_error_when_getting_basket_ID" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetBIdByUId" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetById/successful_get_basket_by_ID" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetById/basket_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetById/database_error_when_getting_basket" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetItems/successful_get_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetItems/error_getting_basket_ID" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetItems/error_getting_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestGetItems" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestAddItem/successful_add_new_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestAddItem/successful_update_existing_item_amount" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestAddItem/error_inserting_new_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestAddItem" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestDeleteItem/successful_delete_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestDeleteItem/item_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestDeleteItem/database_error_when_deleting_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestDeleteItem/error_getting_rows_affected" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestDeleteItem" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestUpdateItemAmount/successful_update_item_amount" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestUpdateItemAmount/database_error_when_updating_item_amount" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/basket" name="TestUpdateItemAmount" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="15" failures="0" time="0.002000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestCreate/successful_brand_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestCreate/brand_creation_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetById/successful_get_brand_by_ID" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetById/brand_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetById/database_error_when_getting_brand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestDelete/successful_brand_deletion" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestDelete/brand_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestDelete/database_error_when_deleting_brand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestDelete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetAllBrandsInCategory/successful_get_all_brands_in_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetAllBrandsInCategory/no_brands_found_in_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetAllBrandsInCategory/database_error_when_getting_brands" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/brand" name="TestGetAllBrandsInCategory" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="24" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestCreate/successful_favourites_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestCreate/favourites_creation_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetFIdByUId/successful_get_favourites_id_by_user_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetFIdByUId/favourites_not_found_for_user" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetFIdByUId/database_error_when_getting_favourites_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetFIdByUId" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetById/successful_get_favourites_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetById/favourites_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetById/database_error_when_getting_favourites" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetItems/successful_get_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetItems/error_getting_favourites_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetItems/error_getting_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetItems/no_items_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestGetItems" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestAddItem/successful_add_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestAddItem/error_adding_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestAddItem" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestDeleteItem/successful_delete_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestDeleteItem/item_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestDeleteItem/database_error_when_deleting_item" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestDeleteItem/error_getting_rows_affected" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/favourites" name="TestDeleteItem" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="31" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/order" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestCreate/successful_order_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestCreate/order_creation_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetById/successful_get_order_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetById/order_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetById/database_error_when_getting_order" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetItems/successful_get_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetItems/no_items_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetItems/database_error_when_getting_items" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetItems" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetFreeOrders/successful_get_free_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetFreeOrders/no_free_orders_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetFreeOrders/database_error_when_getting_free_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetFreeOrders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetOrdersByUser/successful_get_orders_by_user" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetOrdersByUser/no_orders_found_for_user" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetOrdersByUser/database_error_when_getting_user_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetOrdersByUser" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetStatus/successful_get_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetStatus/order_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetStatus/database_error_when_getting_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestGetStatus" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestDelete/successful_delete_order" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestDelete/order_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestDelete/database_error_when_deleting_order" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestDelete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestUpdateStatus/successful_update_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestUpdateStatus/order_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestUpdateStatus/database_error_when_updating_status" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/order" name="TestUpdateStatus" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="25" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/product" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestCreate/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestCreate/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetById/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetById/product_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetById/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByName/successful_get_by_name" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByName/product_not_found_by_name" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByName" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByArticule/successful_get_by_articule" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByArticule/product_not_found_by_articule" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByArticule" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByCategory/successful_get_by_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByCategory/empty_category" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByCategory/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByCategory" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByBrand/successful_get_by_brand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByBrand/empty_brand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByBrand/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestGetByBrand" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestDelete/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestDelete/product_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestDelete/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/product" name="TestDelete" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="19" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/review" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreate/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreate/repository_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestGetById/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestGetById/review_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestGetById/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestDelete/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestDelete/review_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestDelete/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestDelete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestReviewsForProduct/successful_get_reviews_for_product" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestReviewsForProduct/no_reviews_for_product" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestReviewsForProduct/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestReviewsForProduct" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreateWithDifferentReviews/create_low_rating_review" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreateWithDifferentReviews/create_empty_text_review" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreateWithDifferentReviews/create_review_for_different_product" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/review" name="TestCreateWithDifferentReviews" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="19" failures="0" time="0.001000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/user" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestCreate/successful_creation" time="0.060000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestCreate/database_error" time="0.060000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestCreate" time="0.120000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetById/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetById/user_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetById/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByMail/successful_get_by_mail" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByMail/user_not_found_by_mail" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByMail/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByMail" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetAllUsers/successful_get_all_users" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetAllUsers/empty_list" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetAllUsers/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetAllUsers" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByPhone/successful_get_by_phone" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByPhone/user_not_found_by_phone" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByPhone/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/user" name="TestGetByPhone" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="23" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestCreate/successful_creation" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestCreate/error_inserting_worker" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestCreate/error_updating_user_role" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestCreate" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetById/successful_get_by_id" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetById/worker_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetById/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetById" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetOrders/successful_get_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetOrders/worker_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetOrders/error_getting_orders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetOrders" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestDelete/successful_delete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestDelete/worker_not_found" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestDelete/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestDelete" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetAllWorkers/successful_get_all_workers" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetAllWorkers/empty_list" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetAllWorkers/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestGetAllWorkers" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestAcceptOrder/successful_accept_order" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestAcceptOrder/database_error" time="0.000000"></testcase>
+		<testcase classname="github.com/taucuya/ppo/internal/repository/postgres/reps/worker" name="TestAcceptOrder" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/repository/postgres/structs" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="github.com/taucuya/ppo/internal/repository/tests" timestamp="2025-10-01T12:51:37+03:00">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+</testsuites>

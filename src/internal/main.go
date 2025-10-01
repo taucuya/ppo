@@ -72,18 +72,18 @@ func main() {
 	if err != nil {
 		return
 	}
-
+	fmt.Println("DSN", dsn)
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		panic("failed to connect to test database: " + err.Error())
 	}
 
 	_ = runSQLScripts(db, []string{
-		"/home/taya/Desktop/ppoft/src/internal/database/sql/01-create.sql",
-		"/home/taya/Desktop/ppoft/src/internal/database/sql/02-constraints.sql",
-		"/home/taya/Desktop/ppoft/src/internal/database/sql/03-inserts.sql",
-		"/home/taya/Desktop/ppoft/src/internal/database/sql/trigger_accept.sql",
-		"/home/taya/Desktop/ppoft/src/internal/database/sql/trigger_order.sql",
+		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
+		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
+		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
+		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
+		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
 	})
 
 	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)

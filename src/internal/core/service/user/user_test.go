@@ -4,16 +4,23 @@ import (
 	"context"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/taucuya/ppo/internal/core/mock_structs"
+	"github.com/taucuya/ppo/internal/core/service/basket"
+	"github.com/taucuya/ppo/internal/core/service/favourites"
 	"github.com/taucuya/ppo/internal/core/structs"
+	basket_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/basket"
+	favourites_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/favourites"
+	user_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/user"
 )
 
 func TestCreate_AAA(t *testing.T) {
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	testUser := fixture.userBuilder.Build()
 
@@ -72,6 +79,144 @@ func TestCreate_AAA(t *testing.T) {
 
 			err := service.Create(fixture.ctx, testUser)
 			fixture.AssertError(err, tt.expectedErr)
+		})
+	}
+	fixture.Cleanup()
+}
+
+func TestClassicCreate_AAA(t *testing.T) {
+	fixture := NewTestClassicFixture(t)
+	testUser := fixture.userBuilder.Build()
+
+	tests := []struct {
+		name        string
+		setupMocks  func(sqlmock.Sqlmock, uuid.UUID)
+		expectedErr error
+	}{
+		{
+			name: "successful creation",
+			setupMocks: func(mock sqlmock.Sqlmock, userID uuid.UUID) {
+				mock.ExpectQuery(`insert into "user"`).
+					WithArgs(
+						testUser.Name,
+						testUser.Date_of_birth,
+						testUser.Mail,
+						sqlmock.AnyArg(),
+						testUser.Phone,
+						testUser.Address,
+						testUser.Status,
+						testUser.Role,
+					).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
+
+				mock.ExpectExec(`insert into basket`).
+					WithArgs(
+						userID,
+						sqlmock.AnyArg(),
+					).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				mock.ExpectExec(`insert into favourites`).
+					WithArgs(userID).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error on user creation",
+			setupMocks: func(mock sqlmock.Sqlmock, userID uuid.UUID) {
+				mock.ExpectQuery(`insert into "user"`).
+					WithArgs(
+						testUser.Name,
+						testUser.Date_of_birth,
+						testUser.Mail,
+						sqlmock.AnyArg(),
+						testUser.Phone,
+						testUser.Address,
+						testUser.Status,
+						testUser.Role,
+					).
+					WillReturnError(errTest)
+			},
+			expectedErr: errTest,
+		},
+		{
+			name: "repository error on basket creation",
+			setupMocks: func(mock sqlmock.Sqlmock, userID uuid.UUID) {
+				mock.ExpectQuery(`insert into "user"`).
+					WithArgs(
+						testUser.Name,
+						testUser.Date_of_birth,
+						testUser.Mail,
+						sqlmock.AnyArg(),
+						testUser.Phone,
+						testUser.Address,
+						testUser.Status,
+						testUser.Role,
+					).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
+
+				mock.ExpectExec(`insert into basket`).
+					WithArgs(
+						userID,
+						sqlmock.AnyArg(),
+					).
+					WillReturnError(errTest)
+			},
+			expectedErr: errTest,
+		},
+		{
+			name: "repository error on favourites creation",
+			setupMocks: func(mock sqlmock.Sqlmock, userID uuid.UUID) {
+				mock.ExpectQuery(`insert into "user"`).
+					WithArgs(
+						testUser.Name,
+						testUser.Date_of_birth,
+						testUser.Mail,
+						sqlmock.AnyArg(),
+						testUser.Phone,
+						testUser.Address,
+						testUser.Status,
+						testUser.Role,
+					).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
+
+				mock.ExpectExec(`insert into basket`).
+					WithArgs(
+						userID,
+						sqlmock.AnyArg(),
+					).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				mock.ExpectExec(`insert into favourites`).
+					WithArgs(userID).
+					WillReturnError(errTest)
+			},
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, mock, err := sqlmock.New()
+			require.NoError(t, err)
+
+			sqlxDB := sqlx.NewDb(db, "sqlmock")
+			defer sqlxDB.Close()
+			userRepo := user_rep.New(sqlxDB)
+			basketRepo := basket_rep.New(sqlxDB)
+			favRepo := favourites_rep.New(sqlxDB)
+			favouritesSvc := favourites.New(favRepo)
+			basketSvc := basket.New(basketRepo)
+			service := New(userRepo, basketSvc, favouritesSvc)
+			tt.setupMocks(mock, testUser.Id)
+
+			err = service.Create(fixture.ctx, testUser)
+			fixture.AssertClassicError(err, tt.expectedErr)
+
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("unfulfilled expectations: %s", err)
+			}
 		})
 	}
 }
