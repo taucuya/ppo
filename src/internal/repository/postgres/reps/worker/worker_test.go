@@ -12,6 +12,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testWorker := fixture.workerMother.ValidWorker()
@@ -72,6 +73,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testWorker := fixture.workerMother.ValidWorker()
@@ -131,6 +133,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestGetOrders(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testWorker := fixture.workerMother.ValidWorker()
@@ -203,6 +206,7 @@ func TestGetOrders(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testWorker := fixture.workerMother.ValidWorker()
@@ -255,6 +259,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestGetAllWorkers(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testWorkers := fixture.workerMother.WorkersList()
@@ -314,6 +319,7 @@ func TestGetAllWorkers(t *testing.T) {
 }
 
 func TestAcceptOrder(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testOrder := fixture.workerMother.ValidOrder()

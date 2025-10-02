@@ -11,6 +11,7 @@ import (
 )
 
 func TestCreateToken(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -55,6 +56,7 @@ func TestCreateToken(t *testing.T) {
 }
 
 func TestCheckAdmin(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -110,6 +112,7 @@ func TestCheckAdmin(t *testing.T) {
 }
 
 func TestCheckWorker(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -165,6 +168,7 @@ func TestCheckWorker(t *testing.T) {
 }
 
 func TestVerifyToken(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -225,6 +229,7 @@ func TestVerifyToken(t *testing.T) {
 }
 
 func TestDeleteToken(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {

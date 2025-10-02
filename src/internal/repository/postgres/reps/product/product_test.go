@@ -13,8 +13,8 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	testProduct := fixture.productBuilder.Build()
 
@@ -70,11 +70,12 @@ func TestCreate(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	testProduct := fixture.productBuilder.Build()
 
@@ -133,11 +134,12 @@ func TestGetById(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }
 
 func TestGetByName(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	testProduct := fixture.productBuilder.WithName("UniqueProduct").Build()
 
@@ -186,11 +188,12 @@ func TestGetByName(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }
 
 func TestGetByArticule(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	testProduct := fixture.productBuilder.WithArticule("UNIQUE123").Build()
 
@@ -239,11 +242,12 @@ func TestGetByArticule(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }
 
 func TestGetByCategory(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	category := "electronics"
 	testProducts := []structs.Product{
@@ -313,11 +317,12 @@ func TestGetByCategory(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }
 
 func TestGetByBrand(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	brand := "TestBrand"
 	testProducts := []structs.Product{
@@ -387,11 +392,12 @@ func TestGetByBrand(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }
 
 func TestDelete(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
-	defer fixture.Cleanup()
 
 	testProduct := fixture.productBuilder.Build()
 
@@ -438,4 +444,5 @@ func TestDelete(t *testing.T) {
 			require.NoError(t, fixture.mock.ExpectationsWereMet())
 		})
 	}
+	fixture.Cleanup()
 }

@@ -14,25 +14,29 @@ services:
   #     interval: 5s
   #     timeout: 5s
   #     retries: 5
+  #   networks:
+  #     - app-network
 
-  # api:
-  #   build: .
-  #   environment:
-  #     DB_HOST: postgres
-  #     DB_PORT: 5432
-  #     DB_USER: test_user
-  #     DB_PASSWORD: test_password
-  #     DB_NAME: test_db
-  #     JWT_SECRET: "your_jwt_secret_key_here"
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   restart: unless-stopped
+#   api:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     environment:
+#       DB_HOST: postgres
+#       DB_PORT: 5432
+#       DB_USER: test_user
+#       DB_PASSWORD: test_password
+#       DB_NAME: test_db
+#       JWT_SECRET: "your_jwt_secret_key_here"
+#     ports:
+#       - "8080:8080"
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#     restart: unless-stopped
+#     networks:
+#       - app-network
 
-# volumes:
-#   postgres_data:
 
 
 ## тесты
@@ -77,6 +81,8 @@ services:
       ]
 
 networks:
+  app-network:
+    driver: bridge
   test_network:
     driver: bridge
 

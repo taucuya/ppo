@@ -13,6 +13,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	validReview := fixture.reviewMother.ValidReview()
@@ -67,6 +68,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	validReview := fixture.reviewMother.ValidReview()
@@ -130,6 +132,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	validReview := fixture.reviewMother.ValidReview()
@@ -181,6 +184,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestReviewsForProduct(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	productID := fixture.reviewMother.ValidReview().IdProduct
@@ -252,6 +256,7 @@ func TestReviewsForProduct(t *testing.T) {
 }
 
 func TestCreateWithDifferentReviews(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 	defer fixture.Cleanup()
 

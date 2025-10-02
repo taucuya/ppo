@@ -7,12 +7,14 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	structs "github.com/taucuya/ppo/internal/core/structs"
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 	testUser := fixture.userBuilder.Build()
 
@@ -62,6 +64,30 @@ func TestCreate(t *testing.T) {
 			expectedID:  uuid.UUID{},
 			expectedErr: errTest,
 		},
+		{
+			name: "panic recovery",
+			setupMock: func(user structs.User) {
+				fixture.mock.ExpectQuery(`insert into "user"`).
+					WithArgs(
+						user.Name,
+						user.Date_of_birth,
+						user.Mail,
+						sqlmock.AnyArg(),
+						user.Phone,
+						user.Address,
+						user.Status,
+						user.Role,
+					).
+					WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(user.Id).
+						RowError(0, &pq.Error{
+							Severity: "PANIC",
+							Code:     "XX000",
+							Message:  "database panic occurred",
+						}))
+			},
+			expectedID:  uuid.UUID{},
+			expectedErr: errors.New("pq: database panic occurred"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -79,6 +105,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testUser := fixture.userBuilder.Build()
@@ -138,6 +165,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestGetByMail(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testUser := fixture.userBuilder.WithMail("unique@example.com").Build()
@@ -207,6 +235,7 @@ func TestGetByMail(t *testing.T) {
 }
 
 func TestGetAllUsers(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testUsers := []structs.User{
@@ -272,6 +301,7 @@ func TestGetAllUsers(t *testing.T) {
 }
 
 func TestGetByPhone(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	testUser := fixture.userBuilder.WithPhone("+1234567890").Build()

@@ -14,6 +14,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -58,6 +59,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetBIdByUId(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -118,6 +120,7 @@ func TestGetBIdByUId(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -179,6 +182,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestGetItems(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	items := []rep_structs.BasketItem{
@@ -277,6 +281,7 @@ func TestGetItems(t *testing.T) {
 }
 
 func TestAddItem(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -349,6 +354,7 @@ func TestAddItem(t *testing.T) {
 }
 
 func TestDeleteItem(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -419,6 +425,7 @@ func TestDeleteItem(t *testing.T) {
 }
 
 func TestUpdateItemAmount(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {

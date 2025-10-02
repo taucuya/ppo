@@ -15,6 +15,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -56,6 +57,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -113,6 +115,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestGetItems(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	items := []rep_structs.OrderItem{
@@ -202,6 +205,7 @@ func TestGetItems(t *testing.T) {
 }
 
 func TestGetFreeOrders(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	orders := []rep_structs.Order{
@@ -299,6 +303,7 @@ func TestGetFreeOrders(t *testing.T) {
 }
 
 func TestGetOrdersByUser(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	orders := []rep_structs.Order{
@@ -379,6 +384,7 @@ func TestGetOrdersByUser(t *testing.T) {
 }
 
 func TestGetStatus(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -435,6 +441,7 @@ func TestGetStatus(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -485,6 +492,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestUpdateStatus(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {

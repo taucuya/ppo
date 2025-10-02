@@ -14,6 +14,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -55,6 +56,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestGetById(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -112,6 +114,7 @@ func TestGetById(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	tests := []struct {
@@ -163,6 +166,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestGetAllBrandsInCategory(t *testing.T) {
+	t.Parallel()
 	fixture := NewTestFixture(t)
 
 	brands := []rep_structs.Brand{

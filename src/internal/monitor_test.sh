@@ -17,7 +17,7 @@ MONITOR_PID=$!
 
 sleep 0.5
 
-go test -v ./... -shuffle=on -p 3 -parallel 2
+go test -v ./... -shuffle=on -parallel 2
 TEST_RESULT=$?
 
 kill $MONITOR_PID 2>/dev/null
