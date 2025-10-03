@@ -27,7 +27,7 @@ func CreateOrder(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/order", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/orders", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Request creation failed:", err)
 		return
@@ -60,7 +60,7 @@ func GetOrderById(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	resp, err := client.Get("http://localhost:8080/api/v1/order/" + orderID)
+	resp, err := client.Get("http://localhost:8080/api/v1/orders/" + orderID)
 	if err != nil {
 		fmt.Println("❌ Request failed:", err)
 		return
@@ -90,7 +90,7 @@ func GetOrderItems(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	resp, err := client.Get("http://localhost:8080/api/v1/order/" + orderID + "/items")
+	resp, err := client.Get("http://localhost:8080/api/v1/order/items/" + orderID)
 	if err != nil {
 		fmt.Println("❌ Request failed:", err)
 		return
@@ -124,7 +124,7 @@ func GetOrderItems(client *http.Client, reader *bufio.Reader) {
 }
 
 func GetFreeOrders(client *http.Client) {
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/order/freeorders", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/orders/?status=непринятый", nil)
 	if err != nil {
 		fmt.Println("Failed to create request:", err)
 		return
@@ -182,7 +182,7 @@ func ChangeOrderStatus(client *http.Client, reader *bufio.Reader) {
 	payload := map[string]string{"status": status}
 	body, _ := json.Marshal(payload)
 
-	req, err := http.NewRequest("PUT", "http://localhost:8080/api/v1/order/"+orderID+"/status", bytes.NewBuffer(body))
+	req, err := http.NewRequest("PATCH", "http://localhost:8080/api/v1/orders/"+orderID+"?status="+status, bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Request creation failed:", err)
 		return
@@ -216,7 +216,7 @@ func DeleteOrder(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/order/"+orderID, nil)
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/orders/"+orderID, nil)
 	if err != nil {
 		fmt.Println("❌ Request creation failed:", err)
 		return

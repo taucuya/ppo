@@ -68,11 +68,11 @@ func (s *Service) AddItem(ctx context.Context, i structs.FavouritesItem, id uuid
 	return err
 }
 
-func (s *Service) DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.UUID) error {
-	bid, err := s.rep.GetFIdByUId(ctx, id)
+func (s *Service) DeleteItem(ctx context.Context, id uuid.UUID, id_item uuid.UUID) error {
+	fid, err := s.rep.GetFIdByUId(ctx, id)
 	if err != nil {
 		return err
 	}
-	err = s.rep.DeleteItem(ctx, bid, product_id)
+	err = s.rep.DeleteItem(ctx, fid, id_item)
 	return err
 }

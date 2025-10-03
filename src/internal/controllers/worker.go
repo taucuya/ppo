@@ -153,7 +153,7 @@ func (c *Controller) AcceptOrderHandler(ctx *gin.Context) {
 
 	orderID := ctx.Query("order_id")
 	if orderID == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email parameter is required"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Order id parameter is required"})
 		return
 	}
 

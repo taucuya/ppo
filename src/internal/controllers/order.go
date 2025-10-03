@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -88,10 +87,14 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 	goodA := c.VerifyA(ctx)
 
 	if !goodW && !goodA {
-		fmt.Println("HERE", goodW, goodA)
 		return
 	}
-
+	status := ctx.Query("status")
+	if status != "непринятый" {
+		log.Printf("[ERROR] Cant parse status to get free orders")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order status format"})
+		return
+	}
 	ords, err := c.OrderService.GetFreeOrders(ctx)
 	if err != nil {
 		log.Printf("[ERROR] Cant get free orders: %v", err)
@@ -135,8 +138,20 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Status string `json:"status"`
+	status := ctx.Query("status")
+
+	possible := []string{"некорректный", "непринятый", "принятый", "собранный", "отданный"}
+
+	inarr := false
+	for _, i := range possible {
+		if status == i {
+			inarr = true
+		}
+	}
+	if !inarr {
+		log.Printf("[ERROR] Cant parse status to get order status")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order status format"})
+		return
 	}
 
 	id, err := uuid.Parse(ctx.Param("id"))
@@ -146,13 +161,7 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.ShouldBindJSON(&input); err != nil || input.Status == "" {
-		log.Printf("[ERROR] Cant bind JSON: %v", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	err = c.OrderService.ChangeOrderStatus(ctx, id, input.Status)
+	err = c.OrderService.ChangeOrderStatus(ctx, id, status)
 	if err != nil {
 		log.Printf("[ERROR] Cant change order status: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -182,4 +191,27 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted"})
+}
+
+func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
+	good := c.Verify(ctx)
+	if !good {
+		return
+	}
+
+	atoken, err := ctx.Cookie("access_token")
+	if err != nil {
+		log.Printf("[ERROR] Cant get access token: %v", err)
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
+		return
+	}
+
+	id, err := c.AuthServise.GetId(atoken)
+	if err != nil {
+		log.Printf("[ERROR] Cant get user id: %v", err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		return
+	}
+	_ = id
+	// if err := c.OrderService.
 }

@@ -88,6 +88,19 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {
 	category := ctx.Query("category")
 
+	possible := []string{"бюджет", "средний сегмент", "люкс"}
+	inarr := false
+	for _, i := range possible {
+		if category == i {
+			inarr = true
+		}
+	}
+	if !inarr {
+		log.Printf("[ERROR] Cant parse status to get brand category")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid brand category format"})
+		return
+	}
+
 	res, err := c.BrandService.GetAllBrandsInCategory(ctx, category)
 	if err != nil {
 		log.Printf("[ERROR] Cant get brands by category: %v", err)
