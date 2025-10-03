@@ -7,6 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (c *Controller) GetUserByPrivatesHandler(ctx *gin.Context) {
+	email := ctx.Query("email")
+	phone := ctx.Query("phone")
+	if phone != "" {
+		c.GetUserByPhoneHandler(ctx)
+	}
+	if email != "" {
+		c.GetUserByEmailHandler(ctx)
+	}
+	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email or phone parameter is required"})
+}
+
 func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {

@@ -77,8 +77,8 @@ func (rep *Repository) AddItem(ctx context.Context, i structs.FavouritesItem) er
 	return err
 }
 
-func (rep *Repository) DeleteItem(ctx context.Context, id uuid.UUID, product_id uuid.UUID) error {
-	result, err := rep.db.ExecContext(ctx, "delete from favourites_item where id_product = $1 and id_favourites = $2", product_id, id)
+func (rep *Repository) DeleteItem(ctx context.Context, id uuid.UUID, id_item uuid.UUID) error {
+	result, err := rep.db.ExecContext(ctx, "delete from favourites_item where id = $1 and id_favourites = $2", id_item, id)
 	if err != nil {
 		return err
 	}

@@ -109,17 +109,14 @@ func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		ProductID uuid.UUID `json:"product_id" binding:"required"`
-	}
-
-	if err := ctx.ShouldBindJSON(&input); err != nil {
-		log.Printf("[ERROR] Cant bind JSON: %v", err)
+	id_item, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		log.Printf("[ERROR] Cant parse favourites id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := c.FavouritesService.DeleteItem(ctx.Request.Context(), id, input.ProductID); err != nil {
+	if err := c.FavouritesService.DeleteItem(ctx.Request.Context(), id, id_item); err != nil {
 		log.Printf("[ERROR] Cant delete item from Favourites: %v", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
 		return

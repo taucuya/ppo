@@ -113,6 +113,8 @@ func printWelcome() {
 	white.Println("- View items in order")
 	worker.Printf("  %-20s", "get-free-orders")
 	white.Println("- List available orders (worker)")
+	worker.Printf("  %-20s", "get-user-orders")
+	white.Println("- List done orders")
 	worker.Printf("  %-20s", "change-order-status")
 	white.Println("- Update order status (admin/worker)")
 	admin.Printf("  %-20s", "delete-order")
@@ -284,6 +286,9 @@ func main() {
 
 		case strings.HasPrefix(cmd, "get-my-order"):
 			client_worker.GetWorkerOrders(client)
+
+		case strings.HasPrefix(cmd, "get-user-order"):
+			client_order.GetOrdersByUser(client)
 
 		default:
 			color.New(color.FgRed).Println("Unknown command. Type 'help' to see available commands.")
