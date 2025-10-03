@@ -25,7 +25,7 @@ func CreateWorker(client *http.Client, reader *bufio.Reader) {
 	}
 
 	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", "http://localhost:8080/api/v1/worker", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "http://localhost:8080/api/v1/workers", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -50,7 +50,7 @@ func DeleteWorker(client *http.Client, reader *bufio.Reader) {
 	id, _ := reader.ReadString('\n')
 	id = strings.TrimSpace(id)
 
-	req, _ := http.NewRequest("DELETE", "http://localhost:8080/api/v1/worker/"+id, nil)
+	req, _ := http.NewRequest("DELETE", "http://localhost:8080/api/v1/workers/"+id, nil)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("❌ Request error:", err)
@@ -76,7 +76,7 @@ func GetWorkerById(client *http.Client, reader *bufio.Reader) {
 	id, _ := reader.ReadString('\n')
 	id = strings.TrimSpace(id)
 
-	resp, err := client.Get("http://localhost:8080/api/v1/worker/" + id)
+	resp, err := client.Get("http://localhost:8080/api/v1/workers/" + id)
 	if err != nil {
 		fmt.Println("❌ Request error:", err)
 		return
@@ -101,7 +101,7 @@ func GetWorkerById(client *http.Client, reader *bufio.Reader) {
 }
 
 func GetAllWorkers(client *http.Client) {
-	resp, err := client.Get("http://localhost:8080/api/v1/worker")
+	resp, err := client.Get("http://localhost:8080/api/v1/workers/all")
 	if err != nil {
 		fmt.Println("❌ Request error:", err)
 		return
@@ -138,7 +138,7 @@ func AcceptOrder(client *http.Client, reader *bufio.Reader) {
 	orderID, _ := reader.ReadString('\n')
 	orderID = strings.TrimSpace(orderID)
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/worker/accept?order_id="+orderID, nil)
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/workers/accept?order_id="+orderID, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -167,7 +167,7 @@ func AcceptOrder(client *http.Client, reader *bufio.Reader) {
 }
 
 func GetWorkerOrders(client *http.Client) {
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/worker/orders", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/workers/orders", nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return

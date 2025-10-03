@@ -13,7 +13,7 @@ func GetUserByEmail(client *http.Client, reader *bufio.Reader) {
 	email, _ := reader.ReadString('\n')
 	email = strings.TrimSpace(email)
 
-	resp, err := client.Get("http://localhost:8080/api/v1/user/email?email=" + email)
+	resp, err := client.Get("http://localhost:8080/api/v1/users/email?email=" + email)
 	if err != nil {
 		fmt.Println("❌ Request error:", err)
 		return
@@ -53,7 +53,7 @@ func GetUserByPhone(client *http.Client, reader *bufio.Reader) {
 		phone = strings.Replace(phone, "+", "%2B", 1)
 	}
 
-	resp, err := client.Get("http://localhost:8080/api/v1/user/phone?phone=" + phone)
+	resp, err := client.Get("http://localhost:8080/api/v1/users/phone?phone=" + phone)
 	if err != nil {
 		fmt.Println("❌ Request error:", err)
 		return
@@ -86,7 +86,7 @@ func GetUserByPhone(client *http.Client, reader *bufio.Reader) {
 
 func GetAllUsers(client *http.Client, reader *bufio.Reader) {
 
-	resp, err := client.Get("http://localhost:8080/api/v1/user/users")
+	resp, err := client.Get("http://localhost:8080/api/v1/users/all")
 	if err != nil {
 		fmt.Println("❌ Request error:", err)
 		return

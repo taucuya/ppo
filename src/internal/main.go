@@ -170,11 +170,10 @@ func main() {
 		{
 			order.POST("", c.CreateOrderHandler)
 			order.GET("/items/:id", c.GetOrderItemsHandler)
-			order.GET("", c.GetFreeOrdersHandler)
+			order.GET("", c.GetOrdersHandler)
 			order.GET("/:id", c.GetOrderByIdHandler)
 			order.PATCH("/:id", c.ChangeOrderStatusHandler)
 			order.DELETE("/:id", c.DeleteOrderHandler)
-			order.GET("", c.GetOrdersByUserHandler)
 		}
 
 		product := api.Group("/products")
@@ -187,7 +186,7 @@ func main() {
 
 		review := api.Group("/reviews")
 		{
-			review.POST(":id_product", c.CreateReviewHandler)
+			review.POST("/:id_product", c.CreateReviewHandler)
 			review.GET("/:id", c.GetReviewByIdHandler)
 			review.DELETE("/:id", c.DeleteReviewHandler)
 		}
