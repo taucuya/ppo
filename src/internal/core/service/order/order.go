@@ -12,6 +12,7 @@ type OrderService interface {
 	GetById(ctx context.Context, id uuid.UUID) (structs.Order, error)
 	GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error)
 	GetFreeOrders(ctx context.Context) ([]structs.Order, error)
+	GetOrdersByUser(ctx context.Context, id uuid.UUID) ([]structs.Order, error)
 	GetStatus(ctx context.Context, id uuid.UUID) (string, error)
 	ChangeOrderStatus(ctx context.Context, id uuid.UUID) error
 	Delete(ctx context.Context, id uuid.UUID) error
@@ -22,6 +23,7 @@ type OrderRepository interface {
 	GetById(ctx context.Context, id uuid.UUID) (structs.Order, error)
 	GetItems(ctx context.Context, id uuid.UUID) ([]structs.OrderItem, error)
 	GetFreeOrders(ctx context.Context) ([]structs.Order, error)
+	GetOrdersByUser(ctx context.Context, id uuid.UUID) ([]structs.Order, error)
 	GetStatus(ctx context.Context, id uuid.UUID) (string, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 	UpdateStatus(ctx context.Context, id uuid.UUID, status string) error
@@ -62,6 +64,14 @@ func (s *Service) GetFreeOrders(ctx context.Context) ([]structs.Order, error) {
 		return nil, err
 	}
 	return ords, nil
+}
+
+func (s *Service) GetOrdersByUser(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	orders, err := s.rep.GetOrdersByUser(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
 
 func (s *Service) GetStatus(ctx context.Context, id uuid.UUID) (string, error) {

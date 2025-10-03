@@ -8,7 +8,7 @@ import (
 )
 
 type FavouritesService interface {
-	Create(ctx context.Context, b structs.Favourites) error
+	Create(ctx context.Context, f structs.Favourites) error
 	GetById(ctx context.Context, id uuid.UUID) (structs.Favourites, error)
 	GetItems(ctx context.Context, id_Favourites uuid.UUID) ([]structs.FavouritesItem, error)
 	AddItem(ctx context.Context, i structs.FavouritesItem) error
@@ -16,7 +16,7 @@ type FavouritesService interface {
 }
 
 type FavouritesRepository interface {
-	Create(ctx context.Context, b structs.Favourites) error
+	Create(ctx context.Context, f structs.Favourites) error
 	GetFIdByUId(ctx context.Context, id uuid.UUID) (uuid.UUID, error)
 	GetById(ctx context.Context, id uuid.UUID) (structs.Favourites, error)
 	GetItems(ctx context.Context, id_favourites uuid.UUID) ([]structs.FavouritesItem, error)
@@ -32,8 +32,8 @@ func New(rep FavouritesRepository) *Service {
 	return &Service{rep: rep}
 }
 
-func (s *Service) Create(ctx context.Context, b structs.Favourites) error {
-	err := s.rep.Create(ctx, b)
+func (s *Service) Create(ctx context.Context, f structs.Favourites) error {
+	err := s.rep.Create(ctx, f)
 	return err
 }
 

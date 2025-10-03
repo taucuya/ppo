@@ -188,6 +188,59 @@ func TestGetFreeOrders_AAA(t *testing.T) {
 	fixture.Cleanup()
 }
 
+func TestGetOrdersByUser_AAA(t *testing.T) {
+	fixture := NewTestFixture(t)
+
+	tests := []struct {
+		name        string
+		setupMocks  func(*mock_structs.MockOrderRepository)
+		expectedRet []structs.Order
+		expectedErr error
+	}{
+		{
+			name: "successful get free orders",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetOrdersByUser(fixture.ctx, fixture.order.IdUser).Return(fixture.orders, nil)
+			},
+			expectedRet: fixture.orders,
+			expectedErr: nil,
+		},
+		{
+			name: "empty list",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetOrdersByUser(fixture.ctx, fixture.order.IdUser).Return([]structs.Order{}, nil)
+			},
+			expectedRet: []structs.Order{},
+			expectedErr: nil,
+		},
+		{
+			name: "repository error",
+			setupMocks: func(mockRepo *mock_structs.MockOrderRepository) {
+				mockRepo.EXPECT().GetOrdersByUser(fixture.ctx, fixture.order.IdUser).Return(nil, errTest)
+			},
+			expectedRet: nil,
+			expectedErr: errTest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service, mockRepo := fixture.CreateServiceWithMocks()
+			tt.setupMocks(mockRepo)
+
+			ret, err := service.GetOrdersByUser(fixture.ctx, fixture.order.IdUser)
+
+			if tt.expectedErr != nil {
+				fixture.AssertError(err, tt.expectedErr)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expectedRet, ret)
+			}
+		})
+	}
+	fixture.Cleanup()
+}
+
 func TestGetStatus_AAA(t *testing.T) {
 	fixture := NewTestFixture(t)
 

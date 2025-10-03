@@ -138,6 +138,26 @@ func (rep *Repository) GetFreeOrders(ctx context.Context) ([]structs.Order, erro
 	return ords, nil
 }
 
+func (rep *Repository) GetOrdersByUser(ctx context.Context, id uuid.UUID) ([]structs.Order, error) {
+	var orders []rep_structs.Order
+	err := rep.db.SelectContext(ctx, &orders, `select * from "orders" where id_user = $1`, id)
+	if err != nil {
+		return nil, err
+	}
+	var res []structs.Order
+	for _, v := range orders {
+		res = append(res, structs.Order{
+			Id:      v.Id,
+			Date:    v.Date,
+			IdUser:  v.IdUser,
+			Address: v.Address,
+			Status:  v.Status,
+			Price:   v.Price,
+		})
+	}
+	return res, nil
+}
+
 func (rep *Repository) GetStatus(ctx context.Context, id uuid.UUID) (string, error) {
 	var status string
 	err := rep.db.GetContext(ctx, &status, "select status from \"order\" where id = $1", id)

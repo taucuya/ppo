@@ -193,6 +193,7 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted"})
 }
 
+func (c *Controller) GetOrdersByUser(ctx *gin.Context) {
 func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -212,6 +213,15 @@ func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
 		return
 	}
+
+	user, err := c.OrderService.GetOrdersByUser(ctx, id)
+	if err != nil {
+		log.Printf("[ERROR] Cant get orders by user: %v", err)
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "Orders not found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
 	_ = id
 	// if err := c.OrderService.
 }

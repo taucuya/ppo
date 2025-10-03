@@ -19,11 +19,7 @@ func New(db *sqlx.DB) *Repository {
 }
 
 func (rep *Repository) Create(ctx context.Context, f structs.Favourites) error {
-	id, err := rep.GetFIdByUId(ctx, f.Id)
-	if err != nil {
-		return err
-	}
-	_, err = rep.db.NamedExecContext(ctx, "insert into favourites (id_user) values ($1)", id)
+	_, err := rep.db.ExecContext(ctx, "insert into favourites (id_user) values ($1)", f.IdUser)
 	return err
 }
 
