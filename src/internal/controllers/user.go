@@ -7,6 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetUserByPrivatesHandler получает пользователя по email или телефону
+// @Summary Получить пользователя по email или телефону
+// @Description Возвращает информацию о пользователе по email или номеру телефона (только для администраторов)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param email query string false "Email пользователя"
+// @Param phone query string false "Телефон пользователя"
+// @Success 200 {object} object "Данные пользователя"
+// @Failure 400 {object} object "Не указаны параметры email или phone"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Пользователь не найден"
+// @Router /api/v1/users [get]
 func (c *Controller) GetUserByPrivatesHandler(ctx *gin.Context) {
 	email := ctx.Query("email")
 	phone := ctx.Query("phone")
@@ -41,6 +56,18 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
+// GetAllUsersHandler получает всех пользователей
+// @Summary Получить всех пользователей
+// @Description Возвращает список всех пользователей системы (только для администраторов)
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} object "Список всех пользователей"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Пользователи не найдены"
+// @Router /api/v1/users/all [get]
 func (c *Controller) GetAllUsersHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {

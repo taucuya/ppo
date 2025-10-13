@@ -9,6 +9,22 @@ import (
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
+type AddFavouriteRequest struct {
+	IdProduct string `json:"id_product" binding:"required"`
+}
+
+// GetFavouritesHandler получает все товары в избранном пользователя
+// @Summary Получить избранные товары
+// @Description Возвращает список всех товаров в избранном текущего пользователя
+// @Tags favourites
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} object "Список товаров в избранном"
+// @Failure 400 {object} object "Неверный формат ID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 500 {object} object "Ошибка сервера при получении избранного"
+// @Router /api/v1/favourites/items [get]
 func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -39,6 +55,19 @@ func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, items)
 }
 
+// AddFavouritesItemHandler добавляет товар в избранное
+// @Summary Добавить товар в избранное
+// @Description Добавляет товар в избранное текущего пользователя
+// @Tags favourites
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body AddFavouriteRequest true "Данные товара для добавления в избранное"
+// @Success 201 {object} object "Товар успешно добавлен в избранное"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 500 {object} object "Ошибка сервера при добавлении в избранное"
+// @Router /api/v1/favourites/items [post]
 func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -59,9 +88,7 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		IdProduct string `json:"id_product"`
-	}
+	var input AddFavouriteRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
@@ -88,6 +115,20 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Item added"})
 }
+
+// DeleteFavouritesItemHandler удаляет товар из избранного
+// @Summary Удалить товар из избранного
+// @Description Удаляет товар из избранного текущего пользователя
+// @Tags favourites
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID элемента избранного"
+// @Success 200 {object} object "Товар успешно удален из избранного"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 500 {object} object "Ошибка сервера при удалении из избранного"
+// @Router /api/v1/favourites/items/{id} [delete]
 
 func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)

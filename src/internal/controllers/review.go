@@ -10,16 +10,32 @@ import (
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
+type CreateReviewRequest struct {
+	Rating int    `json:"rating" binding:"required,min=1,max=5"`
+	Text   string `json:"r_text" binding:"required"`
+}
+
+// CreateReviewHandler создает новый отзыв
+// @Summary Создать отзыв
+// @Description Создает новый отзыв для указанного продукта от текущего пользователя
+// @Tags reviews
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id_product path string true "UUID продукта"
+// @Param request body CreateReviewRequest true "Данные для создания отзыва"
+// @Success 201 {object} object "Отзыв успешно создан"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 500 {object} object "Ошибка сервера при создании отзыва"
+// @Router /api/v1/reviews/{id_product} [post]
 func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
 		return
 	}
 
-	var input struct {
-		Rating int    `json:"rating"`
-		Text   string `json:"r_text"`
-	}
+	var input CreateReviewRequest
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -64,6 +80,19 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Review created"})
 }
 
+// GetReviewByIdHandler получает отзыв по ID
+// @Summary Получить отзыв по ID
+// @Description Возвращает информацию об отзыве по его идентификатору
+// @Tags reviews
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID отзыва"
+// @Success 200 {object} object "Данные отзыва"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Отзыв не найден"
+// @Router /api/v1/reviews/{id} [get]
 func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -87,6 +116,20 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, review)
 }
 
+// DeleteReviewHandler удаляет отзыв
+// @Summary Удалить отзыв
+// @Description Удаляет отзыв по его идентификатору (только для администраторов)
+// @Tags reviews
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID отзыва"
+// @Success 200 {object} object "Отзыв успешно удален"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 500 {object} object "Ошибка сервера при удалении отзыва"
+// @Router /api/v1/reviews/{id} [delete]
 func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {

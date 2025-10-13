@@ -10,15 +10,37 @@ import (
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
+type SignupRequest struct {
+	Name        string `json:"name" binding:"required"`
+	DateOfBirth string `json:"date_of_birth" binding:"required"`
+	Mail        string `json:"email" binding:"required,email"`
+	Password    string `json:"password" binding:"required"`
+	Phone       string `json:"phone" binding:"required"`
+	Address     string `json:"address" binding:"required"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LogoutRequest struct {
+	Rt string `json:"refresh_token" binding:"required"`
+}
+
+// SignupHandler регистрирует нового пользователя
+// @Summary Регистрация пользователя
+// @Description Создает нового пользователя в системе
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body SignupRequest true "Данные для регистрации"
+// @Success 201 {object} object "Пользователь успешно зарегистрирован"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 500 {object} object "Ошибка сервера при регистрации"
+// @Router /api/v1/auth/signup [post]
 func (c *Controller) SignupHandler(ctx *gin.Context) {
-	var input struct {
-		Name        string `json:"name" binding:"required"`
-		DateOfBirth string `json:"date_of_birth" binding:"required"`
-		Mail        string `json:"email" binding:"required,email"`
-		Password    string `json:"password" binding:"required"`
-		Phone       string `json:"phone" binding:"required"`
-		Address     string `json:"address" binding:"required"`
-	}
+	var input SignupRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
@@ -55,11 +77,19 @@ func (c *Controller) SignupHandler(ctx *gin.Context) {
 	})
 }
 
+// LoginHandler выполняет вход пользователя
+// @Summary Вход в систему
+// @Description Аутентифицирует пользователя и возвращает токены
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body LoginRequest true "Учетные данные для входа"
+// @Success 200 {object} object "Успешный вход"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неверные учетные данные"
+// @Router /api/v1/auth/login [post]
 func (c *Controller) LoginHandler(ctx *gin.Context) {
-	var input struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required"`
-	}
+	var input LoginRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
@@ -81,10 +111,19 @@ func (c *Controller) LoginHandler(ctx *gin.Context) {
 	})
 }
 
+// LogoutHandler выполняет выход пользователя
+// @Summary Выход из системы
+// @Description Завершает сессию пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body LogoutRequest true "Refresh token для выхода"
+// @Success 200 {object} object "Успешный выход"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 500 {object} object "Ошибка сервера при выходе"
+// @Router /api/v1/auth/logout [post]
 func (c *Controller) LogoutHandler(ctx *gin.Context) {
-	var refreshToken struct {
-		Rt string `json:"refresh_token" binding:"required"`
-	}
+	var refreshToken LogoutRequest
 	if err := ctx.ShouldBindJSON(&refreshToken); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
