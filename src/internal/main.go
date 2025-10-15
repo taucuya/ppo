@@ -142,69 +142,86 @@ func main() {
 			auth.POST("/logout", c.LogoutHandler)
 		}
 
-		basket := api.Group("/baskets")
+		users := api.Group("/users")
 		{
-			basket.GET("/items", c.GetBasketItemsHandler)
-			basket.POST("/items", c.AddBasketItemHandler)
-			basket.GET("", c.GetBasketByIdHandler)
-			basket.DELETE("/items", c.DeleteBasketItemHandler)
-			basket.PATCH("/items", c.UpdateBasketItemAmountHandler)
+			users.GET("", c.GetUserByPrivatesHandler)
+			users.GET("/all", c.GetAllUsersHandler)
+
+			me := users.Group("/me")
+			{
+				basket := me.Group("/basket")
+				{
+					basket.GET("", c.GetBasketByIdHandler)
+					basketItems := basket.Group("/items")
+					{
+						basketItems.GET("", c.GetBasketItemsHandler)
+						basketItems.POST("", c.AddBasketItemHandler)
+						basketItems.DELETE("", c.DeleteBasketItemHandler)
+						basketItems.PATCH("", c.UpdateBasketItemAmountHandler)
+					}
+				}
+
+				favourite := me.Group("/favourite")
+				{
+					favouriteItems := favourite.Group("/items")
+					{
+						favouriteItems.GET("", c.GetFavouritesHandler)
+						favouriteItems.POST("", c.AddFavouritesItemHandler)
+						favouriteItems.DELETE("/:id", c.DeleteFavouritesItemHandler)
+					}
+				}
+
+				orders := me.Group("/orders")
+				{
+					orders.GET("", c.GetOrdersHandler)
+					orders.POST("", c.CreateOrderHandler)
+					orders.GET("/:id", c.GetOrderByIdHandler)
+					orders.PATCH("/:id", c.ChangeOrderStatusHandler)
+					orders.DELETE("/:id", c.DeleteOrderHandler)
+					orders.GET("/:id/items", c.GetOrderItemsHandler)
+				}
+
+				products := me.Group("/products")
+				{
+					products.POST("/:id_product/reviews", c.CreateReviewHandler)
+				}
+			}
 		}
 
-		brand := api.Group("/brands")
+		brands := api.Group("/brands")
 		{
-			brand.POST("", c.CreateBrandHandler)
-			brand.DELETE("/:id", c.DeleteBrandHandler)
-			brand.GET("/:id", c.GetBrandByIdHandler)
-			brand.GET("", c.GetAllBrandsInCategoryHander)
+			brands.GET("", c.GetAllBrandsInCategoryHander)
+			brands.POST("", c.CreateBrandHandler)
+			brands.GET("/:id", c.GetBrandByIdHandler)
+			brands.DELETE("/:id", c.DeleteBrandHandler)
 		}
 
-		favourites := api.Group("/favourites")
+		products := api.Group("/products")
 		{
-			favourites.GET("/items", c.GetFavouritesHandler)
-			favourites.POST("/items", c.AddFavouritesItemHandler)
-			favourites.DELETE("/items/:id", c.DeleteFavouritesItemHandler)
+			products.GET("", c.GetProductsHandler)
+			products.POST("", c.CreateProductHandler)
+			products.DELETE("/:id", c.DeleteProductHandler)
+			products.GET("/:id/reviews", c.GetReviewsForProductHandler)
 		}
 
-		order := api.Group("/orders")
+		reviews := api.Group("/reviews")
 		{
-			order.POST("", c.CreateOrderHandler)
-			order.GET("/items/:id", c.GetOrderItemsHandler)
-			order.GET("", c.GetOrdersHandler)
-			order.GET("/:id", c.GetOrderByIdHandler)
-			order.PATCH("/:id", c.ChangeOrderStatusHandler)
-			order.DELETE("/:id", c.DeleteOrderHandler)
+			reviews.GET("/:id", c.GetReviewByIdHandler)
+			reviews.DELETE("/:id", c.DeleteReviewHandler)
 		}
 
-		product := api.Group("/products")
+		workers := api.Group("/workers")
 		{
-			product.POST("", c.CreateProductHandler)
-			product.DELETE("/:id", c.DeleteProductHandler)
-			product.GET("", c.GetProductsHandler)
-			product.GET("/:id/reviews", c.GetReviewsForProductHandler)
-		}
+			workers.GET("", c.GetAllWorkersHandler)
+			workers.POST("", c.CreateWorkerHandler)
+			workers.GET("/:id", c.GetWorkerByIdHandler)
+			workers.DELETE("/:id", c.DeleteWorkerHandler)
 
-		review := api.Group("/reviews")
-		{
-			review.POST("/:id_product", c.CreateReviewHandler)
-			review.GET("/:id", c.GetReviewByIdHandler)
-			review.DELETE("/:id", c.DeleteReviewHandler)
-		}
-
-		user := api.Group("/users")
-		{
-			user.GET("", c.GetUserByPrivatesHandler)
-			user.GET("/all", c.GetAllUsersHandler)
-		}
-
-		worker := api.Group("/workers")
-		{
-			worker.POST("", c.CreateWorkerHandler)
-			worker.GET("/all", c.GetAllWorkersHandler)
-			worker.POST("/accept", c.AcceptOrderHandler)
-			worker.GET("/:id", c.GetWorkerByIdHandler)
-			worker.DELETE("/:id", c.DeleteWorkerHandler)
-			worker.GET("/orders", c.GetWorkerOrders)
+			me := workers.Group("/me")
+			{
+				me.POST("/orders", c.AcceptOrderHandler)
+				me.GET("/orders", c.GetWorkerOrders)
+			}
 		}
 	}
 
