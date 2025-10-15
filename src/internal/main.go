@@ -142,69 +142,66 @@ func main() {
 			auth.POST("/logout", c.LogoutHandler)
 		}
 
-		basket := api.Group("/basket")
+		basket := api.Group("/baskets")
 		{
 			basket.GET("/items", c.GetBasketItemsHandler)
-			basket.POST("", c.AddBasketItemHandler)
+			basket.POST("/items", c.AddBasketItemHandler)
 			basket.GET("", c.GetBasketByIdHandler)
-			basket.DELETE("", c.DeleteBasketItemHandler)
-			basket.PUT("", c.UpdateBasketItemAmountHandler)
+			basket.DELETE("/items", c.DeleteBasketItemHandler)
+			basket.PATCH("/items", c.UpdateBasketItemAmountHandler)
 		}
 
-		brand := api.Group("/brand")
+		brand := api.Group("/brands")
 		{
 			brand.POST("", c.CreateBrandHandler)
 			brand.DELETE("/:id", c.DeleteBrandHandler)
 			brand.GET("/:id", c.GetBrandByIdHandler)
-			brand.GET("/category/:cat", c.GetAllBrandsInCategoryHander)
+			brand.GET("", c.GetAllBrandsInCategoryHander)
 		}
 
 		favourites := api.Group("/favourites")
 		{
 			favourites.GET("/items", c.GetFavouritesHandler)
-			favourites.POST("", c.AddFavouritesItemHandler)
-			favourites.DELETE("", c.DeleteFavouritesItemHandler)
+			favourites.POST("/items", c.AddFavouritesItemHandler)
+			favourites.DELETE("/items/:id", c.DeleteFavouritesItemHandler)
 		}
 
-		order := api.Group("/order")
+		order := api.Group("/orders")
 		{
 			order.POST("", c.CreateOrderHandler)
-			order.GET("/:id/items", c.GetOrderItemsHandler)
-			order.GET("/freeorders", c.GetFreeOrdersHandler)
+			order.GET("/items/:id", c.GetOrderItemsHandler)
+			order.GET("", c.GetFreeOrdersHandler)
 			order.GET("/:id", c.GetOrderByIdHandler)
-			order.PUT("/:id/status", c.ChangeOrderStatusHandler)
+			order.PATCH("/:id", c.ChangeOrderStatusHandler)
 			order.DELETE("/:id", c.DeleteOrderHandler)
-			order.PUT("/:id", c.AcceptOrderHandler)
+			order.GET("", c.GetOrdersByUserHandler)
 		}
 
-		product := api.Group("/product")
+		product := api.Group("/products")
 		{
 			product.POST("", c.CreateProductHandler)
 			product.DELETE("/:id", c.DeleteProductHandler)
-			product.GET("/", c.GetProductHandler)
-			product.GET("/category/:category", c.GetProductsByCategoryHandler)
-			product.GET("/brand/:brand", c.GetProductsByBrandHandler)
-			product.GET("/reviews/:id", c.GetReviewsForProductHandler)
+			product.GET("", c.GetProductsHandler)
+			product.GET("/:id/reviews", c.GetReviewsForProductHandler)
 		}
 
-		review := api.Group("/review")
+		review := api.Group("/reviews")
 		{
-			review.POST("product/:id_product", c.CreateReviewHandler)
+			review.POST(":id_product", c.CreateReviewHandler)
 			review.GET("/:id", c.GetReviewByIdHandler)
 			review.DELETE("/:id", c.DeleteReviewHandler)
 		}
 
-		user := api.Group("/user")
+		user := api.Group("/users")
 		{
-			user.GET("/email", c.GetUserByEmailHandler)
-			user.GET("/users", c.GetAllUsersHandler)
-			user.GET("/phone", c.GetUserByPhoneHandler)
+			user.GET("", c.GetUserByPrivatesHandler)
+			user.GET("/all", c.GetAllUsersHandler)
 		}
 
-		worker := api.Group("/worker")
+		worker := api.Group("/workers")
 		{
 			worker.POST("", c.CreateWorkerHandler)
-			worker.GET("", c.GetAllWorkersHandler)
+			worker.GET("/all", c.GetAllWorkersHandler)
 			worker.POST("/accept", c.AcceptOrderHandler)
 			worker.GET("/:id", c.GetWorkerByIdHandler)
 			worker.DELETE("/:id", c.DeleteWorkerHandler)

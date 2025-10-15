@@ -13,7 +13,7 @@ import (
 )
 
 func GetBasketItems(client *http.Client) {
-	url := "http://localhost:8080/api/v1/basket/items"
+	url := "http://localhost:8080/api/v1/baskets/items"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -37,7 +37,7 @@ func GetBasketItems(client *http.Client) {
 }
 
 func GetBasket(client *http.Client) {
-	url := "http://localhost:8080/api/v1/basket"
+	url := "http://localhost:8080/api/v1/baskets"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -93,7 +93,7 @@ func AddToBasket(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/basket", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/baskets/items", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -138,7 +138,7 @@ func DeleteFromBasket(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/basket", bytes.NewBuffer(body))
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/baskets/items", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -194,7 +194,7 @@ func UpdateItemAmount(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("PUT", "http://localhost:8080/api/v1/basket", bytes.NewBuffer(body))
+	req, err := http.NewRequest("PATCH", "http://localhost:8080/api/v1/baskets/items", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return

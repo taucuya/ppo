@@ -1,0 +1,32 @@
+ "servers": [
+    {
+      "url": "http://localhost:8080/api/v1/"
+    } 
+  ]
+
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Аутентификация"
+    },
+    {
+      "name": "basket",
+      "description": "Корзина"
+    },
+    {
+      "name": "favourites"
+      "description": "Избранное"
+    },
+    {
+      "name": "reviews",
+      "description": "Отзывы"
+    },
+    {
+      "name": "user",
+      "description": "Корзина"
+    },
+    {
+      "name": "worker"
+      "description": "Избранное"
+    }
+  ]

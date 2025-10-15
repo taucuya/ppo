@@ -35,31 +35,6 @@ func GetFavouritesItems(client *http.Client) {
 	}
 }
 
-func GetFavourites(client *http.Client) {
-	url := "http://localhost:8080/api/v1/favourites"
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
-		return
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("❌ Request failed:", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	var favourites map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&favourites); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
-
-	fmt.Printf("✅ Favourites ID: %v, User ID: %v", favourites["Id"], favourites["IdUser"])
-}
-
 func AddToFavourites(client *http.Client, reader *bufio.Reader) {
 	fmt.Print("Enter Product ID (UUID): ")
 	productID, _ := reader.ReadString('\n')
@@ -106,33 +81,24 @@ func AddToFavourites(client *http.Client, reader *bufio.Reader) {
 }
 
 func DeleteFromFavourites(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter Product ID (UUID) to delete: ")
-	productID, _ := reader.ReadString('\n')
-	productID = strings.TrimSpace(productID)
+	fmt.Print("Item ID: ")
+	itemID, _ := reader.ReadString('\n')
+	itemID = strings.TrimSpace(itemID)
 
-	idProduct, err := uuid.Parse(productID)
+	id, err := uuid.Parse(itemID)
 	if err != nil {
-		fmt.Println("❌ Invalid product ID:", err)
+		fmt.Println("❌ Invalid item ID:", err)
 		return
 	}
+	url := fmt.Sprintf("http://localhost:8080/api/v1/favourites/items/%s", id.String())
 
-	payload := map[string]interface{}{
-		"product_id": idProduct,
-	}
-
-	body, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
-		return
-	}
-
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/favourites", bytes.NewBuffer(body))
+	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
 	}
-	req.Header.Set("Content-Type", "application/json")
 
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("❌ Request failed:", err)

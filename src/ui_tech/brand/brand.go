@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/google/uuid"
@@ -37,7 +38,7 @@ func CreateBrand(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/brand", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/brands", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -70,7 +71,7 @@ func GetBrandById(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/brand/%s", id.String())
+	url := fmt.Sprintf("http://localhost:8080/api/v1/brands/%s", id.String())
 	resp, err := client.Get(url)
 	if err != nil {
 		fmt.Println("❌ Request failed:", err)
@@ -98,7 +99,7 @@ func DeleteBrand(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/brand/%s", id.String())
+	url := fmt.Sprintf("http://localhost:8080/api/v1/brands/%s", id.String())
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -125,7 +126,12 @@ func GetBrandsByCategory(client *http.Client, reader *bufio.Reader) {
 	category, _ := reader.ReadString('\n')
 	category = strings.TrimSpace(category)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/brand/category/%s", category)
+	baseURL := "http://localhost:8080/api/v1/brands"
+	params := url.Values{}
+	params.Add("category", category)
+
+	url := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+
 	resp, err := client.Get(url)
 	if err != nil {
 		fmt.Println("❌ Request failed:", err)

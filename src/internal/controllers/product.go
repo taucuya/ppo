@@ -66,6 +66,19 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Product created"})
 }
 
+func (c *Controller) GetProductsHandler(ctx *gin.Context) {
+	category := ctx.Query("category")
+	brand := ctx.Query("brand")
+
+	if category == "" && brand == "" {
+		c.GetProductHandler(ctx)
+	} else if category != "" {
+		c.GetProductsByCategoryHandler(ctx)
+	} else if brand != "" {
+		c.GetProductsByBrandHandler(ctx)
+	}
+}
+
 func (c *Controller) GetProductHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -135,7 +148,19 @@ func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
-	category := ctx.Param("category")
+	category := ctx.Query("category")
+	possible := []string{"уходовая", "декоративная", "парфюмерия", "для волос", "мужская"}
+	inarr := false
+	for _, i := range possible {
+		if category == i {
+			inarr = true
+		}
+	}
+	if !inarr {
+		log.Printf("[ERROR] Cant parse status to get product category")
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid product category format"})
+		return
+	}
 	products, err := c.ProductService.GetByCategory(ctx, category)
 	if err != nil {
 		log.Printf("[ERROR] Cant get products by category: %v", err)
