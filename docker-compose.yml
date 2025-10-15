@@ -54,7 +54,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 5  
   tests:
     build:
       context: .
@@ -74,10 +74,10 @@ services:
       - ./coverage:/app/coverage
     command: [
         "go", "test", "-v",
-        "-cover",
-        "-coverprofile=/app/coverage/coverage.out",
-        "-coverpkg=github.com/taucuya/ppo/internal/repository/postgres/reps/...",
-        "./internal/repository/tests/..."
+        # "-cover",
+        # "-coverprofile=/app/coverage/coverage.out",
+        # "-coverpkg=github.com/taucuya/ppo/internal/integration_tests/...",
+        "./internal/integration_tests/..."
       ]
 
 networks:
