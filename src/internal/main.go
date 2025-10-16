@@ -13,6 +13,9 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/taucuya/ppo/internal/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -161,7 +164,6 @@ func main() {
 		users := api.Group("/users")
 		{
 			users.GET("", c.GetUserByPrivatesHandler)
-			users.GET("/all", c.GetAllUsersHandler)
 
 			me := users.Group("/me")
 			{
@@ -183,13 +185,13 @@ func main() {
 					{
 						favouriteItems.GET("", c.GetFavouritesHandler)
 						favouriteItems.POST("", c.AddFavouritesItemHandler)
-						favouriteItems.DELETE("/:id", c.DeleteFavouritesItemHandler)
+						favouriteItems.DELETE("/:id_product", c.DeleteFavouritesItemHandler)
 					}
 				}
 
 				orders := me.Group("/orders")
 				{
-					orders.GET("", c.GetOrdersByUserHandler)
+					orders.GET("", c.GetOrdersHandler)
 					orders.POST("", c.CreateOrderHandler)
 					orders.GET("/:id", c.GetOrderByIdHandler)
 					orders.PATCH("/:id", c.ChangeOrderStatusHandler)
@@ -218,12 +220,8 @@ func main() {
 			products.POST("", c.CreateProductHandler)
 			products.DELETE("/:id", c.DeleteProductHandler)
 			products.GET("/:id/reviews", c.GetReviewsForProductHandler)
-		}
-
-		reviews := api.Group("/reviews")
-		{
-			reviews.GET("/:id", c.GetReviewByIdHandler)
-			reviews.DELETE("/:id", c.DeleteReviewHandler)
+			products.GET("/:id/reviews/:id", c.GetReviewByIdHandler)
+			products.DELETE("/:id/reviews/:id", c.DeleteReviewHandler)
 		}
 
 		workers := api.Group("/workers")
@@ -235,8 +233,11 @@ func main() {
 
 			me := workers.Group("/me")
 			{
-				me.POST("/orders", c.AcceptOrderHandler)
-				me.GET("/orders", c.GetWorkerOrders)
+				orders := me.Group("/orders")
+				{
+					orders.GET("", c.GetWorkerOrders)
+					orders.POST("", c.AcceptOrderHandler)
+				}
 			}
 		}
 	}
@@ -264,5 +265,4 @@ func main() {
 	}
 
 	log.Println("Server exiting")
-
 }

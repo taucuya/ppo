@@ -10,6 +10,31 @@ import (
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
+type CreateProductRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+	Price       string `json:"price" binding:"required"`
+	Category    string `json:"category" binding:"required"`
+	Amount      int    `json:"amount" binding:"required,min=0"`
+	IdBrand     string `json:"id_brand" binding:"required"`
+	PicLink     string `json:"pic_link"`
+	Articule    string `json:"articule"`
+}
+
+// CreateProductHandler создает новый продукт
+// @Summary Создать продукт
+// @Description Создает новый продукт в системе (только для администраторов)
+// @Tags products
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateProductRequest true "Данные для создания продукта"
+// @Success 201 {object} object "Продукт успешно создан"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 500 {object} object "Ошибка сервера при создании продукта"
+// @Router /api/v1/products [post]
 func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
@@ -66,6 +91,23 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Product created"})
 }
 
+// GetProductsHandler получает продукты
+// @Summary Получить продукты
+// @Description Возвращает список продуктов с различными фильтрами: по категории или бренду
+// @Tags products
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id query string false "UUID продукта"
+// @Param art query string false "Артикул продукта"
+// @Param category query string false "Категория продукта" Enums(уходовая, декоративная, парфюмерия, для волос, мужская)
+// @Param brand query string false "Название бренда"
+// @Success 200 {object} object "Данные продукта или список продуктов"
+// @Failure 400 {object} object "Неверные параметры запроса"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Продукт не найден"
+// @Failure 500 {object} object "Ошибка сервера при получении продуктов"
+// @Router /api/v1/products [get]
 func (c *Controller) GetProductsHandler(ctx *gin.Context) {
 	category := ctx.Query("category")
 	brand := ctx.Query("brand")
@@ -125,6 +167,21 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusBadRequest, gin.H{"error": "No valid query parameter provided"})
 }
 
+// DeleteProductHandler удаляет продукт
+// @Summary Удалить продукт
+// @Description Удаляет продукт по его идентификатору (только для администраторов)
+// @Tags products
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID продукта"
+// @Success 200 {object} object "Продукт успешно удален"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Продукт не найден"
+// @Failure 500 {object} object "Ошибка сервера при удалении продукта"
+// @Router /api/v1/products/{id} [delete]
 func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
@@ -183,6 +240,18 @@ func (c *Controller) GetProductsByBrandHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, products)
 }
 
+// GetReviewsForProductHandler получает отзывы для продукта
+// @Summary Получить отзывы для продукта
+// @Description Возвращает список отзывов для указанного продукта
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param id path string true "UUID продукта"
+// @Success 200 {array} object "Список отзывов для продукта"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 404 {object} object "Отзывы не найден"
+// @Failure 500 {object} object "Ошибка сервера при получении отзывов"
+// @Router /api/v1/products/{id}/reviews [get]
 func (c *Controller) GetReviewsForProductHandler(ctx *gin.Context) {
 	productID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {

@@ -10,6 +10,27 @@ import (
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
+type BasketItemRequest struct {
+	ProductID uuid.UUID `json:"product_id" binding:"required"`
+	Amount    int       `json:"amount" binding:"required,min=1"`
+}
+
+type BasketItemDeleteRequest struct {
+	ProductID uuid.UUID `json:"product_id" binding:"required"`
+}
+
+// GetBasketItemsHandler получает все товары в корзине пользователя
+// @Summary Получить товары корзины
+// @Description Возвращает список всех товаров в корзине текущего пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} object "Список товаров в корзине"
+// @Failure 400 {object} object "Неверный формат ID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 500 {object} object "Ошибка сервера при получении товаров"
+// @Router /api/v1/users/me/basket/items [get]
 func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -40,6 +61,18 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, items)
 }
 
+// GetBasketByIdHandler получает корзину по ID пользователя
+// @Summary Получить корзину
+// @Description Возвращает корзину текущего пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} object "Данные корзины"
+// @Failure 400 {object} object "Неверный формат ID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Корзина не найдена"
+// @Router /api/v1/users/me/basket [get]
 func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -71,6 +104,20 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, basket)
 }
 
+// AddBasketItemHandler добавляет товар в корзину
+// @Summary Добавить товар в корзину
+// @Description Добавляет товар с указанным количеством в корзину пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body BasketItemRequest true "Данные товара для добавления"
+// @Success 201 {object} object "Товар успешно добавлен"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Корзина не найдена"
+// @Failure 500 {object} object "Ошибка сервера при добавлении товара"
+// @Router /api/v1/users/me/basket/items [post]
 func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -91,10 +138,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		IdProduct string `json:"id_product"`
-		Amount    int    `json:"amount"`
-	}
+	var input BasketItemRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
@@ -102,15 +146,8 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 		return
 	}
 
-	idProduct, err := uuid.Parse(input.IdProduct)
-	if err != nil {
-		log.Printf("[ERROR] Cant get product id: %v", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id_product"})
-		return
-	}
-
 	item := structs.BasketItem{
-		IdProduct: idProduct,
+		IdProduct: input.ProductID,
 		Amount:    input.Amount,
 	}
 
@@ -123,6 +160,20 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Item added"})
 }
 
+// DeleteBasketItemHandler удаляет товар из корзины
+// @Summary Удалить товар из корзины
+// @Description Удаляет указанный товар из корзины пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body BasketItemDeleteRequest true "Данные товара для удаления"
+// @Success 200 {object} object "Товар успешно удален"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Корзина не найдена"
+// @Failure 500 {object} object "Ошибка сервера при удалении товара"
+// @Router /api/v1/users/me/basket/items [delete]
 func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -143,9 +194,7 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		ProductID uuid.UUID `json:"product_id" binding:"required"`
-	}
+	var input BasketItemDeleteRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
@@ -162,6 +211,20 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Item deleted"})
 }
 
+// UpdateBasketItemAmountHandler обновляет количество товара в корзине
+// @Summary Обновить количество товара
+// @Description Обновляет количество указанного товара в корзине пользователя
+// @Tags user
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body BasketItemRequest true "Данные для обновления количества"
+// @Success 200 {object} object "Количество товара успешно обновлено"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Элемент корзины не найден"
+// @Failure 500 {object} object "Ошибка сервера при обновлении количества"
+// @Router /api/v1/users/me/basket/items [patch]
 func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -182,10 +245,7 @@ func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		ProductID uuid.UUID `json:"product_id" binding:"required"`
-		Amount    int       `json:"amount" binding:"required"`
-	}
+	var input BasketItemRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)

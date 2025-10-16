@@ -1,0 +1,1493 @@
+definitions:
+  controller.AddFavouriteRequest:
+    properties:
+      id_product:
+        type: string
+    required:
+    - id_product
+    type: object
+  controller.BasketItemDeleteRequest:
+    properties:
+      product_id:
+        type: string
+    required:
+    - product_id
+    type: object
+  controller.BasketItemRequest:
+    properties:
+      amount:
+        minimum: 1
+        type: integer
+      product_id:
+        type: string
+    required:
+    - amount
+    - product_id
+    type: object
+  controller.CreateBrandRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      price_category:
+        type: string
+    required:
+    - description
+    - name
+    - price_category
+    type: object
+  controller.CreateOrderRequest:
+    properties:
+      address:
+        type: string
+    required:
+    - address
+    type: object
+  controller.CreateProductRequest:
+    properties:
+      amount:
+        minimum: 0
+        type: integer
+      articule:
+        type: string
+      category:
+        type: string
+      description:
+        type: string
+      id_brand:
+        type: string
+      name:
+        type: string
+      pic_link:
+        type: string
+      price:
+        type: string
+    required:
+    - amount
+    - category
+    - id_brand
+    - name
+    - price
+    type: object
+  controller.CreateReviewRequest:
+    properties:
+      r_text:
+        type: string
+      rating:
+        maximum: 5
+        minimum: 1
+        type: integer
+    required:
+    - r_text
+    - rating
+    type: object
+  controller.CreateWorkerRequest:
+    properties:
+      id_user:
+        type: string
+      job_title:
+        type: string
+    required:
+    - id_user
+    - job_title
+    type: object
+  controller.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  controller.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  controller.SignupRequest:
+    properties:
+      address:
+        type: string
+      date_of_birth:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+    required:
+    - address
+    - date_of_birth
+    - email
+    - name
+    - password
+    - phone
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Аутентифицирует пользователя и возвращает токены
+      parameters:
+      - description: Учетные данные для входа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный вход
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            type: object
+      summary: Вход в систему
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Завершает сессию пользователя
+      parameters:
+      - description: Refresh token для выхода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный выход
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при выходе
+          schema:
+            type: object
+      summary: Выход из системы
+      tags:
+      - auth
+  /api/v1/auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя в системе
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь успешно зарегистрирован
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при регистрации
+          schema:
+            type: object
+      summary: Регистрация пользователя
+      tags:
+      - auth
+  /api/v1/brands:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список брендов в указанной ценовой категории
+      parameters:
+      - description: Ценовая категория
+        enum:
+        - бюджет
+        - средний сегмент
+        - люкс
+        in: query
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список брендов в категории
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверная категория
+          schema:
+            type: object
+        "404":
+          description: Бренды не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении брендов
+          schema:
+            type: object
+      summary: Получить бренды по категории цен
+      tags:
+      - brands
+    post:
+      consumes:
+      - application/json
+      description: Создает новый бренд в системе (только для администраторов)
+      parameters:
+      - description: Данные для создания бренда
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateBrandRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Бренд успешно создан
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при создании бренда
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать бренд
+      tags:
+      - brands
+  /api/v1/brands/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет бренд по его идентификатору (только для администраторов)
+      parameters:
+      - description: UUID бренда
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Бренд успешно удален
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Бренд не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении бренда
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить бренд
+      tags:
+      - brands
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о бренде по его идентификатору (только для
+        администраторов)
+      parameters:
+      - description: UUID бренда
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные бренда
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Бренд не найден
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить бренд по ID
+      tags:
+      - brands
+  /api/v1/orders:
+    post:
+      consumes:
+      - application/json
+      description: Создает новый заказ для текущего пользователя
+      parameters:
+      - description: Данные для создания заказа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Заказ успешно создан
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при создании заказа
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать заказ
+      tags:
+      - orders
+  /api/v1/products:
+    get:
+      consumes:
+      - application/json
+      description: 'Возвращает список продуктов с различными фильтрами: по категории
+        или бренду'
+      parameters:
+      - description: UUID продукта
+        in: query
+        name: id
+        type: string
+      - description: Артикул продукта
+        in: query
+        name: art
+        type: string
+      - description: Категория продукта
+        enum:
+        - уходовая
+        - декоративная
+        - парфюмерия
+        - для волос
+        - мужская
+        in: query
+        name: category
+        type: string
+      - description: Название бренда
+        in: query
+        name: brand
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные продукта или список продуктов
+          schema:
+            type: object
+        "400":
+          description: Неверные параметры запроса
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Продукт не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении продуктов
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить продукты
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Создает новый продукт в системе (только для администраторов)
+      parameters:
+      - description: Данные для создания продукта
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Продукт успешно создан
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при создании продукта
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать продукт
+      tags:
+      - products
+  /api/v1/products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет продукт по его идентификатору (только для администраторов)
+      parameters:
+      - description: UUID продукта
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Продукт успешно удален
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Продукт не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении продукта
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить продукт
+      tags:
+      - products
+  /api/v1/products/{id}/reviews:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список отзывов для указанного продукта
+      parameters:
+      - description: UUID продукта
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список отзывов для продукта
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "404":
+          description: Отзывы не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении отзывов
+          schema:
+            type: object
+      summary: Получить отзывы для продукта
+      tags:
+      - products
+  /api/v1/products/{id}/reviews/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет отзыв по его идентификатору (только для администраторов)
+      parameters:
+      - description: UUID отзыва
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Отзыв успешно удален
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Отзыв не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении отзыва
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить отзыв
+      tags:
+      - products
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию об отзыве по его идентификатору
+      parameters:
+      - description: UUID отзыва
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные отзыва
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Отзыв не найден
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить отзыв по ID
+      tags:
+      - products
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о пользователе по email или номеру телефона
+        (только для администраторов) или информацию о всех userах
+      parameters:
+      - description: Email пользователя
+        in: query
+        name: email
+        type: string
+      - description: Телефон пользователя
+        in: query
+        name: phone
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя
+          schema:
+            type: object
+        "400":
+          description: Не указаны параметры email или phone
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить пользователя по email или телефону
+      tags:
+      - users
+  /api/v1/users/me/basket:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает корзину текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные корзины
+          schema:
+            type: object
+        "400":
+          description: Неверный формат ID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Корзина не найдена
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить корзину
+      tags:
+      - user
+  /api/v1/users/me/basket/items:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет указанный товар из корзины пользователя
+      parameters:
+      - description: Данные товара для удаления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.BasketItemDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Товар успешно удален
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Корзина не найдена
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении товара
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить товар из корзины
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех товаров в корзине текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список товаров в корзине
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверный формат ID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении товаров
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить товары корзины
+      tags:
+      - user
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет количество указанного товара в корзине пользователя
+      parameters:
+      - description: Данные для обновления количества
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.BasketItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Количество товара успешно обновлено
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Элемент корзины не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при обновлении количества
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить количество товара
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Добавляет товар с указанным количеством в корзину пользователя
+      parameters:
+      - description: Данные товара для добавления
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.BasketItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Товар успешно добавлен
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Корзина не найдена
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при добавлении товара
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Добавить товар в корзину
+      tags:
+      - user
+  /api/v1/users/me/favourite/items:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех товаров в избранном текущего пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список товаров в избранном
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверный формат ID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Избранные не найдены
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении избранного
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить избранные товары
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Добавляет товар в избранное текущего пользователя
+      parameters:
+      - description: Данные товара для добавления в избранное
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.AddFavouriteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Товар успешно добавлен в избранное
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при добавлении в избранное
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Добавить товар в избранное
+      tags:
+      - users
+  /api/v1/users/me/favourite/items/{id_product}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет товар из избранного текущего пользователя
+      parameters:
+      - description: UUID товара
+        in: path
+        name: id_product
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Товар успешно удален из избранного
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Избранные не найдены
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении из избранного
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить товар из избранного
+      tags:
+      - user
+  /api/v1/users/me/orders:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список заказов. Без параметров - заказы текущего пользователя,
+        с status=непринятый - свободные заказы для работников
+      parameters:
+      - description: Статус заказа для фильтрации
+        enum:
+        - непринятый
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заказов
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверный параметр статуса
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Заказы не найдены
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении заказов
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить заказы
+      tags:
+      - orders
+  /api/v1/users/me/orders/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет заказ по его идентификатору (только для администраторов)
+      parameters:
+      - description: UUID заказа
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заказ успешно удален
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении заказа
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить заказ
+      tags:
+      - orders
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о заказе по его идентификатору (для работников
+        и администраторов)
+      parameters:
+      - description: UUID заказа
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные заказа
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Заказ не найден
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить заказ по ID
+      tags:
+      - orders
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет статус заказа (для работников и администраторов)
+      parameters:
+      - description: UUID заказа
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Новый статус заказа
+        enum:
+        - некорректный
+        - непринятый
+        - принятый
+        - собранный
+        - отданный
+        in: query
+        name: status
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статус заказа успешно обновлен
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Заказ не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при обновлении статуса
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Изменить статус заказа
+      tags:
+      - orders
+  /api/v1/users/me/orders/{id}/items:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список товаров в указанном заказе
+      parameters:
+      - description: UUID заказа
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список товаров в заказе
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "404":
+          description: Отзывы не найдены
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении товаров
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить товары заказа
+      tags:
+      - orders
+  /api/v1/users/me/products/{id_product}/reviews:
+    post:
+      consumes:
+      - application/json
+      description: Создает новый отзыв для указанного продукта от текущего пользователя
+      parameters:
+      - description: UUID продукта
+        in: path
+        name: id_product
+        required: true
+        type: string
+      - description: Данные для создания отзыва
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateReviewRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Отзыв успешно создан
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при создании отзыва
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать отзыв
+      tags:
+      - products
+  /api/v1/workers:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех работников системы (только для администраторов)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список всех работников
+          schema:
+            items:
+              type: object
+            type: array
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Работник не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении работников
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить всех работников
+      tags:
+      - workers
+    post:
+      consumes:
+      - application/json
+      description: Создает нового работника в системе (только для администраторов)
+      parameters:
+      - description: Данные для создания работника
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateWorkerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Работник успешно создан
+          schema:
+            type: object
+        "400":
+          description: Неверный формат данных
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при создании работника
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать работника
+      tags:
+      - workers
+  /api/v1/workers/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет работника по его идентификатору (только для администраторов)
+      parameters:
+      - description: UUID работника
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Работник успешно удален
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Работник не найден
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при удалении работника
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить работника
+      tags:
+      - workers
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о работнике по его идентификатору (только
+        для администраторов)
+      parameters:
+      - description: UUID работника
+        example: '"123e4567-e89b-12d3-a456-426614174000"'
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные работника
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Работник не найден
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить работника по ID
+      tags:
+      - workers
+  /api/v1/workers/me/orders:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список заказов текущего работника (только для работников)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заказов работника
+          schema:
+            items:
+              type: object
+            type: array
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Заказы не найдены
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить заказы работника
+      tags:
+      - workers
+    post:
+      consumes:
+      - application/json
+      description: Принимает заказ для выполнения текущим работником (только для работников)
+      parameters:
+      - description: UUID заказа
+        in: query
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заказ успешно принят
+          schema:
+            type: object
+        "400":
+          description: Неверный формат UUID заказа
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Заказ не найдены
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при принятии заказа
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Принять заказ
+      tags:
+      - workers
+swagger: "2.0"
