@@ -66,6 +66,28 @@ func main() {
 
 	loadEnv()
 	dsn := os.Getenv("DB_DSN")
+	if dsn == "" {
+		dbHost := os.Getenv("DB_HOST")
+		dbPort := os.Getenv("DB_PORT")
+		dbUser := os.Getenv("DB_USER")
+		dbPassword := os.Getenv("DB_PASSWORD")
+		dbName := os.Getenv("DB_NAME")
+
+		if dbHost != "" {
+			dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+				dbUser, dbPassword, dbHost, dbPort, dbName)
+		} else {
+			dsn = "postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable"
+		}
+	}
+
+	fmt.Printf("DSN: %s\n", dsn)
+
+	db, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		panic("failed to connect to database: " + err.Error())
+	}
+	defer db.Close()
 	key := []byte(os.Getenv("JWT_SECRET"))
 	acstime, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_LIFETIME_MINUTES"))
 	if err != nil {
@@ -76,28 +98,20 @@ func main() {
 		return
 	}
 
-	db, err := sqlx.Connect("postgres", dsn)
-	if err != nil {
-		panic("failed to connect to test database: " + err.Error())
-	}
-
 	_ = runSQLScripts(db, []string{
-		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
+		"./internal/database/sql/01-create.sql",
+		"./internal/database/sql/02-constraints.sql",
+		"./internal/database/sql/03-inserts.sql",
+		"./internal/database/sql/trigger_accept.sql",
+		"./internal/database/sql/trigger_order.sql",
 	})
-
 	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Cant open log file: %v", err)
 	}
-
 	log.SetOutput(logFile)
 
 	gin.DefaultWriter = logFile
-
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(time.Duration(acstime)*time.Minute), time.Duration(time.Duration(reftime)*24*time.Hour))
 	bar := basket_rep.New(db)
@@ -108,7 +122,6 @@ func main() {
 	rr := review_rep.New(db)
 	ur := user_rep.New(db)
 	wr := worker_rep.New(db)
-
 	bas := basket.New(bar)
 	fs := favourites.New(fr)
 	us := user.New(ur, bas, fs)
@@ -118,7 +131,6 @@ func main() {
 	ps := product.New(pr)
 	rs := review.New(rr)
 	ws := worker.New(wr)
-
 	c := controller.Controller{
 		BasketService:     *bas,
 		UserService:       *us,
@@ -132,11 +144,13 @@ func main() {
 	}
 
 	router := gin.New()
-	url := ginSwagger.URL("/swagger/doc.json")
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
-
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	router.GET("/health", func(c *gin.Context) {
+		fmt.Println("Health check called")
+		c.JSON(200, gin.H{"status": "ok", "service": "running"})
+	})
 
 	api := router.Group("/api/v1")
 	{
