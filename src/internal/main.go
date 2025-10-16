@@ -13,6 +13,9 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/taucuya/ppo/internal/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -63,6 +66,28 @@ func main() {
 
 	loadEnv()
 	dsn := os.Getenv("DB_DSN")
+	if dsn == "" {
+		dbHost := os.Getenv("DB_HOST")
+		dbPort := os.Getenv("DB_PORT")
+		dbUser := os.Getenv("DB_USER")
+		dbPassword := os.Getenv("DB_PASSWORD")
+		dbName := os.Getenv("DB_NAME")
+
+		if dbHost != "" {
+			dsn = fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+				dbUser, dbPassword, dbHost, dbPort, dbName)
+		} else {
+			dsn = "postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable"
+		}
+	}
+
+	fmt.Printf("DSN: %s\n", dsn)
+
+	db, err := sqlx.Connect("postgres", dsn)
+	if err != nil {
+		panic("failed to connect to database: " + err.Error())
+	}
+	defer db.Close()
 	key := []byte(os.Getenv("JWT_SECRET"))
 	acstime, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_LIFETIME_MINUTES"))
 	if err != nil {
@@ -72,29 +97,21 @@ func main() {
 	if err != nil {
 		return
 	}
-	fmt.Println("DSN", dsn)
-	db, err := sqlx.Connect("postgres", dsn)
-	if err != nil {
-		panic("failed to connect to test database: " + err.Error())
-	}
 
 	_ = runSQLScripts(db, []string{
-		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
-		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
+		"./internal/database/sql/01-create.sql",
+		"./internal/database/sql/02-constraints.sql",
+		"./internal/database/sql/03-inserts.sql",
+		"./internal/database/sql/trigger_accept.sql",
+		"./internal/database/sql/trigger_order.sql",
 	})
-
 	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Cant open log file: %v", err)
 	}
-
 	log.SetOutput(logFile)
 
 	gin.DefaultWriter = logFile
-
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(time.Duration(acstime)*time.Minute), time.Duration(time.Duration(reftime)*24*time.Hour))
 	bar := basket_rep.New(db)
@@ -105,7 +122,6 @@ func main() {
 	rr := review_rep.New(db)
 	ur := user_rep.New(db)
 	wr := worker_rep.New(db)
-
 	bas := basket.New(bar)
 	fs := favourites.New(fr)
 	us := user.New(ur, bas, fs)
@@ -115,7 +131,6 @@ func main() {
 	ps := product.New(pr)
 	rs := review.New(rr)
 	ws := worker.New(wr)
-
 	c := controller.Controller{
 		BasketService:     *bas,
 		UserService:       *us,
@@ -129,9 +144,13 @@ func main() {
 	}
 
 	router := gin.New()
-
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	router.GET("/health", func(c *gin.Context) {
+		fmt.Println("Health check called")
+		c.JSON(200, gin.H{"status": "ok", "service": "running"})
+	})
 
 	api := router.Group("/api/v1")
 	{
@@ -142,70 +161,84 @@ func main() {
 			auth.POST("/logout", c.LogoutHandler)
 		}
 
-		basket := api.Group("/baskets")
+		users := api.Group("/users")
 		{
-			basket.GET("/items", c.GetBasketItemsHandler)
-			basket.POST("/items", c.AddBasketItemHandler)
-			basket.GET("", c.GetBasketByIdHandler)
-			basket.DELETE("/items", c.DeleteBasketItemHandler)
-			basket.PATCH("/items", c.UpdateBasketItemAmountHandler)
+			users.GET("", c.GetUserByPrivatesHandler)
+
+			me := users.Group("/me")
+			{
+				basket := me.Group("/basket")
+				{
+					basket.GET("", c.GetBasketByIdHandler)
+					basketItems := basket.Group("/items")
+					{
+						basketItems.GET("", c.GetBasketItemsHandler)
+						basketItems.POST("", c.AddBasketItemHandler)
+						basketItems.DELETE("", c.DeleteBasketItemHandler)
+						basketItems.PATCH("", c.UpdateBasketItemAmountHandler)
+					}
+				}
+
+				favourite := me.Group("/favourite")
+				{
+					favouriteItems := favourite.Group("/items")
+					{
+						favouriteItems.GET("", c.GetFavouritesHandler)
+						favouriteItems.POST("", c.AddFavouritesItemHandler)
+						favouriteItems.DELETE("/:id_product", c.DeleteFavouritesItemHandler)
+					}
+				}
+
+				orders := me.Group("/orders")
+				{
+					orders.GET("", c.GetOrdersHandler)
+					orders.POST("", c.CreateOrderHandler)
+					orders.GET("/:id", c.GetOrderByIdHandler)
+					orders.PATCH("/:id", c.ChangeOrderStatusHandler)
+					orders.DELETE("/:id", c.DeleteOrderHandler)
+					orders.GET("/:id/items", c.GetOrderItemsHandler)
+				}
+
+				products := me.Group("/products")
+				{
+					products.POST("/:id_product/reviews", c.CreateReviewHandler)
+				}
+			}
 		}
 
-		brand := api.Group("/brands")
+		brands := api.Group("/brands")
 		{
-			brand.POST("", c.CreateBrandHandler)
-			brand.DELETE("/:id", c.DeleteBrandHandler)
-			brand.GET("/:id", c.GetBrandByIdHandler)
-			brand.GET("", c.GetAllBrandsInCategoryHander)
+			brands.GET("", c.GetAllBrandsInCategoryHander)
+			brands.POST("", c.CreateBrandHandler)
+			brands.GET("/:id", c.GetBrandByIdHandler)
+			brands.DELETE("/:id", c.DeleteBrandHandler)
 		}
 
-		favourites := api.Group("/favourites")
+		products := api.Group("/products")
 		{
-			favourites.GET("/items", c.GetFavouritesHandler)
-			favourites.POST("/items", c.AddFavouritesItemHandler)
-			favourites.DELETE("/items/:id", c.DeleteFavouritesItemHandler)
+			products.GET("", c.GetProductsHandler)
+			products.POST("", c.CreateProductHandler)
+			products.DELETE("/:id", c.DeleteProductHandler)
+			products.GET("/:id/reviews", c.GetReviewsForProductHandler)
+			products.GET("/:id/reviews/:id", c.GetReviewByIdHandler)
+			products.DELETE("/:id/reviews/:id", c.DeleteReviewHandler)
 		}
 
-		order := api.Group("/orders")
+		workers := api.Group("/workers")
 		{
-			order.POST("", c.CreateOrderHandler)
-			order.GET("/items/:id", c.GetOrderItemsHandler)
-			order.GET("", c.GetFreeOrdersHandler)
-			order.GET("/:id", c.GetOrderByIdHandler)
-			order.PATCH("/:id", c.ChangeOrderStatusHandler)
-			order.DELETE("/:id", c.DeleteOrderHandler)
-			order.GET("", c.GetOrdersByUserHandler)
-		}
+			workers.GET("", c.GetAllWorkersHandler)
+			workers.POST("", c.CreateWorkerHandler)
+			workers.GET("/:id", c.GetWorkerByIdHandler)
+			workers.DELETE("/:id", c.DeleteWorkerHandler)
 
-		product := api.Group("/products")
-		{
-			product.POST("", c.CreateProductHandler)
-			product.DELETE("/:id", c.DeleteProductHandler)
-			product.GET("", c.GetProductsHandler)
-			product.GET("/:id/reviews", c.GetReviewsForProductHandler)
-		}
-
-		review := api.Group("/reviews")
-		{
-			review.POST(":id_product", c.CreateReviewHandler)
-			review.GET("/:id", c.GetReviewByIdHandler)
-			review.DELETE("/:id", c.DeleteReviewHandler)
-		}
-
-		user := api.Group("/users")
-		{
-			user.GET("", c.GetUserByPrivatesHandler)
-			user.GET("/all", c.GetAllUsersHandler)
-		}
-
-		worker := api.Group("/workers")
-		{
-			worker.POST("", c.CreateWorkerHandler)
-			worker.GET("/all", c.GetAllWorkersHandler)
-			worker.POST("/accept", c.AcceptOrderHandler)
-			worker.GET("/:id", c.GetWorkerByIdHandler)
-			worker.DELETE("/:id", c.DeleteWorkerHandler)
-			worker.GET("/orders", c.GetWorkerOrders)
+			me := workers.Group("/me")
+			{
+				orders := me.Group("/orders")
+				{
+					orders.GET("", c.GetWorkerOrders)
+					orders.POST("", c.AcceptOrderHandler)
+				}
+			}
 		}
 	}
 
@@ -232,5 +265,4 @@ func main() {
 	}
 
 	log.Println("Server exiting")
-
 }

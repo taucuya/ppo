@@ -99,8 +99,18 @@ func (p *Provider) RefreshToken(ctx context.Context, atoken string, rtoken strin
 
 	if accessToken != nil && accessToken.Valid {
 		accessClaims, ok := accessToken.Claims.(jwt.MapClaims)
-		if ok && accessClaims["id"] != nil && accessClaims["id"].(uuid.UUID) != uuid.UUID(id) {
-			return "", errors.New("token user mismatch")
+		if ok && accessClaims["id"] != nil {
+			accessIDStr, ok := accessClaims["id"].(string)
+			if !ok {
+				return "", errors.New("invalid id in access token")
+			}
+			accessID, err := uuid.Parse(accessIDStr)
+			if err != nil {
+				return "", errors.New("malformed UUID in access token")
+			}
+			if accessID != id {
+				return "", errors.New("token user mismatch")
+			}
 		}
 	}
 
