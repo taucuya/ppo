@@ -18,7 +18,7 @@ type CreateReviewRequest struct {
 // CreateReviewHandler создает новый отзыв
 // @Summary Создать отзыв
 // @Description Создает новый отзыв для указанного продукта от текущего пользователя
-// @Tags reviews
+// @Tags products
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -28,7 +28,7 @@ type CreateReviewRequest struct {
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при создании отзыва"
-// @Router /api/v1/reviews/{id_product} [post]
+// @Router /api/v1/users/me/products/{id_product}/reviews [post]
 func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -83,7 +83,7 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 // GetReviewByIdHandler получает отзыв по ID
 // @Summary Получить отзыв по ID
 // @Description Возвращает информацию об отзыве по его идентификатору
-// @Tags reviews
+// @Tags products
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -92,7 +92,7 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 404 {object} object "Отзыв не найден"
-// @Router /api/v1/reviews/{id} [get]
+// @Router /api/v1/products/{id}/reviews/{id} [get]
 func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -119,7 +119,7 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 // DeleteReviewHandler удаляет отзыв
 // @Summary Удалить отзыв
 // @Description Удаляет отзыв по его идентификатору (только для администраторов)
-// @Tags reviews
+// @Tags products
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -129,7 +129,7 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 500 {object} object "Ошибка сервера при удалении отзыва"
-// @Router /api/v1/reviews/{id} [delete]
+// @Router /api/v1/products/{id}/reviews/{id} [delete]
 func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {

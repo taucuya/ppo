@@ -9,7 +9,7 @@ import (
 
 // GetUserByPrivatesHandler получает пользователя по email или телефону
 // @Summary Получить пользователя по email или телефону
-// @Description Возвращает информацию о пользователе по email или номеру телефона (только для администраторов)
+// @Description Возвращает информацию о пользователе по email или номеру телефона (только для администраторов) или информацию о всех userах
 // @Tags users
 // @Accept json
 // @Produce json
@@ -27,9 +27,10 @@ func (c *Controller) GetUserByPrivatesHandler(ctx *gin.Context) {
 	phone := ctx.Query("phone")
 	if phone != "" {
 		c.GetUserByPhoneHandler(ctx)
-	}
-	if email != "" {
+	} else if email != "" {
 		c.GetUserByEmailHandler(ctx)
+	} else {
+		c.GetAllUsersHandler(ctx)
 	}
 	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email or phone parameter is required"})
 }
@@ -56,18 +57,6 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
-// GetAllUsersHandler получает всех пользователей
-// @Summary Получить всех пользователей
-// @Description Возвращает список всех пользователей системы (только для администраторов)
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Success 200 {array} object "Список всех пользователей"
-// @Failure 401 {object} object "Неавторизованный доступ"
-// @Failure 403 {object} object "Недостаточно прав"
-// @Failure 404 {object} object "Пользователи не найдены"
-// @Router /api/v1/users/all [get]
 func (c *Controller) GetAllUsersHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {

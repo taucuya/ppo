@@ -103,7 +103,7 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при получении товаров"
-// @Router /api/v1/orders/items/{id} [get]
+// @Router /api/v1/users/me/orders/{id}/items [get]
 func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 
@@ -141,7 +141,7 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 500 {object} object "Ошибка сервера при получении заказов"
-// @Router /api/v1/orders [get]
+// @Router /api/v1/users/me/orders [get]
 func (c *Controller) GetOrdersHandler(ctx *gin.Context) {
 	status := ctx.Query("status")
 	if status != "" {
@@ -187,7 +187,7 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 404 {object} object "Заказ не найден"
-// @Router /api/v1/orders/{id} [get]
+// @Router /api/v1/users/me/orders/{id} [get]
 func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 	goodW := c.VerifyW(ctx)
 	goodA := c.VerifyA(ctx)
@@ -227,7 +227,7 @@ func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 500 {object} object "Ошибка сервера при обновлении статуса"
-// @Router /api/v1/orders/{id} [patch]
+// @Router /api/v1/users/me/orders/{id} [patch]
 func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	goodW := c.VerifyW(ctx)
 	goodA := c.VerifyA(ctx)
@@ -282,7 +282,7 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 500 {object} object "Ошибка сервера при удалении заказа"
-// @Router /api/v1/orders/{id} [delete]
+// @Router /api/v1/users/me/orders/{id} [delete]
 func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {

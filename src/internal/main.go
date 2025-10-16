@@ -145,7 +145,6 @@ func main() {
 		users := api.Group("/users")
 		{
 			users.GET("", c.GetUserByPrivatesHandler)
-			users.GET("/all", c.GetAllUsersHandler)
 
 			me := users.Group("/me")
 			{
@@ -167,7 +166,7 @@ func main() {
 					{
 						favouriteItems.GET("", c.GetFavouritesHandler)
 						favouriteItems.POST("", c.AddFavouritesItemHandler)
-						favouriteItems.DELETE("/:id", c.DeleteFavouritesItemHandler)
+						favouriteItems.DELETE("/:id_product", c.DeleteFavouritesItemHandler)
 					}
 				}
 
@@ -202,12 +201,8 @@ func main() {
 			products.POST("", c.CreateProductHandler)
 			products.DELETE("/:id", c.DeleteProductHandler)
 			products.GET("/:id/reviews", c.GetReviewsForProductHandler)
-		}
-
-		reviews := api.Group("/reviews")
-		{
-			reviews.GET("/:id", c.GetReviewByIdHandler)
-			reviews.DELETE("/:id", c.DeleteReviewHandler)
+			products.GET("/:id/reviews/:id", c.GetReviewByIdHandler)
+			products.DELETE("/:id/reviews/:id", c.DeleteReviewHandler)
 		}
 
 		workers := api.Group("/workers")
@@ -219,8 +214,11 @@ func main() {
 
 			me := workers.Group("/me")
 			{
-				me.POST("/orders", c.AcceptOrderHandler)
-				me.GET("/orders", c.GetWorkerOrders)
+				orders := me.Group("/orders")
+				{
+					orders.GET("", c.GetWorkerOrders)
+					orders.POST("", c.AcceptOrderHandler)
+				}
 			}
 		}
 	}

@@ -16,7 +16,7 @@ type AddFavouriteRequest struct {
 // GetFavouritesHandler получает все товары в избранном пользователя
 // @Summary Получить избранные товары
 // @Description Возвращает список всех товаров в избранном текущего пользователя
-// @Tags favourites
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -24,7 +24,7 @@ type AddFavouriteRequest struct {
 // @Failure 400 {object} object "Неверный формат ID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при получении избранного"
-// @Router /api/v1/favourites/items [get]
+// @Router /api/v1/users/me/favourite/items [get]
 func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -58,7 +58,7 @@ func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 // AddFavouritesItemHandler добавляет товар в избранное
 // @Summary Добавить товар в избранное
 // @Description Добавляет товар в избранное текущего пользователя
-// @Tags favourites
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -67,7 +67,7 @@ func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при добавлении в избранное"
-// @Router /api/v1/favourites/items [post]
+// @Router /api/v1/users/me/favourite/items [post]
 func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -119,17 +119,16 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 // DeleteFavouritesItemHandler удаляет товар из избранного
 // @Summary Удалить товар из избранного
 // @Description Удаляет товар из избранного текущего пользователя
-// @Tags favourites
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
-// @Param id path string true "UUID элемента избранного"
+// @Param id_product path string true "UUID товара"
 // @Success 200 {object} object "Товар успешно удален из избранного"
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при удалении из избранного"
-// @Router /api/v1/favourites/items/{id} [delete]
-
+// @Router /api/v1/users/me/favourite/items/{id_product} [delete]
 func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {

@@ -140,7 +140,7 @@ func (c *Controller) GetWorkerByIdHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 404 {object} object "Заказы не найдены"
-// @Router /api/v1/workers/orders [get]
+// @Router /api/v1/workers/me/orders [get]
 func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
 	good := c.VerifyW(ctx)
 	if !good {
@@ -182,7 +182,7 @@ func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 500 {object} object "Ошибка сервера при получении работников"
-// @Router /api/v1/workers/all [get]
+// @Router /api/v1/workers [get]
 func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
@@ -212,7 +212,7 @@ func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 500 {object} object "Ошибка сервера при принятии заказа"
-// @Router /api/v1/workers/accept [post]
+// @Router /api/v1/workers/me/orders [post]
 func (c *Controller) AcceptOrderHandler(ctx *gin.Context) {
 	good := c.VerifyW(ctx)
 	if !good {

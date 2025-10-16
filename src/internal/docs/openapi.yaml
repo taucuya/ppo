@@ -1319,6 +1319,40 @@ paths:
       tags:
         - workers
   /api/v1/workers/me/orders/:
+    get:
+      description: Возвращает список заказов текущего работника (только для работников)
+      responses:
+        "200":
+          description: Список заказов работника
+          content:
+            application/json:
+              schema:
+                items:
+                  type: object
+                type: array
+        "401":
+          description: Неавторизованный доступ
+          content:
+            application/json:
+              schema:
+                type: object
+        "403":
+          description: Недостаточно прав
+          content:
+            application/json:
+              schema:
+                type: object
+        "404":
+          description: Заказы не найдены
+          content:
+            application/json:
+              schema:
+                type: object
+      security:
+        - BearerAuth: []
+      summary: Получить заказы работника
+      tags:
+        - workers
     post:
       description: Принимает заказ для выполнения текущим работником (только для работников)
       parameters:
@@ -1398,42 +1432,7 @@ paths:
         - BearerAuth: []
       summary: Получить всех работников
       tags:
-        - workers
-  /api/v1/workers/me/orders:
-    get:
-      description: Возвращает список заказов текущего работника (только для работников)
-      responses:
-        "200":
-          description: Список заказов работника
-          content:
-            application/json:
-              schema:
-                items:
-                  type: object
-                type: array
-        "401":
-          description: Неавторизованный доступ
-          content:
-            application/json:
-              schema:
-                type: object
-        "403":
-          description: Недостаточно прав
-          content:
-            application/json:
-              schema:
-                type: object
-        "404":
-          description: Заказы не найдены
-          content:
-            application/json:
-              schema:
-                type: object
-      security:
-        - BearerAuth: []
-      summary: Получить заказы работника
-      tags:
-        - workers
+        - workers    
 servers:
   - url: http://localhost:8080/api/v1
   - url: https://localhost:8080/api/v1

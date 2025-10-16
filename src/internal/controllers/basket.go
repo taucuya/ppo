@@ -22,7 +22,7 @@ type BasketItemDeleteRequest struct {
 // GetBasketItemsHandler получает все товары в корзине пользователя
 // @Summary Получить товары корзины
 // @Description Возвращает список всех товаров в корзине текущего пользователя
-// @Tags basket
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -30,7 +30,7 @@ type BasketItemDeleteRequest struct {
 // @Failure 400 {object} object "Неверный формат ID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при получении товаров"
-// @Router /api/v1/baskets/items [get]
+// @Router /api/v1/users/me/basket/items [get]
 func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -64,7 +64,7 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 // GetBasketByIdHandler получает корзину по ID пользователя
 // @Summary Получить корзину
 // @Description Возвращает корзину текущего пользователя
-// @Tags basket
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -72,7 +72,7 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат ID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 404 {object} object "Корзина не найдена"
-// @Router /api/v1/baskets [get]
+// @Router /api/v1/users/me/basket [get]
 func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -107,7 +107,7 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 // AddBasketItemHandler добавляет товар в корзину
 // @Summary Добавить товар в корзину
 // @Description Добавляет товар с указанным количеством в корзину пользователя
-// @Tags basket
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -116,7 +116,7 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при добавлении товара"
-// @Router /api/v1/baskets/items [post]
+// @Router /api/v1/users/me/basket/items [post]
 func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -162,7 +162,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 // DeleteBasketItemHandler удаляет товар из корзины
 // @Summary Удалить товар из корзины
 // @Description Удаляет указанный товар из корзины пользователя
-// @Tags basket
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -171,7 +171,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при удалении товара"
-// @Router /api/v1/baskets/items [delete]
+// @Router /api/v1/users/me/basket/items [delete]
 func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -212,7 +212,7 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 // UpdateBasketItemAmountHandler обновляет количество товара в корзине
 // @Summary Обновить количество товара
 // @Description Обновляет количество указанного товара в корзине пользователя
-// @Tags basket
+// @Tags user
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -221,7 +221,7 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 500 {object} object "Ошибка сервера при обновлении количества"
-// @Router /api/v1/baskets/items [patch]
+// @Router /api/v1/users/me/basket/items [patch]
 func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
