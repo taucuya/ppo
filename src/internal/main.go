@@ -13,8 +13,9 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+
+	// swaggerFiles "github.com/swaggo/files"
+	// ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/taucuya/ppo/internal/docs"
 
 	"github.com/gin-gonic/gin"
