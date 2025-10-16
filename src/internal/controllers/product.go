@@ -179,6 +179,7 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Продукт не найден"
 // @Failure 500 {object} object "Ошибка сервера при удалении продукта"
 // @Router /api/v1/products/{id} [delete]
 func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
@@ -248,6 +249,7 @@ func (c *Controller) GetProductsByBrandHandler(ctx *gin.Context) {
 // @Param id path string true "UUID продукта"
 // @Success 200 {array} object "Список отзывов для продукта"
 // @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 404 {object} object "Отзывы не найден"
 // @Failure 500 {object} object "Ошибка сервера при получении отзывов"
 // @Router /api/v1/products/{id}/reviews [get]
 func (c *Controller) GetReviewsForProductHandler(ctx *gin.Context) {

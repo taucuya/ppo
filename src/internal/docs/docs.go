@@ -153,266 +153,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/baskets": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает корзину текущего пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basket"
-                ],
-                "summary": "Получить корзину",
-                "responses": {
-                    "200": {
-                        "description": "Данные корзины",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат ID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "404": {
-                        "description": "Корзина не найдена",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/baskets/items": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список всех товаров в корзине текущего пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basket"
-                ],
-                "summary": "Получить товары корзины",
-                "responses": {
-                    "200": {
-                        "description": "Список товаров в корзине",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат ID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при получении товаров",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Добавляет товар с указанным количеством в корзину пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basket"
-                ],
-                "summary": "Добавить товар в корзину",
-                "parameters": [
-                    {
-                        "description": "Данные товара для добавления",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.BasketItemRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Товар успешно добавлен",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат данных",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при добавлении товара",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Удаляет указанный товар из корзины пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basket"
-                ],
-                "summary": "Удалить товар из корзины",
-                "parameters": [
-                    {
-                        "description": "Данные товара для удаления",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.BasketItemDeleteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Товар успешно удален",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат данных",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при удалении товара",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Обновляет количество указанного товара в корзине пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "basket"
-                ],
-                "summary": "Обновить количество товара",
-                "parameters": [
-                    {
-                        "description": "Данные для обновления количества",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.BasketItemRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Количество товара успешно обновлено",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат данных",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при обновлении количества",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/brands": {
             "get": {
                 "description": "Возвращает список брендов в указанной ценовой категории",
@@ -452,6 +192,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Неверная категория",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Бренды не найден",
                         "schema": {
                             "type": "object"
                         }
@@ -637,6 +383,12 @@ const docTemplate = `{
                             "type": "object"
                         }
                     },
+                    "404": {
+                        "description": "Бренд не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "500": {
                         "description": "Ошибка сервера при удалении бренда",
                         "schema": {
@@ -646,175 +398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/favourites/items": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список всех товаров в избранном текущего пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "favourites"
-                ],
-                "summary": "Получить избранные товары",
-                "responses": {
-                    "200": {
-                        "description": "Список товаров в избранном",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат ID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при получении избранного",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Добавляет товар в избранное текущего пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "favourites"
-                ],
-                "summary": "Добавить товар в избранное",
-                "parameters": [
-                    {
-                        "description": "Данные товара для добавления в избранное",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.AddFavouriteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Товар успешно добавлен в избранное",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат данных",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при добавлении в избранное",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/orders": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список заказов. Без параметров - заказы текущего пользователя, с status=непринятый - свободные заказы для работников",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Получить заказы",
-                "parameters": [
-                    {
-                        "enum": [
-                            "непринятый"
-                        ],
-                        "type": "string",
-                        "description": "Статус заказа для фильтрации",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Список заказов",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный параметр статуса",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при получении заказов",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -864,257 +448,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Ошибка сервера при создании заказа",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/orders/items/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список товаров в указанном заказе",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Получить товары заказа",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UUID заказа",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Список товаров в заказе",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат UUID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при получении товаров",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/orders/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает информацию о заказе по его идентификатору (для работников и администраторов)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Получить заказ по ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UUID заказа",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Данные заказа",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат UUID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "404": {
-                        "description": "Заказ не найден",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Удаляет заказ по его идентификатору (только для администраторов)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Удалить заказ",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UUID заказа",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Заказ успешно удален",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат UUID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при удалении заказа",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Обновляет статус заказа (для работников и администраторов)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Изменить статус заказа",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UUID заказа",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "enum": [
-                            "некорректный",
-                            "непринятый",
-                            "принятый",
-                            "собранный",
-                            "отданный"
-                        ],
-                        "type": "string",
-                        "description": "Новый статус заказа",
-                        "name": "status",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Статус заказа успешно обновлен",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат данных",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при обновлении статуса",
                         "schema": {
                             "type": "object"
                         }
@@ -1320,6 +653,12 @@ const docTemplate = `{
                             "type": "object"
                         }
                     },
+                    "404": {
+                        "description": "Продукт не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "500": {
                         "description": "Ошибка сервера при удалении продукта",
                         "schema": {
@@ -1367,6 +706,12 @@ const docTemplate = `{
                             "type": "object"
                         }
                     },
+                    "404": {
+                        "description": "Отзывы не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "500": {
                         "description": "Ошибка сервера при получении отзывов",
                         "schema": {
@@ -1376,71 +721,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/reviews/{id_product}": {
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Создает новый отзыв для указанного продукта от текущего пользователя",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "reviews"
-                ],
-                "summary": "Создать отзыв",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UUID продукта",
-                        "name": "id_product",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Данные для создания отзыва",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.CreateReviewRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Отзыв успешно создан",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат данных",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при создании отзыва",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/reviews/{id}": {
+        "/api/v1/products/{id}/reviews/{id}": {
             "get": {
                 "security": [
                     {
@@ -1455,7 +736,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reviews"
+                    "products"
                 ],
                 "summary": "Получить отзыв по ID",
                 "parameters": [
@@ -1508,7 +789,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reviews"
+                    "products"
                 ],
                 "summary": "Удалить отзыв",
                 "parameters": [
@@ -1545,6 +826,12 @@ const docTemplate = `{
                             "type": "object"
                         }
                     },
+                    "404": {
+                        "description": "Отзыв не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "500": {
                         "description": "Ошибка сервера при удалении отзыва",
                         "schema": {
@@ -1561,7 +848,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает информацию о пользователе по email или номеру телефона (только для администраторов)",
+                "description": "Возвращает информацию о пользователе по email или номеру телефона (только для администраторов) или информацию о всех userах",
                 "consumes": [
                     "application/json"
                 ],
@@ -1620,14 +907,345 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/all": {
+        "/api/v1/users/me/basket": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает список всех пользователей системы (только для администраторов)",
+                "description": "Возвращает корзину текущего пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получить корзину",
+                "responses": {
+                    "200": {
+                        "description": "Данные корзины",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат ID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Корзина не найдена",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/basket/items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех товаров в корзине текущего пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получить товары корзины",
+                "responses": {
+                    "200": {
+                        "description": "Список товаров в корзине",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат ID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при получении товаров",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавляет товар с указанным количеством в корзину пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Добавить товар в корзину",
+                "parameters": [
+                    {
+                        "description": "Данные товара для добавления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.BasketItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Товар успешно добавлен",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Корзина не найдена",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при добавлении товара",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет указанный товар из корзины пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Удалить товар из корзины",
+                "parameters": [
+                    {
+                        "description": "Данные товара для удаления",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.BasketItemDeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Товар успешно удален",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Корзина не найдена",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при удалении товара",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет количество указанного товара в корзине пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Обновить количество товара",
+                "parameters": [
+                    {
+                        "description": "Данные для обновления количества",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.BasketItemRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Количество товара успешно обновлено",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Элемент корзины не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при обновлении количества",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/favourite/items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех товаров в избранном текущего пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получить избранные товары",
+                "responses": {
+                    "200": {
+                        "description": "Список товаров в избранном",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат ID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Избранные не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при получении избранного",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Добавляет товар в избранное текущего пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -1637,10 +1255,527 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Получить всех пользователей",
+                "summary": "Добавить товар в избранное",
+                "parameters": [
+                    {
+                        "description": "Данные товара для добавления в избранное",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.AddFavouriteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Товар успешно добавлен в избранное",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при добавлении в избранное",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/favourite/items/{id_product}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет товар из избранного текущего пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Удалить товар из избранного",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID товара",
+                        "name": "id_product",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Список всех пользователей",
+                        "description": "Товар успешно удален из избранного",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат UUID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Избранные не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при удалении из избранного",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список заказов. Без параметров - заказы текущего пользователя, с status=непринятый - свободные заказы для работников",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить заказы",
+                "parameters": [
+                    {
+                        "enum": [
+                            "непринятый"
+                        ],
+                        "type": "string",
+                        "description": "Статус заказа для фильтрации",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список заказов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный параметр статуса",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Заказы не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при получении заказов",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает информацию о заказе по его идентификатору (для работников и администраторов)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить заказ по ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные заказа",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат UUID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Заказ не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаляет заказ по его идентификатору (только для администраторов)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Удалить заказ",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Заказ успешно удален",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат UUID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при удалении заказа",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновляет статус заказа (для работников и администраторов)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Изменить статус заказа",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "некорректный",
+                            "непринятый",
+                            "принятый",
+                            "собранный",
+                            "отданный"
+                        ],
+                        "type": "string",
+                        "description": "Новый статус заказа",
+                        "name": "status",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Статус заказа успешно обновлен",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Заказ не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при обновлении статуса",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/orders/{id}/items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список товаров в указанном заказе",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить товары заказа",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID заказа",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список товаров в заказе",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат UUID",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Отзывы не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при получении товаров",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/me/products/{id_product}/reviews": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Создает новый отзыв для указанного продукта от текущего пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Создать отзыв",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "UUID продукта",
+                        "name": "id_product",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для создания отзыва",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CreateReviewRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Отзыв успешно создан",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат данных",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при создании отзыва",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/workers": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список всех работников системы (только для администраторов)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workers"
+                ],
+                "summary": "Получить всех работников",
+                "responses": {
+                    "200": {
+                        "description": "Список всех работников",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1661,15 +1796,19 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Пользователи не найдены",
+                        "description": "Работник не найден",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при получении работников",
                         "schema": {
                             "type": "object"
                         }
                     }
                 }
-            }
-        },
-        "/api/v1/workers": {
+            },
             "post": {
                 "security": [
                     {
@@ -1732,7 +1871,54 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/workers/accept": {
+        "/api/v1/workers/me/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список заказов текущего работника (только для работников)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workers"
+                ],
+                "summary": "Получить заказы работника",
+                "responses": {
+                    "200": {
+                        "description": "Список заказов работника",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Заказы не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1784,106 +1970,14 @@ const docTemplate = `{
                             "type": "object"
                         }
                     },
+                    "404": {
+                        "description": "Заказ не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
                     "500": {
                         "description": "Ошибка сервера при принятии заказа",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/workers/all": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список всех работников системы (только для администраторов)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workers"
-                ],
-                "summary": "Получить всех работников",
-                "responses": {
-                    "200": {
-                        "description": "Список всех работников",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "500": {
-                        "description": "Ошибка сервера при получении работников",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/workers/orders": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает список заказов текущего работника (только для работников)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workers"
-                ],
-                "summary": "Получить заказы работника",
-                "responses": {
-                    "200": {
-                        "description": "Список заказов работника",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "404": {
-                        "description": "Заказы не найдены",
                         "schema": {
                             "type": "object"
                         }
@@ -1999,6 +2093,12 @@ const docTemplate = `{
                     },
                     "403": {
                         "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Работник не найден",
                         "schema": {
                             "type": "object"
                         }

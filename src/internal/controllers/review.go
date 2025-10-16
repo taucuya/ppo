@@ -128,6 +128,7 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Отзыв не найден"
 // @Failure 500 {object} object "Ошибка сервера при удалении отзыва"
 // @Router /api/v1/products/{id}/reviews/{id} [delete]
 func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {

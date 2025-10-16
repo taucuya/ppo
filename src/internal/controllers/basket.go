@@ -115,6 +115,7 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 // @Success 201 {object} object "Товар успешно добавлен"
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Корзина не найдена"
 // @Failure 500 {object} object "Ошибка сервера при добавлении товара"
 // @Router /api/v1/users/me/basket/items [post]
 func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
@@ -170,6 +171,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 // @Success 200 {object} object "Товар успешно удален"
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Корзина не найдена"
 // @Failure 500 {object} object "Ошибка сервера при удалении товара"
 // @Router /api/v1/users/me/basket/items [delete]
 func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
@@ -220,6 +222,7 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 // @Success 200 {object} object "Количество товара успешно обновлено"
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Элемент корзины не найден"
 // @Failure 500 {object} object "Ошибка сервера при обновлении количества"
 // @Router /api/v1/users/me/basket/items [patch]
 func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {

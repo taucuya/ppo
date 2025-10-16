@@ -106,6 +106,7 @@ func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Бренд не найден"
 // @Failure 500 {object} object "Ошибка сервера при удалении бренда"
 // @Router /api/v1/brands/{id} [delete]
 func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
@@ -138,6 +139,7 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 // @Param category query string true "Ценовая категория" Enums(бюджет, средний сегмент, люкс)
 // @Success 200 {array} object "Список брендов в категории"
 // @Failure 400 {object} object "Неверная категория"
+// @Failure 404 {object} object "Бренды не найден"
 // @Failure 500 {object} object "Ошибка сервера при получении брендов"
 // @Router /api/v1/brands [get]
 func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {

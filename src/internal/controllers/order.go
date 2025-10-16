@@ -102,6 +102,7 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 // @Success 200 {array} object "Список товаров в заказе"
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Отзывы не найдены"
 // @Failure 500 {object} object "Ошибка сервера при получении товаров"
 // @Router /api/v1/users/me/orders/{id}/items [get]
 func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
@@ -140,6 +141,7 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный параметр статуса"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказы не найдены"
 // @Failure 500 {object} object "Ошибка сервера при получении заказов"
 // @Router /api/v1/users/me/orders [get]
 func (c *Controller) GetOrdersHandler(ctx *gin.Context) {
@@ -226,6 +228,7 @@ func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат данных"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказ не найден"
 // @Failure 500 {object} object "Ошибка сервера при обновлении статуса"
 // @Router /api/v1/users/me/orders/{id} [patch]
 func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {

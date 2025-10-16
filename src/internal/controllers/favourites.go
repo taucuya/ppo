@@ -23,6 +23,7 @@ type AddFavouriteRequest struct {
 // @Success 200 {array} object "Список товаров в избранном"
 // @Failure 400 {object} object "Неверный формат ID"
 // @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Избранные не найдены"
 // @Failure 500 {object} object "Ошибка сервера при получении избранного"
 // @Router /api/v1/users/me/favourite/items [get]
 func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
@@ -127,6 +128,7 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 // @Success 200 {object} object "Товар успешно удален из избранного"
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Избранные не найдены"
 // @Failure 500 {object} object "Ошибка сервера при удалении из избранного"
 // @Router /api/v1/users/me/favourite/items/{id_product} [delete]
 func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {

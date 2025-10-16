@@ -68,6 +68,7 @@ func (c *Controller) CreateWorkerHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Работник не найден"
 // @Failure 500 {object} object "Ошибка сервера при удалении работника"
 // @Router /api/v1/workers/{id} [delete]
 func (c *Controller) DeleteWorkerHandler(ctx *gin.Context) {
@@ -181,6 +182,7 @@ func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
 // @Success 200 {array} object "Список всех работников"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Работник не найден"
 // @Failure 500 {object} object "Ошибка сервера при получении работников"
 // @Router /api/v1/workers [get]
 func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
@@ -211,6 +213,7 @@ func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
 // @Failure 400 {object} object "Неверный формат UUID заказа"
 // @Failure 401 {object} object "Неавторизованный доступ"
 // @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказ не найдены"
 // @Failure 500 {object} object "Ошибка сервера при принятии заказа"
 // @Router /api/v1/workers/me/orders [post]
 func (c *Controller) AcceptOrderHandler(ctx *gin.Context) {

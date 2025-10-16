@@ -13,6 +13,9 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "github.com/taucuya/ppo/internal/docs"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -72,7 +75,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	fmt.Println("DSN", dsn)
+
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		panic("failed to connect to test database: " + err.Error())
@@ -129,6 +132,8 @@ func main() {
 	}
 
 	router := gin.New()
+	url := ginSwagger.URL("/swagger/doc.json")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
@@ -246,5 +251,4 @@ func main() {
 	}
 
 	log.Println("Server exiting")
-
 }
