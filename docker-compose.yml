@@ -1,21 +1,21 @@
 services:
-  # postgres:
-  #   image: postgres:15-alpine
-  #   environment:
-  #     POSTGRES_USER: test_user
-  #     POSTGRES_PASSWORD: test_password
-  #     POSTGRES_DB: test_db
-  #   ports:
-  #     - "5433:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - app-network
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
 
 #   api:
 #     build:
@@ -40,45 +40,45 @@ services:
 
 
 ## тесты
-  test_db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
-      POSTGRES_DB: test_db
-    ports:
-      - "5433:5432"
-    networks:
-      - test_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile.tests
-    depends_on:
-      test_db:
-        condition: service_healthy
-    networks:
-      - test_network
-    environment:
-      DB_HOST: test_db
-      DB_PORT: 5432
-      DB_USER: test_user
-      DB_PASSWORD: test_password
-      DB_NAME: test_db
-    volumes:
-      - ./coverage:/app/coverage
-    command: [
-        "go", "test", "-v",
-        "-cover",
-        "-coverprofile=/app/coverage/coverage.out",
-        "-coverpkg=github.com/taucuya/ppo/internal/repository/postgres/reps/...",
-        "./internal/repository/tests/..."
-      ]
+  # test_db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_USER: test_user
+  #     POSTGRES_PASSWORD: test_password
+  #     POSTGRES_DB: test_db
+  #   ports:
+  #     - "5433:5432"
+  #   networks:
+  #     - test_network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 5
+  # tests:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.tests
+  #   depends_on:
+  #     test_db:
+  #       condition: service_healthy
+  #   networks:
+  #     - test_network
+  #   environment:
+  #     DB_HOST: test_db
+  #     DB_PORT: 5432
+  #     DB_USER: test_user
+  #     DB_PASSWORD: test_password
+  #     DB_NAME: test_db
+  #   volumes:
+  #     - ./coverage:/app/coverage
+  #   command: [
+  #       "go", "test", "-v",
+  #       "-cover",
+  #       "-coverprofile=/app/coverage/coverage.out",
+  #       "-coverpkg=github.com/taucuya/ppo/internal/repository/postgres/reps/...",
+  #       "./internal/repository/tests/..."
+  #     ]
 
 networks:
   app-network:
