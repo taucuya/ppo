@@ -58,17 +58,6 @@ func (f *WorkerTestFixture) createTestWorker(userID uuid.UUID) structs.Worker {
 	}
 }
 
-func (f *WorkerTestFixture) createTestOrder(userID uuid.UUID) uuid.UUID {
-	_, err := db.Exec("INSERT INTO basket (id_user, date) VALUES ($1, $2)", userID, time.Now())
-	require.NoError(f.t, err)
-
-	orderID := uuid.New()
-	_, err = db.Exec(`INSERT INTO "order" (id, id_user, address, status) VALUES ($1, $2, $3, $4)`,
-		orderID, userID, "123 Test St", "непринятый")
-	require.NoError(f.t, err)
-	return orderID
-}
-
 func (f *WorkerTestFixture) setupWorker() (uuid.UUID, uuid.UUID) {
 	testUser := f.createTestUser()
 	userID, err := f.userRepo.Create(f.ctx, testUser)
