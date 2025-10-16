@@ -193,7 +193,6 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted"})
 }
 
-func (c *Controller) GetOrdersByUser(ctx *gin.Context) {
 func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -222,6 +221,4 @@ func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, user)
-	_ = id
-	// if err := c.OrderService.
 }
