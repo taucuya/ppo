@@ -39,7 +39,7 @@ func CreateReview(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/review/product/%s", idProduct)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/reviews/%s", idProduct)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -69,7 +69,7 @@ func GetReviewById(client *http.Client, reader *bufio.Reader) {
 	id, _ := reader.ReadString('\n')
 	id = strings.TrimSpace(id)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/review/%s", id)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/reviews/%s", id)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Authorization", "Bearer YOUR_TOKEN")
 

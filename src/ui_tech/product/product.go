@@ -59,7 +59,7 @@ func CreateProduct(client *http.Client, reader *bufio.Reader) {
 		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/product", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/products", bytes.NewBuffer(body))
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -88,7 +88,7 @@ func DeleteProduct(client *http.Client, reader *bufio.Reader) {
 	id, _ := reader.ReadString('\n')
 	id = strings.TrimSpace(id)
 
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/product/"+id, nil)
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/products/"+id, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -109,11 +109,11 @@ func DeleteProduct(client *http.Client, reader *bufio.Reader) {
 }
 
 func GetProduct(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter search query (e.g. Name=ProductName): ")
+	fmt.Print("Enter search query (e.g. art=123456 or id=12345): ")
 	query, _ := reader.ReadString('\n')
 	query = strings.TrimSpace(query)
 
-	url := "http://localhost:8080/api/v1/product/?" + query
+	url := "http://localhost:8080/api/v1/products/?" + query
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
@@ -156,7 +156,7 @@ func GetProductsByCategory(client *http.Client, reader *bufio.Reader) {
 	category, _ := reader.ReadString('\n')
 	category = strings.TrimSpace(category)
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/product/category/"+category, nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/products/?category="+category, nil)
 	if err != nil {
 		fmt.Println("❌ Failed to create request:", err)
 		return
@@ -196,7 +196,7 @@ func GetProductsByBrand(client *http.Client, reader *bufio.Reader) {
 	brand, _ := reader.ReadString('\n')
 	brand = strings.TrimSpace(brand)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/product/brand/%s", brand)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/products/?brand=%s", brand)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

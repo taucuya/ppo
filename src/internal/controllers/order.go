@@ -11,6 +11,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type CreateOrderRequest struct {
+	Address string `json:"address" binding:"required"`
+}
+
+type OrderResponse struct {
+	ID      uuid.UUID `json:"id"`
+	Date    time.Time `json:"date"`
+	IdUser  uuid.UUID `json:"id_user"`
+	Address string    `json:"address"`
+	Status  string    `json:"status "`
+	Price   float64   `json:"price"`
+}
+
+type OrderItemResponse struct {
+	ID        uuid.UUID `json:"id"`
+	IdProduct uuid.UUID `json:"id_product"`
+	IdOrder   uuid.UUID `json:"id_order"`
+	Amount    int       `json:"amount"`
+	Price     float64   `json:"price"`
+	Name      string    `json:"name"`
+}
+
+// CreateOrderHandler создает новый заказ
+// @Summary Создать заказ
+// @Description Создает новый заказ для текущего пользователя
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateOrderRequest true "Данные для создания заказа"
+// @Success 201 {object} object "Заказ успешно создан"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 500 {object} object "Ошибка сервера при создании заказа"
+// @Router /api/v1/orders [post]
 func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -31,9 +66,7 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 		return
 	}
 
-	var input struct {
-		Address string `json:"address"`
-	}
+	var input CreateOrderRequest
 
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		log.Printf("[ERROR] Cant bind JSON: %v", err)
@@ -58,6 +91,20 @@ func (c *Controller) CreateOrderHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Order created"})
 }
 
+// GetOrderItemsHandler получает товары в заказе
+// @Summary Получить товары заказа
+// @Description Возвращает список товаров в указанном заказе
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID заказа"
+// @Success 200 {array} object "Список товаров в заказе"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 404 {object} object "Отзывы не найдены"
+// @Failure 500 {object} object "Ошибка сервера при получении товаров"
+// @Router /api/v1/users/me/orders/{id}/items [get]
 func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 
@@ -80,6 +127,30 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, items)
+}
+
+// GetOrdersHandler получает заказы
+// @Summary Получить заказы
+// @Description Возвращает список заказов. Без параметров - заказы текущего пользователя, с status=непринятый - свободные заказы для работников
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param status query string false "Статус заказа для фильтрации" Enums(непринятый)
+// @Success 200 {array} object "Список заказов"
+// @Failure 400 {object} object "Неверный параметр статуса"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказы не найдены"
+// @Failure 500 {object} object "Ошибка сервера при получении заказов"
+// @Router /api/v1/users/me/orders [get]
+func (c *Controller) GetOrdersHandler(ctx *gin.Context) {
+	status := ctx.Query("status")
+	if status != "" {
+		c.GetFreeOrdersHandler(ctx)
+	} else {
+		c.GetOrdersByUserHandler(ctx)
+	}
 }
 
 func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
@@ -105,6 +176,20 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ords)
 }
 
+// GetOrderByIdHandler получает заказ по ID
+// @Summary Получить заказ по ID
+// @Description Возвращает информацию о заказе по его идентификатору (для работников и администраторов)
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID заказа"
+// @Success 200 {object} object "Данные заказа"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказ не найден"
+// @Router /api/v1/users/me/orders/{id} [get]
 func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 	goodW := c.VerifyW(ctx)
 	goodA := c.VerifyA(ctx)
@@ -130,6 +215,22 @@ func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, order)
 }
 
+// ChangeOrderStatusHandler изменяет статус заказа
+// @Summary Изменить статус заказа
+// @Description Обновляет статус заказа (для работников и администраторов)
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID заказа"
+// @Param status query string true "Новый статус заказа" Enums(некорректный, непринятый, принятый, собранный, отданный)
+// @Success 200 {object} object "Статус заказа успешно обновлен"
+// @Failure 400 {object} object "Неверный формат данных"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказ не найден"
+// @Failure 500 {object} object "Ошибка сервера при обновлении статуса"
+// @Router /api/v1/users/me/orders/{id} [patch]
 func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	goodW := c.VerifyW(ctx)
 	goodA := c.VerifyA(ctx)
@@ -171,6 +272,20 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order status updated"})
 }
 
+// DeleteOrderHandler удаляет заказ
+// @Summary Удалить заказ
+// @Description Удаляет заказ по его идентификатору (только для администраторов)
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "UUID заказа"
+// @Success 200 {object} object "Заказ успешно удален"
+// @Failure 400 {object} object "Неверный формат UUID"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 500 {object} object "Ошибка сервера при удалении заказа"
+// @Router /api/v1/users/me/orders/{id} [delete]
 func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
@@ -193,7 +308,6 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted"})
 }
 
-func (c *Controller) GetOrdersByUser(ctx *gin.Context) {
 func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
@@ -222,6 +336,4 @@ func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, user)
-	_ = id
-	// if err := c.OrderService.
 }

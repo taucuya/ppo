@@ -7,14 +7,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetUserByPrivatesHandler получает пользователя по email или телефону
+// @Summary Получить пользователя по email или телефону
+// @Description Возвращает информацию о пользователе по email или номеру телефона (только для администраторов) или информацию о всех userах
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param email query string false "Email пользователя"
+// @Param phone query string false "Телефон пользователя"
+// @Success 200 {object} object "Данные пользователя"
+// @Failure 400 {object} object "Не указаны параметры email или phone"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Пользователь не найден"
+// @Router /api/v1/users [get]
 func (c *Controller) GetUserByPrivatesHandler(ctx *gin.Context) {
 	email := ctx.Query("email")
 	phone := ctx.Query("phone")
 	if phone != "" {
 		c.GetUserByPhoneHandler(ctx)
-	}
-	if email != "" {
+	} else if email != "" {
 		c.GetUserByEmailHandler(ctx)
+	} else {
+		c.GetAllUsersHandler(ctx)
 	}
 	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email or phone parameter is required"})
 }
