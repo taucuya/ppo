@@ -339,7 +339,7 @@ func TestGetOrdersByUser(t *testing.T) {
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "date", "id_user", "address", "status", "price"}).
 					AddRow(orders[0].Id, orders[0].Date, orders[0].IdUser, orders[0].Address, orders[0].Status, orders[0].Price)
-				fixture.mock.ExpectQuery(`select \* from "orders" where id_user = \$1`).
+				fixture.mock.ExpectQuery(`select \* from "order" where id_user = \$1`).
 					WithArgs(fixture.order.IdUser).
 					WillReturnRows(rows)
 			},
