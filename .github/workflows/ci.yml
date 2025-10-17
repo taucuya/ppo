@@ -85,10 +85,8 @@ jobs:
 
     - name: Check and upload results
       run: |
-        ls -la shared-results/
         mkdir -p integration-allure-results
         cp shared-results/* integration-allure-results/ 2>/dev/null || echo "No files to copy"
-        ls -la integration-allure-results/
 
     - name: Upload integration tests results
       uses: actions/upload-artifact@v4
@@ -123,10 +121,8 @@ jobs:
 
     - name: Process and upload E2E results
       run: |
-        ls -la shared-results/
         mkdir -p e2e-allure-results
         cp shared-results/* e2e-allure-results/ 2>/dev/null || echo "No files to copy"
-        ls -la e2e-allure-results/
 
     - name: Upload E2E test results
       uses: actions/upload-artifact@v4
@@ -149,14 +145,6 @@ jobs:
       with:
         path: all-results
 
-    - name: Try to download previous allure history
-      id: download-history
-      continue-on-error: true
-      uses: actions/download-artifact@v4
-      with:
-        name: allure-history
-        path: allure-history/
-
     - name: Install Allure
       run: |
         sudo apt-get update
@@ -164,48 +152,12 @@ jobs:
         wget -q -O allure-2.27.0.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
         sudo tar -zxvf allure-2.27.0.tgz -C /opt/
         sudo ln -sf /opt/allure-2.27.0/bin/allure /usr/bin/allure
-        allure --version
 
-    - name: Debug - Show downloaded files
-      run: |
-        echo "Downloaded test results:"
-        find all-results -name "*.xml" | head -10
-        echo "Total XML files: $(find all-results -name '*.xml' | wc -l)"
-        
-        echo "History status:"
-        if [ -d "allure-history/history" ]; then
-          echo "History found:"
-          ls -la allure-history/history/ | head -5
-        else
-          echo "No previous history found - this is the first run"
-        fi
-
-    - name: Combine and generate Allure report with history
+    - name: Combine and generate Allure report
       run: |
         mkdir -p combined-results
-        
         find all-results -name "*.xml" -exec cp {} combined-results/ \;
-        
-        echo "Files for report:"
-        ls -la combined-results/
-        
         allure generate combined-results -o allure-report --clean
-        
-        if [ -d "allure-history/history" ]; then
-          echo "Copying previous history to new report..."
-          cp -r allure-history/history allure-report/
-          echo "History merged successfully"
-        else
-          echo "First run - creating new history"
-        fi
-        
-        mkdir -p new-history
-        if [ -d "allure-report/history" ]; then
-          echo "Saving history for next run..."
-          cp -r allure-report/history new-history/
-          echo "History files saved:"
-          ls -la new-history/history/ | head -5
-        fi
 
     - name: Upload Allure report
       uses: actions/upload-artifact@v4
@@ -213,20 +165,3 @@ jobs:
         name: allure-report
         path: allure-report/
         retention-days: 30
-
-    - name: Upload new allure history for next run
-      uses: actions/upload-artifact@v4
-      with:
-        name: allure-history
-        path: new-history/
-        retention-days: 30
-
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/testing'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: allure-report
-        destination_dir: ./allure
-        keep_files: true
-        force_orphan: true
