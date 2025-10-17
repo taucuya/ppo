@@ -75,7 +75,15 @@ jobs:
     - name: Run integration tests
       working-directory: ./src
       run: |
-        go test -v -tags=integration ./internal/integration_tests/...
+          echo "=== Current directory structure ==="
+          pwd
+          ls -la
+          echo "=== Database directory ==="
+          find . -name "database" -type d
+          echo "=== SQL files ==="
+          find . -name "*.sql" -type f
+          echo "=== Running tests ==="
+          go test -v -tags=integration ./internal/integration_tests/...
       env:
         DB_DSN: postgres://test_user:test_password@localhost:5432/test_db?sslmode=disable
 
