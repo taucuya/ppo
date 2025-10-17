@@ -350,7 +350,7 @@ func TestGetOrdersByUser(t *testing.T) {
 			name: "no orders found for user",
 			setupMock: func() {
 				rows := sqlmock.NewRows([]string{"id", "date", "id_user", "address", "status", "price"})
-				fixture.mock.ExpectQuery(`select \* from "orders" where id_user = \$1`).
+				fixture.mock.ExpectQuery(`select \* from "order" where id_user = \$1`).
 					WithArgs(fixture.order.IdUser).
 					WillReturnRows(rows)
 			},
@@ -360,7 +360,7 @@ func TestGetOrdersByUser(t *testing.T) {
 		{
 			name: "database error when getting user orders",
 			setupMock: func() {
-				fixture.mock.ExpectQuery(`select \* from "orders" where id_user = \$1`).
+				fixture.mock.ExpectQuery(`select \* from "order" where id_user = \$1`).
 					WithArgs(fixture.order.IdUser).
 					WillReturnError(errTest)
 			},
