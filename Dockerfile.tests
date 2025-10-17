@@ -11,4 +11,4 @@ RUN mkdir -p ./internal/database/sql
 
 CMD ["go", "test", "-v", "./internal/e2e_tests/..."]
 
-# , "-cover", "-coverprofile=coverage.out", "-coverpkg=github.com/taucuya/ppo/internal/integration_tests...", 
+# , "-cover", "-coverprofile=coverage.out", "-coverpkg=github.com/taucuya/ppo/internal/e2e_tests...", 

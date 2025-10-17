@@ -1,0 +1,14 @@
+FROM golang:1.24.0-alpine AS builder
+
+WORKDIR /app
+
+COPY ./src/go.mod ./src/go.sum ./
+RUN go mod download
+
+COPY ./src .
+
+RUN mkdir -p ./internal/database/sql
+
+CMD ["go", "test", "-v", "./internal/integration_tests/..."]
+
+# , "-cover", "-coverprofile=coverage.out", "-coverpkg=github.com/taucuya/ppo/internal/integration_tests...", 

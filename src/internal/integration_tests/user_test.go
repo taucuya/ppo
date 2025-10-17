@@ -24,7 +24,7 @@ var db *sqlx.DB
 func TestMain(m *testing.M) {
 	var err error
 
-	dsn := "postgres://test_user:test_password@localhost:5432/test_db?sslmode=disable"
+	dsn := "postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable"
 
 	db, err = sqlx.Connect("postgres", dsn)
 	if err != nil {
@@ -32,12 +32,20 @@ func TestMain(m *testing.M) {
 	}
 
 	err = runSQLScripts(db, []string{
-		"/home/runner/work/ppo/ppo/src/internal/database/sql/01-create.sql",
-		"/home/runner/work/ppo/ppo/src/internal/database/sql/02-constraints.sql",
-		"/home/runner/work/ppo/ppo/src/internal/database/sql/03-inserts.sql",
-		"/home/runner/work/ppo/ppo/src/internal/database/sql/trigger_accept.sql",
-		"/home/runner/work/ppo/ppo/src/internal/database/sql/trigger_order.sql",
+		"/app/internal/database/sql/01-create.sql",
+		"/app/internal/database/sql/02-constraints.sql",
+		"/app/internal/database/sql/trigger_accept.sql",
+		"/app/internal/database/sql/trigger_order.sql",
 	})
+
+	// err = runSQLScripts(db, []string{
+	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/01-create.sql",
+	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/02-constraints.sql",
+	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/03-inserts.sql",
+	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/trigger_accept.sql",
+	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/trigger_order.sql",
+	// })
+
 	if err != nil {
 		panic("failed to run SQL scripts: " + err.Error())
 	}

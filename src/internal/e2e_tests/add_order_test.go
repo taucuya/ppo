@@ -130,7 +130,7 @@ func TestE2E_UserOrderFlow(t *testing.T) {
 	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
-	t.Logf("✅ E2E тест завершен успешно! Пользователь %s создал заказ", testEmail)
+	t.Logf("E2E тест завершен успешно! Пользователь %s создал заказ", testEmail)
 }
 
 func getResponseBody(resp *http.Response) string {
