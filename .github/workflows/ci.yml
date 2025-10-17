@@ -1,226 +1,3 @@
-# name: CI/CD Pipeline with Allure
-
-# on:
-#   push:
-#     branches: [ testing ]
-#   pull_request:
-#     branches: [ main ]
-
-# jobs:
-#   unit-tests:
-#     name: Unit Tests
-#     runs-on: ubuntu-latest
-    
-#     services:
-#       postgres:
-#         image: postgres:15-alpine
-#         env:
-#           POSTGRES_USER: test_user
-#           POSTGRES_PASSWORD: test_password
-#           POSTGRES_DB: test_db
-#         options: >-
-#           --health-cmd pg_isready
-#           --health-interval 10s
-#           --health-timeout 5s
-#           --health-retries 5
-#         ports:
-#           - 5432:5432
-
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
-
-#     - name: Set up Go
-#       uses: actions/setup-go@v4
-#       with:
-#         go-version: '1.24'
-#         cache-dependency-path: src/go.sum
-
-#     - name: Install gotestsum
-#       run: |
-#         go install gotest.tools/gotestsum@latest
-
-#     - name: Run unit tests
-#       working-directory: ./src
-#       run: |
-#         mkdir -p allure-results
-#         gotestsum --junitfile allure-results/junit-unit.xml --format standard-verbose \
-#           -- ./internal/core/service/... ./internal/repository/postgres/reps/... -v -race
-
-#     - name: Upload unit tests results
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: unit-test-results
-#         path: src/allure-results/
-#         retention-days: 1
-
-#   integration-tests:
-#     name: Integration Tests
-#     runs-on: ubuntu-latest
-#     needs: unit-tests
-
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
-
-#     - name: Set up Docker Buildx
-#       uses: docker/setup-buildx-action@v3
-
-#     - name: Create shared directory for results
-#       run: |
-#         mkdir -p shared-results
-#         chmod 777 shared-results
-
-#     - name: Run tests in container with shared volume
-#       run: |
-#         docker run -d --name test-postgres \
-#           -e POSTGRES_USER=test_user \
-#           -e POSTGRES_PASSWORD=test_password \
-#           -e POSTGRES_DB=test_db \
-#           -p 5432:5432 \
-#           postgres:15-alpine
-        
-#         until pg_isready -h localhost -p 5432 -U test_user; do
-#           sleep 2
-#         done
-        
-#         docker run --rm \
-#           --name integration-tests \
-#           --link test-postgres:postgres \
-#           -v $(pwd)/shared-results:/results \
-#           -e DB_DSN="postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable" \
-#           $(docker build -q -f Dockerfile.integration_tests .) \
-#           sh -c "
-#             mkdir -p /results &&
-#             gotestsum --junitfile /results/junit-integration.xml --format standard-verbose \
-#               -- ./internal/integration_tests/... -v -tags=integration
-#           "
-        
-#         docker stop test-postgres
-#         docker rm test-postgres
-
-#     - name: Check and upload results
-#       run: |
-#         echo "=== Checking shared-results ==="
-#         ls -la shared-results/
-#         mkdir -p integration-allure-results
-#         cp shared-results/* integration-allure-results/ 2>/dev/null || echo "No files to copy"
-#         ls -la integration-allure-results/
-
-#     - name: Upload integration tests results
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: integration-test-results
-#         path: integration-allure-results/
-#         retention-days: 1
-
-#   e2e-tests:
-#     name: E2E Tests
-#     runs-on: ubuntu-latest
-#     needs: integration-tests
-
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
-
-#     - name: Set up Docker Buildx
-#       uses: docker/setup-buildx-action@v3
-
-#     - name: Create shared directory for results
-#       run: |
-#         mkdir -p shared-results
-#         chmod 777 shared-results
-
-#     - name: Build and run E2E tests with shared volume
-#       run: |
-#         docker compose -f docker-compose.yml up -d --build
-        
-#         echo "Waiting for services to be ready..."
-#         sleep 30
-        
-#         docker run --rm \
-#           --network container:$(docker compose -f docker-compose.yml ps -q app) \
-#           -v $(pwd)/shared-results:/results \
-#           -e API_URL="http://app:8080" \
-#           $(docker build -q -f Dockerfile.e2e_tests .) \
-#           sh -c "
-#             mkdir -p /results &&
-#             gotestsum --junitfile /results/junit-e2e.xml --format standard-verbose \
-#               -- ./internal/e2e_tests/... -v -tags=e2e
-#           "
-        
-#         docker compose -f docker-compose.yml down
-
-#     - name: Process and upload E2E results
-#       run: |
-#         echo "=== Checking shared-results ==="
-#         ls -la shared-results/
-#         mkdir -p e2e-allure-results
-        
-#         cp shared-results/* e2e-allure-results/ 2>/dev/null || echo "No files to copy"
-        
-#         if [ -f e2e-allure-results/junit-e2e.xml ]; then
-#           echo "Converting JUnit to Allure format..."
-#         fi
-        
-#         ls -la e2e-allure-results/
-
-#     - name: Upload E2E test results
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: e2e-test-results
-#         path: e2e-allure-results/
-#         retention-days: 1
-
-#   generate-allure-report:
-#     name: Generate Allure Report
-#     runs-on: ubuntu-latest
-#     needs: [unit-tests, integration-tests, e2e-tests]
-    
-#     steps:
-#     - name: Checkout code
-#       uses: actions/checkout@v4
-
-#     - name: Download all test results
-#       uses: actions/download-artifact@v4
-#       with:
-#         path: all-results
-
-#     - name: Install Allure
-#       run: |
-#         sudo apt-get update
-#         sudo apt-get install default-jre -y
-#         wget -O allure-2.27.0.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
-#         sudo tar -zxvf allure-2.27.0.tgz -C /opt/
-#         sudo ln -s /opt/allure-2.27.0/bin/allure /usr/bin/allure
-#         allure --version
-
-#     - name: Debug - Show downloaded files
-#       run: |
-#         echo "=== Downloaded files structure ==="
-#         find all-results -type f -name "*.xml" | head -20
-#         echo "=== Total XML files found: ==="
-#         find all-results -name "*.xml" | wc -l
-
-#     - name: Combine and generate Allure report
-#       run: |
-#         mkdir -p combined-allure-results
-        
-#         find all-results -name "*.xml" -exec cp {} combined-allure-results/ \;
-        
-#         echo "=== Files in combined-allure-results ==="
-#         ls -la combined-allure-results/
-        
-#         allure generate combined-allure-results -o allure-report --clean
-
-#     - name: Upload Allure report
-#       uses: actions/upload-artifact@v4
-#       with:
-#         name: allure-report
-#         path: allure-report/
-#         retention-days: 30
-
-
 name: CI/CD Pipeline with Allure
 
 on:
@@ -364,60 +141,70 @@ jobs:
     needs: [unit-tests, integration-tests, e2e-tests]
     
     steps:
-    - name: Checkout code with history
+    - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: ${{ github.ref }}
-        path: main-repo
 
     - name: Download all test results
       uses: actions/download-artifact@v4
       with:
         path: all-results
 
-    - name: Download previous allure history
+    - name: Try to download previous allure history
+      id: download-history
+      continue-on-error: true
       uses: actions/download-artifact@v4
       with:
         name: allure-history
         path: allure-history/
-        continue-on-error: true
 
     - name: Install Allure
       run: |
         sudo apt-get update
-        sudo apt-get install default-jre -y
-        wget -O allure-2.27.0.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+        sudo apt-get install default-jre wget -y
+        wget -q -O allure-2.27.0.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
         sudo tar -zxvf allure-2.27.0.tgz -C /opt/
-        sudo ln -s /opt/allure-2.27.0/bin/allure /usr/bin/allure
+        sudo ln -sf /opt/allure-2.27.0/bin/allure /usr/bin/allure
         allure --version
 
     - name: Debug - Show downloaded files
       run: |
-        find all-results -type f -name "*.xml" | head -20
-        find all-results -name "*.xml" | wc -l
-        ls -la allure-history/ || echo "No history found"
-
-    - name: Combine and generate Allure report
-      run: |
-        mkdir -p combined-allure-results
+        echo "Downloaded test results:"
+        find all-results -name "*.xml" | head -10
+        echo "Total XML files: $(find all-results -name '*.xml' | wc -l)"
         
-        find all-results -name "*.xml" -exec cp {} combined-allure-results/ \;
-        
-        echo "=== Files in combined-allure-results ==="
-        ls -la combined-allure-results/
-        
-        allure generate combined-allure-results -o allure-report --clean
-        
+        echo "History status:"
         if [ -d "allure-history/history" ]; then
-          echo "Copying history to new report..."
-          cp -r allure-history/history allure-report/
+          echo "History found:"
+          ls -la allure-history/history/ | head -5
         else
           echo "No previous history found - this is the first run"
+        fi
+
+    - name: Combine and generate Allure report with history
+      run: |
+        mkdir -p combined-results
+        
+        find all-results -name "*.xml" -exec cp {} combined-results/ \;
+        
+        echo "Files for report:"
+        ls -la combined-results/
+        
+        allure generate combined-results -o allure-report --clean
+        
+        if [ -d "allure-history/history" ]; then
+          echo "Copying previous history to new report..."
+          cp -r allure-history/history allure-report/
+          echo "History merged successfully"
+        else
+          echo "First run - creating new history"
         fi
         
         mkdir -p new-history
         if [ -d "allure-report/history" ]; then
+          echo "Saving history for next run..."
           cp -r allure-report/history new-history/
+          echo "History files saved:"
+          ls -la new-history/history/ | head -5
         fi
 
     - name: Upload Allure report
@@ -427,7 +214,7 @@ jobs:
         path: allure-report/
         retention-days: 30
 
-    - name: Upload new allure history
+    - name: Upload new allure history for next run
       uses: actions/upload-artifact@v4
       with:
         name: allure-history
@@ -441,4 +228,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: allure-report
         destination_dir: ./allure
-        keep_files: false
+        keep_files: true
