@@ -127,6 +127,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	atoken, err := ctx.Cookie("access_token")
 	if err != nil {
 		log.Printf("[ERROR] Cant get access token: %v", err)
+		fmt.Println("HERE")
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "access token missing"})
 		return
 	}
