@@ -400,12 +400,21 @@ jobs:
     - name: Combine and generate Allure report
       run: |
         mkdir -p combined-allure-results
+        
         find all-results -name "*.xml" -exec cp {} combined-allure-results/ \;
+        
+        echo "=== Files in combined-allure-results ==="
         ls -la combined-allure-results/
+        
         allure generate combined-allure-results -o allure-report --clean
+        
         if [ -d "allure-history/history" ]; then
+          echo "Copying history to new report..."
           cp -r allure-history/history allure-report/
+        else
+          echo "No previous history found - this is the first run"
         fi
+        
         mkdir -p new-history
         if [ -d "allure-report/history" ]; then
           cp -r allure-report/history new-history/
