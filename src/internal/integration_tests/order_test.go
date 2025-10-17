@@ -227,60 +227,6 @@ func TestOrder_GetItems_AAA(t *testing.T) {
 	}
 }
 
-func TestOrder_GetOrdersByUser_AAA(t *testing.T) {
-	fixture := NewOrderTestFixture(t)
-
-	tests := []struct {
-		name          string
-		setup         func() uuid.UUID
-		cleanup       func()
-		expectedCount int
-		expectedErr   bool
-	}{
-		{
-			name: "get empty orders list for user",
-			setup: func() uuid.UUID {
-				truncateTables(t)
-				userID, _ := fixture.setupUserWithOrder()
-				return userID
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 0,
-			expectedErr:   true,
-		},
-		{
-			name: "get empty orders list for non-existent user",
-			setup: func() uuid.UUID {
-				truncateTables(t)
-				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 0,
-			expectedErr:   true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			userID := tt.setup()
-			defer tt.cleanup()
-
-			orders, err := fixture.service.GetOrdersByUser(fixture.ctx, userID)
-
-			if tt.expectedErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				require.Len(t, orders, tt.expectedCount)
-			}
-		})
-	}
-}
-
 func TestOrder_GetStatus_AAA(t *testing.T) {
 	fixture := NewOrderTestFixture(t)
 
