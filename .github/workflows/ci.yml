@@ -37,9 +37,11 @@ jobs:
         cache-dependency-path: src/go.sum
 
     - name: Run unit tests
+      working-directory: ./src
       run: |
         go test -v -race ./internal/core/service/...
         go test -v -race ./internal/repository/postgres/reps/...
+
 
   integration-tests:
     name: Integration Tests
@@ -71,6 +73,7 @@ jobs:
         go-version: '1.24'
 
     - name: Run integration tests
+      working-directory: ./src
       run: |
         go test -v -tags=integration ./internal/integration_tests/...
       env:
@@ -89,6 +92,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Run E2E tests with Docker Compose
+      working-directory: ./src
       run: |
         docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
         docker-compose -f docker-compose.test.yml down
