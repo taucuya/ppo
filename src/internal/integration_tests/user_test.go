@@ -32,10 +32,11 @@ func TestMain(m *testing.M) {
 	}
 
 	err = runSQLScripts(db, []string{
-		"/app/internal/database/sql/01-create.sql",
-		"/app/internal/database/sql/02-constraints.sql",
-		"/app/internal/database/sql/trigger_accept.sql",
-		"/app/internal/database/sql/trigger_order.sql",
+		"../../database/sql/01-create.sql",
+		"../../database/sql/02-constraints.sql",
+		"../../database/sql/03-inserts.sql",
+		"../../database/sql/trigger_accept.sql",
+		"../../database/sql/trigger_order.sql",
 	})
 	if err != nil {
 		panic("failed to run SQL scripts: " + err.Error())
