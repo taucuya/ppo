@@ -341,7 +341,7 @@ jobs:
       run: |
         docker compose -f docker-compose.yml up -d --build
         sleep 30
-        docker run --rm --network container:$(docker compose -f docker-compose.yml ps -q app) -v $(pwd)/shared-results:/results -e API_URL="http://app:8080" $(docker build -q -f Dockerfile.tests .) sh -c "mkdir -p /results && gotestsum --junitfile /results/junit-e2e.xml --format standard-verbose -- ./internal/e2e_tests/... -v -tags=e2e"
+        docker run --rm --network container:$(docker compose -f docker-compose.yml ps -q app) -v $(pwd)/shared-results:/results -e API_URL="http://api:8080" $(docker build -q -f Dockerfile.tests .) sh -c "mkdir -p /results && gotestsum --junitfile /results/junit-e2e.xml --format standard-verbose -- ./internal/e2e_tests/... -v -tags=e2e"
         docker compose -f docker-compose.yml down
 
     - name: Process and upload E2E results
