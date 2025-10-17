@@ -240,9 +240,9 @@ jobs:
     - name: Combine and generate Allure report
       run: |
         mkdir -p combined-allure-results
-      
+        
         find all-results -name "*.xml" -exec cp {} combined-allure-results/ \;
-      
+        
         allure generate combined-allure-results -o allure-report --clean
 
     - name: Upload Allure report
