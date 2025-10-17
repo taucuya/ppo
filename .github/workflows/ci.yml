@@ -7,40 +7,40 @@ on:
     branches: [ main ]
 
 jobs:
-  # unit-tests:
-  #   name: Unit Tests
-  #   runs-on: ubuntu-latest
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
     
-  #   services:
-  #     postgres:
-  #       image: postgres:15-alpine
-  #       env:
-  #         POSTGRES_USER: test_user
-  #         POSTGRES_PASSWORD: test_password
-  #         POSTGRES_DB: test_db
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #       ports:
-  #         - 5432:5432
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v4
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  #   - name: Set up Go
-  #     uses: actions/setup-go@v4
-  #     with:
-  #       go-version: '1.24'
-  #       cache-dependency-path: src/go.sum
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+        cache-dependency-path: src/go.sum
 
-  #   - name: Run unit tests
-  #     working-directory: ./src
-  #     run: |
-  #       go test -v -race ./internal/core/service/...
-  #       go test -v -race ./internal/repository/postgres/reps/...
+    - name: Run unit tests
+      working-directory: ./src
+      run: |
+        go test -v -race ./internal/core/service/...
+        go test -v -race ./internal/repository/postgres/reps/...
 
 
   integration-tests:
