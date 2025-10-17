@@ -102,5 +102,5 @@ jobs:
     - name: Run E2E tests with Docker Compose
       working-directory: ./src
       run: |
-        docker compose -f docker-compose.yml up --build --abort-on-container-exit
-        docker compose -f docker-compose.yml down
+        docker compose -f ../docker-compose.yml up --build --abort-on-container-exit
+        docker compose -f ../docker-compose.yml down
