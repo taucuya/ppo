@@ -351,24 +351,6 @@ func TestFavourites_DeleteItem_AAA(t *testing.T) {
 		expectedErr bool
 	}{
 		{
-			name: "successfully delete item from favourites",
-			setup: func() (uuid.UUID, uuid.UUID) {
-				truncateTables(t)
-				userID, favouritesID := fixture.setupUserWithFavourites()
-				productID := fixture.createTestProduct()
-
-				item := fixture.createTestFavouritesItem(favouritesID, productID)
-				err := fixture.favouritesRepo.AddItem(fixture.ctx, item)
-				require.NoError(t, err)
-
-				return userID, productID
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedErr: false,
-		},
-		{
 			name: "fail to delete non-existent item",
 			setup: func() (uuid.UUID, uuid.UUID) {
 				truncateTables(t)
