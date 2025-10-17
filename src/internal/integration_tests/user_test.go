@@ -24,7 +24,7 @@ var db *sqlx.DB
 func TestMain(m *testing.M) {
 	var err error
 
-	dsn := "postgres://test_user:test_password@test_db:5432/test_db?sslmode=disable"
+	dsn := "postgres://test_user:test_password@localhost:5432/test_db?sslmode=disable"
 
 	db, err = sqlx.Connect("postgres", dsn)
 	if err != nil {
