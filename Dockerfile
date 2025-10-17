@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY ./src/go.mod ./src/go.sum ./
 RUN go mod download
+RUN go install gotest.tools/gotestsum@latest
 
 COPY ./src .
 

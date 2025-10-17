@@ -226,15 +226,43 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Run E2E tests and generate Allure results
+    - name: Create shared directory for results
       run: |
+        mkdir -p shared-results
+        chmod 777 shared-results
+
+    - name: Build and run E2E tests with shared volume
+      run: |
+        docker compose -f docker-compose.yml up -d --build
+        
+        echo "Waiting for services to be ready..."
+        sleep 30
+        
+        docker run --rm \
+          --network container:$(docker compose -f docker-compose.yml ps -q app) \
+          -v $(pwd)/shared-results:/results \
+          -e API_URL="http://app:8080" \
+          $(docker build -q -f Dockerfile.e2e_tests .) \
+          sh -c "
+            mkdir -p /results &&
+            gotestsum --junitfile /results/junit-e2e.xml --format standard-verbose \
+              -- ./internal/e2e_tests/... -v -tags=e2e
+          "
+        
+        docker compose -f docker-compose.yml down
+
+    - name: Process and upload E2E results
+      run: |
+        echo "=== Checking shared-results ==="
+        ls -la shared-results/
         mkdir -p e2e-allure-results
         
-        docker compose -f docker-compose.yml up --build --abort-on-container-exit
+        cp shared-results/* e2e-allure-results/ 2>/dev/null || echo "No files to copy"
         
-        docker compose -f docker-compose.yml cp tests:/app/allure-results/ ./e2e-allure-results/ || \
-        docker compose -f docker-compose.yml cp tests:/app/allure-results ./e2e-allure-results/ || \
-        echo "Trying alternative location..."
+        if [ -f e2e-allure-results/junit-e2e.xml ]; then
+          echo "Converting JUnit to Allure format..."
+          # Добавьте конвертацию если нужно
+        fi
         
         ls -la e2e-allure-results/
 
