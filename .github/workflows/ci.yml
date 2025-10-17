@@ -154,7 +154,7 @@ jobs:
         path: src/allure-results/
         retention-days: 1
 
-  integration-tests:
+    integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: unit-tests
@@ -166,16 +166,45 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Run integration tests and generate Allure results
+    - name: Create shared directory for results
       run: |
+        mkdir -p shared-results
+        chmod 777 shared-results
+
+    - name: Run tests in container with shared volume
+      run: |
+        docker run -d --name test-postgres \
+          -e POSTGRES_USER=test_user \
+          -e POSTGRES_PASSWORD=test_password \
+          -e POSTGRES_DB=test_db \
+          -p 5432:5432 \
+          postgres:15-alpine
+        
+        until pg_isready -h localhost -p 5432 -U test_user; do
+          sleep 2
+        done
+        
+        docker run --rm \
+          --name integration-tests \
+          --link test-postgres:postgres \
+          -v $(pwd)/shared-results:/results \
+          -e DB_DSN="postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable" \
+          $(docker build -q -f Dockerfile.integration_tests .) \
+          sh -c "
+            mkdir -p /results &&
+            gotestsum --junitfile /results/junit-integration.xml --format standard-verbose \
+              -- ./internal/integration_tests/... -v -tags=integration
+          "
+        
+        docker stop test-postgres
+        docker rm test-postgres
+
+    - name: Check and upload results
+      run: |
+        echo "=== Checking shared-results ==="
+        ls -la shared-results/
         mkdir -p integration-allure-results
-        
-        docker compose -f docker-compose.integrationtest.yml up --build --abort-on-container-exit
-        
-        docker compose -f docker-compose.integrationtest.yml cp tests:/app/allure-results/ ./integration-allure-results/ || \
-        docker compose -f docker-compose.integrationtest.yml cp tests:/app/allure-results ./integration-allure-results/ || \
-        echo "Trying alternative location..."
-        
+        cp shared-results/* integration-allure-results/ 2>/dev/null || echo "No files to copy"
         ls -la integration-allure-results/
 
     - name: Upload integration tests results
