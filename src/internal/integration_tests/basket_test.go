@@ -399,18 +399,18 @@ func TestBasket_DeleteItem_AAA(t *testing.T) {
 			},
 			expectedErr: false,
 		},
-		// {
-		// 	name: "fail to delete non-existent item",
-		// 	setup: func() (uuid.UUID, uuid.UUID) {
-		// 		truncateTables(t)
-		// 		userID, _ := fixture.setupUserWithBasket()
-		// 		return userID, uuid.New()
-		// 	},
-		// 	cleanup: func() {
-		// 		truncateTables(t)
-		// 	},
-		// 	expectedErr: true,
-		// },
+		{
+			name: "fail to delete non-existent item",
+			setup: func() (uuid.UUID, uuid.UUID) {
+				truncateTables(t)
+				userID, _ := fixture.setupUserWithBasket()
+				return userID, uuid.New()
+			},
+			cleanup: func() {
+				truncateTables(t)
+			},
+			expectedErr: true,
+		},
 		{
 			name: "fail to delete item from non-existent user",
 			setup: func() (uuid.UUID, uuid.UUID) {
