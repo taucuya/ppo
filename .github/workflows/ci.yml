@@ -131,7 +131,7 @@ jobs:
         path: e2e-allure-results/
         retention-days: 1
 
-  generate-allure-report:
+    generate-allure-report:
     name: Generate Allure Report with Trends
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests, e2e-tests]
@@ -139,18 +139,28 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
 
     - name: Download all test results
       uses: actions/download-artifact@v4
       with:
         path: all-results
 
-    - name: Download previous history
-      uses: actions/download-artifact@v4
-      continue-on-error: true
-      with:
-        name: allure-history
-        path: previous-history/
+    - name: Find and download previous history
+      run: |
+        echo "Searching for previous allure-history artifact..."
+        
+        RUN_ID=$(gh run list --workflow="${{ github.workflow }}" --status=success --limit=1 --json databaseId --jq '.[0].databaseId')
+        
+        if [ -n "$RUN_ID" ]; then
+          echo "Found previous successful run: $RUN_ID"
+          gh run download $RUN_ID --name allure-history --dir previous-history || echo "No history found in previous run"
+        else
+          echo "No previous successful runs found"
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install Allure
       run: |
@@ -160,52 +170,48 @@ jobs:
         sudo tar -zxvf allure-2.27.0.tgz -C /opt/
         sudo ln -sf /opt/allure-2.27.0/bin/allure /usr/bin/allure
 
-    - name: Prepare test results with environment
+    - name: Generate report with history
       run: |
         mkdir -p combined-results
-        
         find all-results -name "*.xml" -exec cp {} combined-results/ \;
         
-        cat > combined-results/environment.properties << EOF
-        BRANCH=${{ github.ref }}
-        COMMIT=${{ github.sha }}
-        RUN_ID=${{ github.run_id }}
-        RUN_NUMBER=${{ github.run_number }}
-        DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-        EVENT=${{ github.event_name }}
-        ACTOR=${{ github.actor }}
-        OS=ubuntu-latest
-        EOF
-        
         if [ -d "previous-history/history" ]; then
+          echo "Using previous history for trends"
           mkdir -p combined-results/history
           cp -r previous-history/history/* combined-results/history/
-          echo "Previous history merged"
+        else
+          echo "No previous history found"
         fi
-
-    - name: Generate Allure report with trends
-      run: |
+        
         allure generate combined-results -o allure-report --clean
-        echo "Report generated with trends"
 
-    - name: Prepare history for next run
-      run: |
-        mkdir -p history-artifact
-        if [ -d "allure-report/history" ]; then
-          cp -r allure-report/history history-artifact/
-          echo "History prepared for next run"
-        fi
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
 
-    - name: Upload Allure report with trends
-      uses: actions/upload-artifact@v4
+    - name: Upload artifact to GitHub Pages
+      uses: actions/upload-pages-artifact@v2
       with:
-        name: allure-report
-        path: allure-report/
-        retention-days: 30
+        path: allure-report
 
-    - name: Upload history for trends
+    - name: Upload history for next run
       uses: actions/upload-artifact@v4
       with:
         name: allure-history
-        path: history-artifact/
+        path: allure-report/history/
         retention-days: 30
+
+  deploy-to-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: generate-allure-report
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
