@@ -131,7 +131,7 @@ jobs:
         path: e2e-allure-results/
         retention-days: 1
 
-    generate-allure-report:
+  generate-allure-report:
     name: Generate and Publish Allure Report
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests, e2e-tests]
