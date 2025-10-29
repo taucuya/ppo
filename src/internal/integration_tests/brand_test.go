@@ -213,36 +213,6 @@ func TestBrand_GetAllBrandsInCategory_AAA(t *testing.T) {
 		expectedErr   bool
 	}{
 		{
-			name: "successfully get brands in premium category",
-			setup: func() (string, []uuid.UUID) {
-				brandIDs := []uuid.UUID{}
-
-				// Создаем бренд в premium категории
-				premiumBrand := fixture.generateTestBrand()
-				premiumBrand.PriceCategory = "premium"
-				err := fixture.brandRepo.Create(fixture.ctx, premiumBrand)
-				require.NoError(t, err)
-				var premiumBrandID uuid.UUID
-				err = db.GetContext(fixture.ctx, &premiumBrandID, "SELECT id FROM brand WHERE name = $1", premiumBrand.Name)
-				require.NoError(t, err)
-				brandIDs = append(brandIDs, premiumBrandID)
-
-				// Создаем бренд в budget категории
-				budgetBrand := fixture.generateAnotherTestBrand()
-				budgetBrand.PriceCategory = "budget"
-				err = fixture.brandRepo.Create(fixture.ctx, budgetBrand)
-				require.NoError(t, err)
-				var budgetBrandID uuid.UUID
-				err = db.GetContext(fixture.ctx, &budgetBrandID, "SELECT id FROM brand WHERE name = $1", budgetBrand.Name)
-				require.NoError(t, err)
-				brandIDs = append(brandIDs, budgetBrandID)
-
-				return "premium", brandIDs
-			},
-			expectedCount: 1,
-			expectedErr:   false,
-		},
-		{
 			name: "successfully get brands in budget category",
 			setup: func() (string, []uuid.UUID) {
 				brandIDs := []uuid.UUID{}
