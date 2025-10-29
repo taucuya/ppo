@@ -75,11 +75,11 @@ jobs:
         run: |
           docker network create app-network 2>/dev/null || true
           
-          docker compose -f docker-compose.yml up -d postgres
+          docker compose -f docker-compose.integrationtest.yml up -d postgres
           
           echo "Waiting for PostgreSQL to be ready..."
           for i in {1..30}; do
-            if docker compose -f docker-compose.yml exec postgres pg_isready -U test_user -d test_db; then
+            if docker compose -f docker-compose.integrationtest.yml exec postgres pg_isready -U test_user -d test_db; then
               echo "PostgreSQL is ready!"
               break
             fi
@@ -87,9 +87,9 @@ jobs:
             sleep 2
           done
           
-          docker compose -f docker-compose.yml run --rm init-db
+          docker compose -f docker-compose.integrationtest.yml run --rm init-db
           
-          docker compose -f docker-compose.yml run --rm tests
+          docker compose -f docker-compose.integrationtest.yml run --rm tests
 
       - name: Check test results
         if: always()
@@ -101,7 +101,7 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          docker compose -f docker-compose.yml down -v --remove-orphans
+          docker compose -f docker-compose.integrationtest.yml down -v --remove-orphans
           docker network rm app-network 2>/dev/null || true
 
       - name: Upload integration tests results
