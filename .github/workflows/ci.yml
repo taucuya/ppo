@@ -60,44 +60,57 @@ jobs:
     needs: unit-tests
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Create shared directory for results
-      run: |
-        mkdir -p shared-results
-        chmod 777 shared-results
+      - name: Create directory for test results
+        run: |
+          mkdir -p allure-results-1
+          chmod 777 allure-results-1
 
-    - name: Run tests in container with shared volume
-      run: |
-        docker run -d --name test-postgres -e POSTGRES_USER=test_user -e POSTGRES_PASSWORD=test_password -e POSTGRES_DB=test_db -p 5435:5432 postgres:15-alpine
-        
-        until pg_isready -h localhost -p 5435 -U test_user; do
-          sleep 2
-        done
-        
-        docker run --rm --name integration-tests --link test-postgres:postgres -v $(pwd)/shared-results:/results -e DB_DSN="postgres://test_user:test_password@postgres:5435/test_db?sslmode=disable" $(docker build -q -f Dockerfile.integration_tests .) sh -c "mkdir -p /results && gotestsum --junitfile /results/junit-integration.xml --format standard-verbose -- ./internal/integration_tests/... -v -tags=integration"
-        
-        docker stop test-postgres
-        docker rm test-postgres
+      - name: Build and run integration tests
+        run: |
+          docker network create app-network 2>/dev/null || true
+          
+          docker compose -f docker-compose.yml up -d postgres
+          
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..30}; do
+            if docker compose -f docker-compose.yml exec postgres pg_isready -U test_user -d test_db; then
+              echo "PostgreSQL is ready!"
+              break
+            fi
+            echo "Waiting for PostgreSQL... attempt $i"
+            sleep 2
+          done
+          
+          docker compose -f docker-compose.yml run --rm init-db
+          
+          docker compose -f docker-compose.yml run --rm tests
 
-    - name: Check and upload results
-      if: always()
-      run: |
-        mkdir -p integration-allure-results
-        cp shared-results/* integration-allure-results/ 2>/dev/null || echo "No files to copy"
+      - name: Check test results
+        if: always()
+        run: |
+          echo "Test results:"
+          ls -la allure-results-1/ || echo "No results found"
+          find allure-results-1 -name "*.xml" | wc -l | xargs echo "Number of XML files:"
 
-    - name: Upload integration tests results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: integration-test-results
-        path: integration-allure-results/
-        retention-days: 1
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose -f docker-compose.yml down -v --remove-orphans
+          docker network rm app-network 2>/dev/null || true
 
+      - name: Upload integration tests results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: allure-results-1/
+          retention-days: 1
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
