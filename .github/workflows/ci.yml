@@ -73,7 +73,7 @@ jobs:
 
     - name: Run tests in container with shared volume
       run: |
-        docker run -d --name test-postgres -e POSTGRES_USER=test_user -e POSTGRES_PASSWORD=test_password -e POSTGRES_DB=test_db -p 5432:5432 postgres:15-alpine
+        docker run -d --name test-postgres -e POSTGRES_USER=test_user -e POSTGRES_PASSWORD=test_password -e POSTGRES_DB=test_db -p 5435:5432 postgres:15-alpine
         
         until pg_isready -h localhost -p 5432 -U test_user; do
           sleep 2
