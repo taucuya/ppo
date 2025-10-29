@@ -71,15 +71,19 @@ jobs:
           mkdir -p allure-results-1
           chmod 777 allure-results-1
 
-      - name: Build and run integration tests
+      - name: Build test images
         run: |
-          docker network create app-network 2>/dev/null || true
+          docker build -f Dockerfile.integration_tests -t integration-tests .
+
+      - name: Run integration tests with volume fix
+        run: |
+          docker compose down -v 2>/dev/null || true
           
-          docker compose -f docker-compose.integrationtest.yml up -d postgres
+          docker compose up -d postgres
           
-          echo "Waiting for PostgreSQL to be ready..."
+          echo "Waiting for PostgreSQL..."
           for i in {1..30}; do
-            if docker compose -f docker-compose.integrationtest.yml exec postgres pg_isready -U test_user -d test_db; then
+            if docker compose exec postgres pg_isready -U test_user -d test_db; then
               echo "PostgreSQL is ready!"
               break
             fi
@@ -87,22 +91,47 @@ jobs:
             sleep 2
           done
           
-          docker compose -f docker-compose.integrationtest.yml run --rm init-db
+          echo "=== Initializing database ==="
+          docker compose run --rm init-db
           
-          docker compose -f docker-compose.integrationtest.yml run --rm tests
+          echo "=== Checking created tables ==="
+          docker compose exec postgres psql -U test_user -d test_db -c "\dt" || echo "Failed to list tables"
+          
+          echo "=== Running tests ==="
+          docker compose run --rm -v $(pwd)/allure-results-1:/app/allure-results tests sh -c "
+            mkdir -p /app/allure-results &&
+            gotestsum --junitfile /app/allure-results/junit-integration.xml --format standard-verbose -- ./internal/integration_tests/... -v -tags=integration
+          "
 
-      - name: Check test results
+      - name: Debug directory contents
         if: always()
         run: |
-          echo "Test results:"
-          ls -la allure-results-1/ || echo "No results found"
-          find allure-results-1 -name "*.xml" | wc -l | xargs echo "Number of XML files:"
+          echo "=== Current directory ==="
+          pwd
+          ls -la
+          echo "=== allure-results-1 contents ==="
+          ls -la allure-results-1/ || echo "allure-results-1 directory not found"
+          echo "=== Checking for any test results ==="
+          find . -name "*.xml" -o -name "allure*" | head -20
+
+      - name: Check test results explicitly
+        if: always()
+        run: |
+          echo "=== Explicitly checking test results ==="
+          if [ -d "allure-results-1" ]; then
+            echo "allure-results-1 exists with contents:"
+            ls -la allure-results-1/
+            echo "File count: $(find allure-results-1 -type f | wc -l)"
+          else
+            echo "allure-results-1 directory does not exist"
+            mkdir -p allure-results-1
+            echo "No test results generated" > allure-results-1/error.txt
+          fi
 
       - name: Cleanup
         if: always()
         run: |
-          docker compose -f docker-compose.integrationtest.yml down -v --remove-orphans
-          docker network rm app-network 2>/dev/null || true
+          docker compose down -v
 
       - name: Upload integration tests results
         if: always()
