@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
     ports:
-      - "5434:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -17,51 +17,28 @@ services:
     networks:
       - app-network
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: test_user
-      DB_PASSWORD: test_password
-      DB_NAME: test_db
-      JWT_SECRET: "your_jwt_secret_key_here"
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - app-network
-
   tests:
     build:
       context: .
-      dockerfile: Dockerfile.tests
+      dockerfile: Dockerfile.integration_tests
     depends_on:
-      - api
+      - postgres
     networks:
       - app-network
+    volumes:
+      - ./allure-results:/app/allure-results
     environment:
       APP_URL: http://localhost:8080
-      DB_HOST: postgres
-      DB_PORT: 5432
       DB_USER: test_user
       DB_PASSWORD: test_password
       DB_NAME: test_db
     command: [
         "sh", "-c",
-        "echo 'Waiting for API to start...' && go test -v ./internal/e2e_tests/..."
+        "echo 'Waiting for API to start...' && go test -v ./internal/integration_tests/..."
       ]
 
 networks:
   app-network:
     driver: bridge
-  test_network:
-    driver: bridge
-
 volumes:
   postgres_data:

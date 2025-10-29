@@ -2,7 +2,9 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
@@ -17,77 +19,96 @@ type BrandTestFixture struct {
 	ctx       context.Context
 	service   *brand.Service
 	brandRepo *brand_rep.Repository
+	testID    string
 }
 
 func NewBrandTestFixture(t *testing.T) *BrandTestFixture {
 	brandRepo := brand_rep.New(db)
 	service := brand.New(brandRepo)
 
+	testID := uuid.New().String()[:8]
+
 	return &BrandTestFixture{
 		t:         t,
 		ctx:       context.Background(),
 		service:   service,
 		brandRepo: brandRepo,
+		testID:    testID,
 	}
 }
 
-func (f *BrandTestFixture) createTestBrand() structs.Brand {
+func (f *BrandTestFixture) generateTestBrand() structs.Brand {
+	timestamp := time.Now().UnixNano()
+	uniqueID := fmt.Sprintf("%s-%d", f.testID, timestamp)
+
 	return structs.Brand{
-		Name:          "Test Brand",
+		Name:          fmt.Sprintf("Test Brand %s", uniqueID),
 		Description:   "Test Description",
 		PriceCategory: "premium",
 	}
 }
 
-func (f *BrandTestFixture) createAnotherTestBrand() structs.Brand {
+func (f *BrandTestFixture) generateAnotherTestBrand() structs.Brand {
+	timestamp := time.Now().UnixNano()
+	uniqueID := fmt.Sprintf("%s-%d", f.testID, timestamp)
+
 	return structs.Brand{
-		Name:          "Another Brand",
+		Name:          fmt.Sprintf("Another Brand %s", uniqueID),
 		Description:   "Another Description",
 		PriceCategory: "budget",
 	}
 }
 
-func (f *BrandTestFixture) assertBrandEqual(expected, actual structs.Brand) {
-	require.Equal(f.t, expected.Name, actual.Name)
-	require.Equal(f.t, expected.Description, actual.Description)
-	require.Equal(f.t, expected.PriceCategory, actual.PriceCategory)
+func (f *BrandTestFixture) cleanupBrandData(brandID uuid.UUID) {
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM product WHERE id_brand = $1", brandID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM brand WHERE id = $1", brandID)
+}
+
+func (f *BrandTestFixture) createBrandForTest() (uuid.UUID, structs.Brand) {
+	testBrand := f.generateTestBrand()
+	err := f.brandRepo.Create(f.ctx, testBrand)
+	require.NoError(f.t, err)
+
+	var brandID uuid.UUID
+	err = db.GetContext(f.ctx, &brandID, "SELECT id FROM brand WHERE name = $1", testBrand.Name)
+	require.NoError(f.t, err)
+
+	return brandID, testBrand
 }
 
 func TestBrand_Create_AAA(t *testing.T) {
 	fixture := NewBrandTestFixture(t)
-	testBrand := fixture.createTestBrand()
 
 	tests := []struct {
 		name        string
-		setup       func()
-		cleanup     func()
-		brand       structs.Brand
+		setup       func() structs.Brand
 		expectedErr bool
 	}{
 		{
 			name: "successful brand creation",
-			setup: func() {
-				truncateTables(t)
+			setup: func() structs.Brand {
+				return fixture.generateTestBrand()
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			brand:       testBrand,
 			expectedErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-			defer tt.cleanup()
+			brand := tt.setup()
 
-			err := fixture.service.Create(fixture.ctx, tt.brand)
+			err := fixture.service.Create(fixture.ctx, brand)
 
 			if tt.expectedErr {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
+
+				var createdBrandID uuid.UUID
+				err = db.GetContext(fixture.ctx, &createdBrandID,
+					"SELECT id FROM brand WHERE name = $1", brand.Name)
+				require.NoError(t, err)
+				defer fixture.cleanupBrandData(createdBrandID)
 			}
 		})
 	}
@@ -99,39 +120,20 @@ func TestBrand_GetById_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() uuid.UUID
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully get brand by id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				brand := fixture.createTestBrand()
-				err := fixture.brandRepo.Create(fixture.ctx, brand)
-				require.NoError(t, err)
-
-				// Получаем ID созданного бренда через репозиторий
-				var brands []struct {
-					ID uuid.UUID `db:"id"`
-				}
-				err = db.SelectContext(fixture.ctx, &brands, "SELECT id FROM brand WHERE name = $1", brand.Name)
-				require.NoError(t, err)
-				require.Len(t, brands, 1)
-				return brands[0].ID
-			},
-			cleanup: func() {
-				truncateTables(t)
+				brandID, _ := fixture.createBrandForTest()
+				return brandID
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to get non-existent brand by id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -140,7 +142,9 @@ func TestBrand_GetById_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			brandID := tt.setup()
-			defer tt.cleanup()
+			if brandID != uuid.Nil {
+				defer fixture.cleanupBrandData(brandID)
+			}
 
 			result, err := fixture.service.GetById(fixture.ctx, brandID)
 
@@ -160,38 +164,20 @@ func TestBrand_Delete_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() uuid.UUID
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully delete brand",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				brand := fixture.createTestBrand()
-				err := fixture.brandRepo.Create(fixture.ctx, brand)
-				require.NoError(t, err)
-
-				var brands []struct {
-					ID uuid.UUID `db:"id"`
-				}
-				err = db.SelectContext(fixture.ctx, &brands, "SELECT id FROM brand WHERE name = $1", brand.Name)
-				require.NoError(t, err)
-				require.Len(t, brands, 1)
-				return brands[0].ID
-			},
-			cleanup: func() {
-				truncateTables(t)
+				brandID, _ := fixture.createBrandForTest()
+				return brandID
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to delete non-existent brand",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -200,7 +186,7 @@ func TestBrand_Delete_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			brandID := tt.setup()
-			defer tt.cleanup()
+			// Не очищаем здесь, т.к. тест сам удаляет бренд
 
 			err := fixture.service.Delete(fixture.ctx, brandID)
 
@@ -209,6 +195,7 @@ func TestBrand_Delete_AAA(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 
+				// Проверяем что бренд действительно удален
 				_, err := fixture.service.GetById(fixture.ctx, brandID)
 				require.Error(t, err)
 			}
@@ -218,63 +205,87 @@ func TestBrand_Delete_AAA(t *testing.T) {
 
 func TestBrand_GetAllBrandsInCategory_AAA(t *testing.T) {
 	fixture := NewBrandTestFixture(t)
-	testBrand1 := fixture.createTestBrand()
-	testBrand2 := fixture.createAnotherTestBrand()
 
 	tests := []struct {
 		name          string
-		setup         func() string
-		cleanup       func()
-		category      string
+		setup         func() (string, []uuid.UUID)
 		expectedCount int
 		expectedErr   bool
 	}{
 		{
 			name: "successfully get brands in premium category",
-			setup: func() string {
-				truncateTables(t)
-				err := fixture.brandRepo.Create(fixture.ctx, testBrand1)
+			setup: func() (string, []uuid.UUID) {
+				brandIDs := []uuid.UUID{}
+
+				// Создаем бренд в premium категории
+				premiumBrand := fixture.generateTestBrand()
+				premiumBrand.PriceCategory = "premium"
+				err := fixture.brandRepo.Create(fixture.ctx, premiumBrand)
 				require.NoError(t, err)
-				err = fixture.brandRepo.Create(fixture.ctx, testBrand2)
+				var premiumBrandID uuid.UUID
+				err = db.GetContext(fixture.ctx, &premiumBrandID, "SELECT id FROM brand WHERE name = $1", premiumBrand.Name)
 				require.NoError(t, err)
-				return "premium"
+				brandIDs = append(brandIDs, premiumBrandID)
+
+				// Создаем бренд в budget категории
+				budgetBrand := fixture.generateAnotherTestBrand()
+				budgetBrand.PriceCategory = "budget"
+				err = fixture.brandRepo.Create(fixture.ctx, budgetBrand)
+				require.NoError(t, err)
+				var budgetBrandID uuid.UUID
+				err = db.GetContext(fixture.ctx, &budgetBrandID, "SELECT id FROM brand WHERE name = $1", budgetBrand.Name)
+				require.NoError(t, err)
+				brandIDs = append(brandIDs, budgetBrandID)
+
+				return "premium", brandIDs
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			category:      "premium",
 			expectedCount: 1,
 			expectedErr:   false,
 		},
 		{
 			name: "successfully get brands in budget category",
-			setup: func() string {
-				truncateTables(t)
-				err := fixture.brandRepo.Create(fixture.ctx, testBrand1)
+			setup: func() (string, []uuid.UUID) {
+				brandIDs := []uuid.UUID{}
+
+				premiumBrand := fixture.generateTestBrand()
+				premiumBrand.PriceCategory = "premium"
+				err := fixture.brandRepo.Create(fixture.ctx, premiumBrand)
 				require.NoError(t, err)
-				err = fixture.brandRepo.Create(fixture.ctx, testBrand2)
+				var premiumBrandID uuid.UUID
+				err = db.GetContext(fixture.ctx, &premiumBrandID, "SELECT id FROM brand WHERE name = $1", premiumBrand.Name)
 				require.NoError(t, err)
-				return "budget"
+				brandIDs = append(brandIDs, premiumBrandID)
+
+				budgetBrand := fixture.generateAnotherTestBrand()
+				budgetBrand.PriceCategory = "budget"
+				err = fixture.brandRepo.Create(fixture.ctx, budgetBrand)
+				require.NoError(t, err)
+				var budgetBrandID uuid.UUID
+				err = db.GetContext(fixture.ctx, &budgetBrandID, "SELECT id FROM brand WHERE name = $1", budgetBrand.Name)
+				require.NoError(t, err)
+				brandIDs = append(brandIDs, budgetBrandID)
+
+				return "budget", brandIDs
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			category:      "budget",
 			expectedCount: 1,
 			expectedErr:   false,
 		},
 		{
 			name: "get empty brands list for non-existent category",
-			setup: func() string {
-				truncateTables(t)
-				err := fixture.brandRepo.Create(fixture.ctx, testBrand1)
+			setup: func() (string, []uuid.UUID) {
+				brandIDs := []uuid.UUID{}
+
+				brand := fixture.generateTestBrand()
+				brand.PriceCategory = "premium"
+				err := fixture.brandRepo.Create(fixture.ctx, brand)
 				require.NoError(t, err)
-				return "nonexistent"
+				var brandID uuid.UUID
+				err = db.GetContext(fixture.ctx, &brandID, "SELECT id FROM brand WHERE name = $1", brand.Name)
+				require.NoError(t, err)
+				brandIDs = append(brandIDs, brandID)
+
+				return "nonexistent", brandIDs
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			category:      "nonexistent",
 			expectedCount: 0,
 			expectedErr:   false,
 		},
@@ -282,8 +293,14 @@ func TestBrand_GetAllBrandsInCategory_AAA(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			category := tt.setup()
-			defer tt.cleanup()
+			category, brandIDs := tt.setup()
+
+			// Очищаем созданные бренды после теста
+			defer func() {
+				for _, brandID := range brandIDs {
+					fixture.cleanupBrandData(brandID)
+				}
+			}()
 
 			brands, err := fixture.service.GetAllBrandsInCategory(fixture.ctx, category)
 

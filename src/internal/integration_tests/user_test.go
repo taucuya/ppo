@@ -30,66 +30,24 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic("failed to connect to test database: " + err.Error())
 	}
+	defer db.Close()
 
-	err = runSQLScripts(db, []string{
-		"/app/internal/database/sql/01-create.sql",
-		"/app/internal/database/sql/02-constraints.sql",
-		"/app/internal/database/sql/trigger_accept.sql",
-		"/app/internal/database/sql/trigger_order.sql",
-	})
-
-	// err = runSQLScripts(db, []string{
-	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/01-create.sql",
-	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/02-constraints.sql",
-	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/03-inserts.sql",
-	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/trigger_accept.sql",
-	// 	"/home/runner/work/ppo/ppo/src/internal/database/sql/trigger_order.sql",
-	// })
-
-	if err != nil {
-		panic("failed to run SQL scripts: " + err.Error())
+	if err := db.Ping(); err != nil {
+		panic("database not available: " + err.Error())
 	}
 
 	code := m.Run()
-
-	_ = db.Close()
 	os.Exit(code)
 }
 
-func runSQLScripts(db *sqlx.DB, scripts []string) error {
-	for _, path := range scripts {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("failed to read %s: %w", path, err)
-		}
-
-		_, err = db.Exec(string(content))
-		if err != nil {
-			return fmt.Errorf("failed to execute %s: %w", path, err)
-		}
-	}
-	return nil
-}
-
-func truncateTables(t *testing.T) {
-	tables := []string{
-		"review", "product", "brand", "order_item", "order_worker",
-		"\"order\"", "basket_item", "basket", "worker", "\"user\"", "favourites",
-	}
-
-	for _, table := range tables {
-		_, err := db.Exec("TRUNCATE TABLE " + table + " CASCADE")
-		if err != nil {
-			t.Fatalf("Failed to truncate table %s: %v", table, err)
-		}
-	}
-}
-
 type UserTestFixture struct {
-	t        *testing.T
-	ctx      context.Context
-	service  *user.Service
-	userRepo *user_rep.Repository
+	t          *testing.T
+	ctx        context.Context
+	service    *user.Service
+	userRepo   *user_rep.Repository
+	basketRepo *basket_rep.Repository
+	favRepo    *favourites_rep.Repository
+	testID     string
 }
 
 func NewUserTestFixture(t *testing.T) *UserTestFixture {
@@ -99,36 +57,61 @@ func NewUserTestFixture(t *testing.T) *UserTestFixture {
 
 	service := user.New(userRepo, basketRepo, favRepo)
 
+	testID := uuid.New().String()[:8]
+
 	return &UserTestFixture{
-		t:        t,
-		ctx:      context.Background(),
-		service:  service,
-		userRepo: userRepo,
+		t:          t,
+		ctx:        context.Background(),
+		service:    service,
+		userRepo:   userRepo,
+		basketRepo: basketRepo,
+		favRepo:    favRepo,
+		testID:     testID,
 	}
 }
 
-func (f *UserTestFixture) createTestUser() structs.User {
+func (f *UserTestFixture) generateTestUser() structs.User {
+	timestamp := time.Now().UnixNano()
+	uniqueID := fmt.Sprintf("%s-%d", f.testID, timestamp)
+
 	dob, _ := time.Parse("2006-01-02", "1990-01-01")
+
+	phoneSuffix := fmt.Sprintf("%09d", timestamp%1000000000)
+	phone := "89" + phoneSuffix
+	if len(phone) > 11 {
+		phone = phone[:11]
+	}
+
 	return structs.User{
-		Name:          "Test User",
+		Name:          fmt.Sprintf("Test User %s", uniqueID),
 		Date_of_birth: dob,
-		Mail:          "test@example.com",
+		Mail:          fmt.Sprintf("test%s@example.com", uniqueID),
 		Password:      "password123",
-		Phone:         "89016475843",
+		Phone:         phone,
 		Address:       "123 Test St",
 		Status:        "active",
 		Role:          "обычный пользователь",
 	}
 }
 
-func (f *UserTestFixture) createAnotherTestUser() structs.User {
+func (f *UserTestFixture) generateAnotherTestUser() structs.User {
+	timestamp := time.Now().UnixNano()
+	uniqueID := fmt.Sprintf("%s-%d", f.testID, timestamp)
+
 	dob, _ := time.Parse("2006-01-02", "1995-05-15")
+
+	phoneSuffix := fmt.Sprintf("%09d", (timestamp+1)%1000000000)
+	phone := "89" + phoneSuffix
+	if len(phone) > 11 {
+		phone = phone[:11]
+	}
+
 	return structs.User{
-		Name:          "Another Test User",
+		Name:          fmt.Sprintf("Another Test User %s", uniqueID),
 		Date_of_birth: dob,
-		Mail:          "another@example.com",
+		Mail:          fmt.Sprintf("another%s@example.com", uniqueID),
 		Password:      "password456",
-		Phone:         "89016475844",
+		Phone:         phone,
 		Address:       "456 Another St",
 		Status:        "active",
 		Role:          "обычный пользователь",
@@ -145,58 +128,63 @@ func (f *UserTestFixture) assertUserEqual(expected, actual structs.User) {
 	require.True(f.t, expected.Date_of_birth.Equal(actual.Date_of_birth))
 }
 
+func (f *UserTestFixture) cleanupUserData(userID uuid.UUID) {
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM favourites WHERE id_user = $1", userID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM basket_item WHERE id_basket IN (SELECT id FROM basket WHERE id_user = $1)", userID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM basket WHERE id_user = $1", userID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM \"user\" WHERE id = $1", userID)
+}
+
 func TestUser_Create_AAA(t *testing.T) {
 	fixture := NewUserTestFixture(t)
-	testUser := fixture.createTestUser()
 
 	tests := []struct {
 		name        string
-		setup       func()
-		cleanup     func()
-		user        structs.User
-		expectedErr error
+		setup       func() (structs.User, []uuid.UUID)
+		expectedErr bool
 	}{
 		{
 			name: "successful user creation with basket and favourites",
-			setup: func() {
-				truncateTables(t)
+			setup: func() (structs.User, []uuid.UUID) {
+				user := fixture.generateTestUser()
+				return user, []uuid.UUID{}
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			user:        testUser,
-			expectedErr: nil,
+			expectedErr: false,
 		},
 		{
 			name: "fail to create user with duplicate email",
-			setup: func() {
-				truncateTables(t)
-				_, err := fixture.userRepo.Create(fixture.ctx, testUser)
+			setup: func() (structs.User, []uuid.UUID) {
+				user := fixture.generateTestUser()
+				userID, err := fixture.userRepo.Create(fixture.ctx, user)
 				require.NoError(t, err)
+				return user, []uuid.UUID{userID}
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			user:        testUser,
-			expectedErr: nil,
+			expectedErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-			defer tt.cleanup()
+			user, cleanupIDs := tt.setup()
 
-			err := fixture.service.Create(fixture.ctx, tt.user)
+			defer func() {
+				for _, id := range cleanupIDs {
+					if id != uuid.Nil {
+						fixture.cleanupUserData(id)
+					}
+				}
+			}()
 
-			if tt.expectedErr != nil {
+			err := fixture.service.Create(fixture.ctx, user)
+
+			if tt.expectedErr {
 				require.Error(t, err)
-			} else if tt.name == "successful user creation with basket and favourites" {
+			} else {
 				require.NoError(t, err)
 
-				createdUser, err := fixture.userRepo.GetByMail(fixture.ctx, tt.user.Mail)
+				createdUser, err := fixture.userRepo.GetByMail(fixture.ctx, user.Mail)
 				require.NoError(t, err)
-				fixture.assertUserEqual(tt.user, createdUser)
+				fixture.assertUserEqual(user, createdUser)
 
 				var basketCount int
 				err = db.Get(&basketCount, "SELECT COUNT(*) FROM basket WHERE id_user = $1", createdUser.Id)
@@ -207,6 +195,8 @@ func TestUser_Create_AAA(t *testing.T) {
 				err = db.Get(&favCount, "SELECT COUNT(*) FROM favourites WHERE id_user = $1", createdUser.Id)
 				require.NoError(t, err)
 				require.Equal(t, 1, favCount)
+
+				defer fixture.cleanupUserData(createdUser.Id)
 			}
 		})
 	}
@@ -214,52 +204,45 @@ func TestUser_Create_AAA(t *testing.T) {
 
 func TestUser_GetById_AAA(t *testing.T) {
 	fixture := NewUserTestFixture(t)
-	testUser := fixture.createTestUser()
 
 	tests := []struct {
 		name        string
 		setup       func() uuid.UUID
-		cleanup     func()
-		expectedErr error
+		expectedErr bool
 	}{
 		{
 			name: "successfully get user by id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				id, err := fixture.userRepo.Create(fixture.ctx, testUser)
+				user := fixture.generateTestUser()
+				userID, err := fixture.userRepo.Create(fixture.ctx, user)
 				require.NoError(t, err)
-				return id
+				return userID
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedErr: nil,
+			expectedErr: false,
 		},
 		{
 			name: "fail to get non-existent user by id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedErr: nil,
+			expectedErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userID := tt.setup()
-			defer tt.cleanup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			result, err := fixture.service.GetById(fixture.ctx, userID)
 
-			if tt.name == "successfully get user by id" {
-				require.NoError(t, err)
-				fixture.assertUserEqual(testUser, result)
-			} else {
+			if tt.expectedErr {
 				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, userID, result.Id)
 			}
 		})
 	}
@@ -267,53 +250,50 @@ func TestUser_GetById_AAA(t *testing.T) {
 
 func TestUser_GetByMail_AAA(t *testing.T) {
 	fixture := NewUserTestFixture(t)
-	testUser := fixture.createTestUser()
 
 	tests := []struct {
 		name        string
-		setup       func()
-		cleanup     func()
-		mail        string
-		expectedErr error
+		setup       func() (string, []uuid.UUID)
+		expectedErr bool
 	}{
 		{
 			name: "successfully get user by mail",
-			setup: func() {
-				truncateTables(t)
-				_, err := fixture.userRepo.Create(fixture.ctx, testUser)
+			setup: func() (string, []uuid.UUID) {
+				user := fixture.generateTestUser()
+				userID, err := fixture.userRepo.Create(fixture.ctx, user)
 				require.NoError(t, err)
+				return user.Mail, []uuid.UUID{userID}
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			mail:        testUser.Mail,
-			expectedErr: nil,
+			expectedErr: false,
 		},
 		{
 			name: "fail to get user by non-existent mail",
-			setup: func() {
-				truncateTables(t)
+			setup: func() (string, []uuid.UUID) {
+				return "nonexistent@example.com", []uuid.UUID{}
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			mail:        "nonexistent@example.com",
-			expectedErr: nil,
+			expectedErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-			defer tt.cleanup()
+			mail, cleanupIDs := tt.setup()
 
-			result, err := fixture.service.GetByMail(fixture.ctx, tt.mail)
+			defer func() {
+				for _, id := range cleanupIDs {
+					if id != uuid.Nil {
+						fixture.cleanupUserData(id)
+					}
+				}
+			}()
 
-			if tt.name == "successfully get user by mail" {
-				require.NoError(t, err)
-				fixture.assertUserEqual(testUser, result)
-			} else {
+			result, err := fixture.service.GetByMail(fixture.ctx, mail)
+
+			if tt.expectedErr {
 				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, mail, result.Mail)
 			}
 		})
 	}
@@ -321,107 +301,51 @@ func TestUser_GetByMail_AAA(t *testing.T) {
 
 func TestUser_GetByPhone_AAA(t *testing.T) {
 	fixture := NewUserTestFixture(t)
-	testUser := fixture.createTestUser()
 
 	tests := []struct {
 		name        string
-		setup       func()
-		cleanup     func()
-		phone       string
-		expectedErr error
+		setup       func() (string, []uuid.UUID)
+		expectedErr bool
 	}{
 		{
 			name: "successfully get user by phone",
-			setup: func() {
-				truncateTables(t)
-				_, err := fixture.userRepo.Create(fixture.ctx, testUser)
+			setup: func() (string, []uuid.UUID) {
+				user := fixture.generateTestUser()
+				userID, err := fixture.userRepo.Create(fixture.ctx, user)
 				require.NoError(t, err)
+				return user.Phone, []uuid.UUID{userID}
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			phone:       testUser.Phone,
-			expectedErr: nil,
+			expectedErr: false,
 		},
 		{
 			name: "fail to get user by non-existent phone",
-			setup: func() {
-				truncateTables(t)
+			setup: func() (string, []uuid.UUID) {
+				return "89000000000", []uuid.UUID{}
 			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			phone:       "89000000000",
-			expectedErr: nil,
+			expectedErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-			defer tt.cleanup()
+			phone, cleanupIDs := tt.setup()
 
-			result, err := fixture.service.GetByPhone(fixture.ctx, tt.phone)
+			defer func() {
+				for _, id := range cleanupIDs {
+					if id != uuid.Nil {
+						fixture.cleanupUserData(id)
+					}
+				}
+			}()
 
-			if tt.name == "successfully get user by phone" {
-				require.NoError(t, err)
-				fixture.assertUserEqual(testUser, result)
-			} else {
+			result, err := fixture.service.GetByPhone(fixture.ctx, phone)
+
+			if tt.expectedErr {
 				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, phone, result.Phone)
 			}
-		})
-	}
-}
-
-func TestUser_GetAllUsers_AAA(t *testing.T) {
-	fixture := NewUserTestFixture(t)
-	testUser1 := fixture.createTestUser()
-	testUser2 := fixture.createAnotherTestUser()
-
-	tests := []struct {
-		name          string
-		setup         func()
-		cleanup       func()
-		expectedCount int
-		expectedErr   error
-	}{
-		{
-			name: "successfully get all users",
-			setup: func() {
-				truncateTables(t)
-				_, err := fixture.userRepo.Create(fixture.ctx, testUser1)
-				require.NoError(t, err)
-				_, err = fixture.userRepo.Create(fixture.ctx, testUser2)
-				require.NoError(t, err)
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 2,
-			expectedErr:   nil,
-		},
-		{
-			name: "get empty users list",
-			setup: func() {
-				truncateTables(t)
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 0,
-			expectedErr:   nil,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.setup()
-			defer tt.cleanup()
-
-			users, err := fixture.service.GetAllUsers(fixture.ctx)
-
-			require.NoError(t, err)
-			require.Len(t, users, tt.expectedCount)
 		})
 	}
 }

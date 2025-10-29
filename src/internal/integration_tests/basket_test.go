@@ -2,11 +2,13 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/taucuya/ppo/internal/core/service/basket"
 	"github.com/taucuya/ppo/internal/core/structs"
@@ -20,13 +22,15 @@ type BasketTestFixture struct {
 	service    *basket.Service
 	basketRepo *basket_rep.Repository
 	userRepo   *user_rep.Repository
+	testID     string
 }
 
 func NewBasketTestFixture(t *testing.T) *BasketTestFixture {
 	basketRepo := basket_rep.New(db)
 	userRepo := user_rep.New(db)
-
 	service := basket.New(basketRepo)
+
+	testID := uuid.New().String()[:8]
 
 	return &BasketTestFixture{
 		t:          t,
@@ -34,98 +38,105 @@ func NewBasketTestFixture(t *testing.T) *BasketTestFixture {
 		service:    service,
 		basketRepo: basketRepo,
 		userRepo:   userRepo,
+		testID:     testID,
 	}
 }
 
-func (f *BasketTestFixture) createTestUser() structs.User {
+func (f *BasketTestFixture) generateTestUser() (structs.User, string) {
+	timestamp := time.Now().UnixNano()
+	randomUUID := uuid.New().String()[:8]
+	uniqueID := fmt.Sprintf("%s-%d-%s", f.testID, timestamp, randomUUID)
+
 	dob, _ := time.Parse("2006-01-02", "1990-01-01")
+	plainPassword := "password123"
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
+
+	phonePrefix := "89"
+	randomNumbers := fmt.Sprintf("%09d", timestamp%1000000000)
+	if len(randomNumbers) > 9 {
+		randomNumbers = randomNumbers[:9]
+	}
+	phone := phonePrefix + randomNumbers
+
 	return structs.User{
-		Name:          "Test User",
+		Name:          fmt.Sprintf("Test User %s", uniqueID),
 		Date_of_birth: dob,
-		Mail:          "test@example.com",
-		Password:      "password123",
-		Phone:         "89016475843",
-		Address:       "123 Test St",
+		Mail:          fmt.Sprintf("test%s@example.com", uniqueID),
+		Password:      string(hashedPassword),
+		Phone:         phone,
+		Address:       fmt.Sprintf("123 Test St %s", uniqueID),
 		Status:        "active",
 		Role:          "обычный пользователь",
-	}
+	}, plainPassword
 }
 
-func (f *BasketTestFixture) createTestBasket(userID uuid.UUID) structs.Basket {
-	return structs.Basket{
-		Id:     uuid.New(),
-		IdUser: userID,
-		Date:   time.Now(),
-	}
+func (f *BasketTestFixture) createUserForTest() (uuid.UUID, structs.User, string) {
+	testUser, plainPassword := f.generateTestUser()
+	userID, err := f.userRepo.Create(f.ctx, testUser)
+	require.NoError(f.t, err)
+	return userID, testUser, plainPassword
+}
+
+func (f *BasketTestFixture) cleanupUserData(userID uuid.UUID) {
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM basket_item WHERE id_basket IN (SELECT id FROM basket WHERE id_user = $1)", userID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM basket WHERE id_user = $1", userID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM \"user\" WHERE id = $1", userID)
 }
 
 func (f *BasketTestFixture) createTestProduct() uuid.UUID {
 	productID := uuid.New()
 	brandID := uuid.New()
-	_, err := db.Exec("INSERT INTO brand (id, name) VALUES ($1, $2)", brandID, "Test Brand")
+
+	uniqueArt := fmt.Sprintf("%s-PROD-%d", f.testID, time.Now().UnixNano())
+
+	_, err := db.ExecContext(f.ctx, "INSERT INTO brand (id, name) VALUES ($1, $2)", brandID, fmt.Sprintf("Test Brand %s", f.testID))
 	require.NoError(f.t, err)
-	_, err = db.Exec("INSERT INTO product (id, name, description, price, id_brand, amount, art) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-		productID, "Test Product", "Test Description", 1000, brandID, 10, "TEST-ART-123")
+
+	_, err = db.ExecContext(f.ctx,
+		"INSERT INTO product (id, name, description, price, id_brand, amount, art) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		productID, fmt.Sprintf("Test Product %s", uniqueArt), "Test Description", 1000.00, brandID, 10, uniqueArt)
 	require.NoError(f.t, err)
+
 	return productID
-}
-
-func (f *BasketTestFixture) setupUserWithBasket() (uuid.UUID, uuid.UUID) {
-	testUser := f.createTestUser()
-	userID, err := f.userRepo.Create(f.ctx, testUser)
-	require.NoError(f.t, err)
-
-	testBasket := structs.Basket{
-		IdUser: userID,
-		Date:   time.Now(),
-	}
-	err = f.basketRepo.Create(f.ctx, testBasket)
-	require.NoError(f.t, err)
-
-	basketID, err := f.basketRepo.GetBIdByUId(f.ctx, userID)
-	require.NoError(f.t, err)
-
-	return userID, basketID
 }
 
 func (f *BasketTestFixture) createTestBasketItem(basketID, productID uuid.UUID) structs.BasketItem {
 	return structs.BasketItem{
+		Id:        uuid.New(),
 		IdProduct: productID,
 		IdBasket:  basketID,
 		Amount:    2,
 	}
 }
+
 func TestBasket_Create_AAA(t *testing.T) {
 	fixture := NewBasketTestFixture(t)
 
 	tests := []struct {
 		name        string
-		setup       func() structs.Basket
-		cleanup     func()
+		setup       func() (structs.Basket, uuid.UUID)
 		expectedErr bool
 	}{
 		{
 			name: "successful basket creation",
-			setup: func() structs.Basket {
-				truncateTables(t)
-				testUser := fixture.createTestUser()
-				userID, err := fixture.userRepo.Create(fixture.ctx, testUser)
-				require.NoError(t, err)
-				return fixture.createTestBasket(userID)
-			},
-			cleanup: func() {
-				truncateTables(t)
+			setup: func() (structs.Basket, uuid.UUID) {
+				userID, _, _ := fixture.createUserForTest()
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				return basket, userID
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to create basket for non-existent user",
-			setup: func() structs.Basket {
-				truncateTables(t)
-				return fixture.createTestBasket(uuid.New())
-			},
-			cleanup: func() {
-				truncateTables(t)
+			setup: func() (structs.Basket, uuid.UUID) {
+				basket := structs.Basket{
+					IdUser: uuid.New(),
+					Date:   time.Now(),
+				}
+				return basket, uuid.Nil
 			},
 			expectedErr: true,
 		},
@@ -133,8 +144,10 @@ func TestBasket_Create_AAA(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			basket := tt.setup()
-			defer tt.cleanup()
+			basket, userID := tt.setup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			err := fixture.service.Create(fixture.ctx, basket)
 
@@ -153,29 +166,28 @@ func TestBasket_GetById_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() uuid.UUID
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully get basket by user id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				userID, _ := fixture.setupUserWithBasket()
+				userID, _, _ := fixture.createUserForTest()
+
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
 				return userID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to get basket for non-existent user",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -184,7 +196,9 @@ func TestBasket_GetById_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userID := tt.setup()
-			defer tt.cleanup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			result, err := fixture.service.GetById(fixture.ctx, userID)
 
@@ -204,19 +218,22 @@ func TestBasket_GetItems_AAA(t *testing.T) {
 	tests := []struct {
 		name          string
 		setup         func() uuid.UUID
-		cleanup       func()
 		expectedCount int
 		expectedErr   bool
 	}{
 		{
 			name: "successfully get empty basket items",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				userID, _ := fixture.setupUserWithBasket()
+				userID, _, _ := fixture.createUserForTest()
+
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
 				return userID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedCount: 0,
 			expectedErr:   false,
@@ -224,34 +241,30 @@ func TestBasket_GetItems_AAA(t *testing.T) {
 		{
 			name: "successfully get basket with items",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				userID, basketID := fixture.setupUserWithBasket()
+				userID, _, _ := fixture.createUserForTest()
 
-				brandID := uuid.New()
-				product1 := uuid.New()
-				product2 := uuid.New()
-
-				_, err := db.Exec(`INSERT INTO brand (id, name) VALUES ($1, $2)`, brandID, "Test Brand")
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
 				require.NoError(t, err)
 
-				_, err = db.Exec(`INSERT INTO product (id, name, description, price, id_brand, amount, art) 
-					VALUES ($1, $2, $3, $4, $5, $6, $7), ($8, $9, $10, $11, $12, $13, $14)`,
-					product1, "Product 1", "Desc 1", 1000, brandID, 10, "ART-001",
-					product2, "Product 2", "Desc 2", 2000, brandID, 5, "ART-002")
+				basketObj, err := fixture.service.GetById(fixture.ctx, userID)
 				require.NoError(t, err)
 
-				item1 := fixture.createTestBasketItem(basketID, product1)
-				item2 := fixture.createTestBasketItem(basketID, product2)
+				product1 := fixture.createTestProduct()
+				product2 := fixture.createTestProduct()
 
-				err = fixture.basketRepo.AddItem(fixture.ctx, item1)
+				item1 := fixture.createTestBasketItem(basketObj.Id, product1)
+				item2 := fixture.createTestBasketItem(basketObj.Id, product2)
+
+				err = fixture.service.AddItem(fixture.ctx, item1, userID)
 				require.NoError(t, err)
-				err = fixture.basketRepo.AddItem(fixture.ctx, item2)
+				err = fixture.service.AddItem(fixture.ctx, item2, userID)
 				require.NoError(t, err)
 
 				return userID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedCount: 2,
 			expectedErr:   false,
@@ -259,11 +272,7 @@ func TestBasket_GetItems_AAA(t *testing.T) {
 		{
 			name: "fail to get items for non-existent user",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedCount: 0,
 			expectedErr:   true,
@@ -273,7 +282,9 @@ func TestBasket_GetItems_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userID := tt.setup()
-			defer tt.cleanup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			items, err := fixture.service.GetItems(fixture.ctx, userID)
 
@@ -293,53 +304,64 @@ func TestBasket_AddItem_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() (structs.BasketItem, uuid.UUID)
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully add item to basket",
 			setup: func() (structs.BasketItem, uuid.UUID) {
-				truncateTables(t)
-				userID, basketID := fixture.setupUserWithBasket()
+				userID, _, _ := fixture.createUserForTest()
+
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
+				basketObj, err := fixture.service.GetById(fixture.ctx, userID)
+				require.NoError(t, err)
+
 				productID := fixture.createTestProduct()
-				item := fixture.createTestBasketItem(basketID, productID)
+				item := fixture.createTestBasketItem(basketObj.Id, productID)
+
 				return item, userID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "successfully update amount when adding existing item",
 			setup: func() (structs.BasketItem, uuid.UUID) {
-				truncateTables(t)
-				userID, basketID := fixture.setupUserWithBasket()
-				productID := fixture.createTestProduct()
+				userID, _, _ := fixture.createUserForTest()
 
-				item := fixture.createTestBasketItem(basketID, productID)
-				err := fixture.basketRepo.AddItem(fixture.ctx, item)
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
 				require.NoError(t, err)
 
-				sameItem := fixture.createTestBasketItem(basketID, productID)
+				basketObj, err := fixture.service.GetById(fixture.ctx, userID)
+				require.NoError(t, err)
+
+				productID := fixture.createTestProduct()
+				item := fixture.createTestBasketItem(basketObj.Id, productID)
+
+				err = fixture.service.AddItem(fixture.ctx, item, userID)
+				require.NoError(t, err)
+
+				sameItem := fixture.createTestBasketItem(basketObj.Id, productID)
 				sameItem.Amount = 3
+
 				return sameItem, userID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to add item to non-existent user basket",
 			setup: func() (structs.BasketItem, uuid.UUID) {
-				truncateTables(t)
 				productID := fixture.createTestProduct()
 				item := fixture.createTestBasketItem(uuid.New(), productID)
 				return item, uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -348,7 +370,9 @@ func TestBasket_AddItem_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			item, userID := tt.setup()
-			defer tt.cleanup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			err := fixture.service.AddItem(fixture.ctx, item, userID)
 
@@ -378,47 +402,53 @@ func TestBasket_DeleteItem_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() (uuid.UUID, uuid.UUID)
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully delete item from basket",
 			setup: func() (uuid.UUID, uuid.UUID) {
-				truncateTables(t)
-				userID, basketID := fixture.setupUserWithBasket()
-				productID := fixture.createTestProduct()
+				userID, _, _ := fixture.createUserForTest()
 
-				item := fixture.createTestBasketItem(basketID, productID)
-				err := fixture.basketRepo.AddItem(fixture.ctx, item)
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
+				basketObj, err := fixture.service.GetById(fixture.ctx, userID)
+				require.NoError(t, err)
+
+				productID := fixture.createTestProduct()
+				item := fixture.createTestBasketItem(basketObj.Id, productID)
+
+				err = fixture.service.AddItem(fixture.ctx, item, userID)
 				require.NoError(t, err)
 
 				return userID, productID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to delete non-existent item",
 			setup: func() (uuid.UUID, uuid.UUID) {
-				truncateTables(t)
-				userID, _ := fixture.setupUserWithBasket()
+				userID, _, _ := fixture.createUserForTest()
+
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
 				return userID, uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
 		{
 			name: "fail to delete item from non-existent user",
 			setup: func() (uuid.UUID, uuid.UUID) {
-				truncateTables(t)
 				return uuid.New(), uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -427,7 +457,9 @@ func TestBasket_DeleteItem_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userID, productID := tt.setup()
-			defer tt.cleanup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			err := fixture.service.DeleteItem(fixture.ctx, userID, productID)
 
@@ -450,47 +482,53 @@ func TestBasket_UpdateItemAmount_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() (uuid.UUID, uuid.UUID, int)
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully update item amount",
 			setup: func() (uuid.UUID, uuid.UUID, int) {
-				truncateTables(t)
-				userID, basketID := fixture.setupUserWithBasket()
-				productID := fixture.createTestProduct()
+				userID, _, _ := fixture.createUserForTest()
 
-				item := fixture.createTestBasketItem(basketID, productID)
-				err := fixture.basketRepo.AddItem(fixture.ctx, item)
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
+				basketObj, err := fixture.service.GetById(fixture.ctx, userID)
+				require.NoError(t, err)
+
+				productID := fixture.createTestProduct()
+				item := fixture.createTestBasketItem(basketObj.Id, productID)
+
+				err = fixture.service.AddItem(fixture.ctx, item, userID)
 				require.NoError(t, err)
 
 				return userID, productID, 5
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to update amount for non-existent item",
 			setup: func() (uuid.UUID, uuid.UUID, int) {
-				truncateTables(t)
-				userID, _ := fixture.setupUserWithBasket()
+				userID, _, _ := fixture.createUserForTest()
+
+				basket := structs.Basket{
+					IdUser: userID,
+					Date:   time.Now(),
+				}
+				err := fixture.service.Create(fixture.ctx, basket)
+				require.NoError(t, err)
+
 				return userID, uuid.New(), 5
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to update amount for non-existent user",
 			setup: func() (uuid.UUID, uuid.UUID, int) {
-				truncateTables(t)
 				return uuid.New(), uuid.New(), 5
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -499,7 +537,9 @@ func TestBasket_UpdateItemAmount_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			userID, productID, amount := tt.setup()
-			defer tt.cleanup()
+			if userID != uuid.Nil {
+				defer fixture.cleanupUserData(userID)
+			}
 
 			err := fixture.service.UpdateItemAmount(fixture.ctx, userID, productID, amount)
 

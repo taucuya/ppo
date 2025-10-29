@@ -91,13 +91,6 @@ func TestE2E_UserOrderFlow(t *testing.T) {
 	req, _ = http.NewRequest("POST", baseURL+"/api/v1/users/me/basket/items", bytes.NewBuffer(addToBasketBody))
 	req.Header.Set("Content-Type", "application/json")
 
-	// u, _ := url.Parse(baseURL)
-	// cookies := client.Jar.Cookies(u)
-	// fmt.Printf("🍪 Cookies before basket request: %d\n", len(cookies))
-	// for _, cookie := range cookies {
-	// 	fmt.Printf("  %s: %s\n", cookie.Name, cookie.Value)
-	// }
-
 	resp, err = client.Do(req)
 	require.NoError(t, err)
 	defer resp.Body.Close()
