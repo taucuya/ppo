@@ -170,7 +170,7 @@ const docTemplate = `{
                     {
                         "enum": [
                             "бюджет",
-                            "средний сегмент",
+                            "средний",
                             "люкс"
                         ],
                         "type": "string",
@@ -488,7 +488,7 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "уходовая",
+                            "уход",
                             "декоративная",
                             "парфюмерия",
                             "для волос",
@@ -922,7 +922,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить корзину",
                 "responses": {
@@ -968,7 +968,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить товары корзины",
                 "responses": {
@@ -1015,7 +1015,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Добавить товар в корзину",
                 "parameters": [
@@ -1076,7 +1076,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Удалить товар из корзины",
                 "parameters": [
@@ -1137,7 +1137,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Обновить количество товара",
                 "parameters": [
@@ -1200,7 +1200,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить избранные товары",
                 "responses": {
@@ -1310,7 +1310,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Удалить товар из избранного",
                 "parameters": [

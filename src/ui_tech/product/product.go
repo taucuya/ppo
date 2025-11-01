@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -24,7 +23,7 @@ func CreateProduct(client *http.Client, reader *bufio.Reader) {
 	fmt.Print("Category: ")
 	category, _ := reader.ReadString('\n')
 
-	fmt.Print("Brand: ")
+	fmt.Print("Brand ID: ")
 	brand, _ := reader.ReadString('\n')
 
 	fmt.Print("Price: ")
@@ -35,7 +34,7 @@ func CreateProduct(client *http.Client, reader *bufio.Reader) {
 	stock = strings.TrimSpace(stock)
 	amountInt, err := strconv.Atoi(stock)
 	if err != nil {
-		fmt.Println("❌ Invalid amount:", err)
+		fmt.Println("ERROR: Invalid amount:", err)
 		return
 	}
 
@@ -55,31 +54,30 @@ func CreateProduct(client *http.Client, reader *bufio.Reader) {
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
+		fmt.Println("ERROR: Failed to encode JSON:", err)
 		return
 	}
 
 	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/products", bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
 	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅ Product created!")
+		fmt.Println("SUCCESS: Product created successfully")
 	} else {
-		fmt.Println("❌ Failed to create product:", result["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -90,65 +88,102 @@ func DeleteProduct(client *http.Client, reader *bufio.Reader) {
 
 	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/products/"+id, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Product deleted!")
+		fmt.Println("SUCCESS: Product deleted successfully")
 	} else {
-		fmt.Println("❌ Error: Unable to delete product")
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
-func GetProduct(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter search query (e.g. art=123456 or id=12345): ")
-	query, _ := reader.ReadString('\n')
-	query = strings.TrimSpace(query)
+func GetProductById(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product ID: ")
+	id, _ := reader.ReadString('\n')
+	id = strings.TrimSpace(id)
 
-	url := "http://localhost:8080/api/v1/products/?" + query
+	url := "http://localhost:8080/api/v1/products?id=" + id
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		fmt.Printf("❌ Failed to get product. Status: %s\nDetails: %s\n", resp.Status, string(body))
+	if resp.StatusCode == http.StatusOK {
+		var product map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&product)
+		fmt.Println("SUCCESS: Product found")
+		fmt.Printf("ID:          %v\n", product["Id"])
+		fmt.Printf("Name:        %v\n", product["Name"])
+		fmt.Printf("Description: %v\n", product["Description"])
+		fmt.Printf("Price:       %.2f\n", product["Price"])
+		fmt.Printf("Category:    %v\n", product["Category"])
+		fmt.Printf("Amount:      %v\n", product["Amount"])
+		fmt.Printf("Brand ID:    %v\n", product["IdBrand"])
+		fmt.Printf("Articule:    %v\n", product["Articule"])
+		fmt.Printf("Picture URL: %v\n", product["PicLink"])
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
+	}
+}
+
+func GetProductByArticule(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product Articule: ")
+	articule, _ := reader.ReadString('\n')
+	articule = strings.TrimSpace(articule)
+
+	url := "http://localhost:8080/api/v1/products?art=" + articule
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
-	var product map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&product); err != nil {
-		fmt.Println("❌ Failed to decode product:", err)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
+	defer resp.Body.Close()
 
-	fmt.Println("✅ Product Information:")
-	fmt.Printf("  ID:          %v\n", product["Id"])
-	fmt.Printf("  Name:        %v\n", product["Name"])
-	fmt.Printf("  Description: %v\n", product["Description"])
-	fmt.Printf("  Price:       %.2f\n", product["Price"])
-	fmt.Printf("  Category:    %v\n", product["Category"])
-	fmt.Printf("  Amount:      %v\n", product["Amount"])
-	fmt.Printf("  Brand ID:    %v\n", product["IdBrand"])
-	fmt.Printf("  Articule:    %v\n", product["Articule"])
-	fmt.Printf("  Picture URL: %v\n", product["PicLink"])
+	if resp.StatusCode == http.StatusOK {
+		var product map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&product)
+		fmt.Println("SUCCESS: Product found")
+		fmt.Printf("ID:          %v\n", product["Id"])
+		fmt.Printf("Name:        %v\n", product["Name"])
+		fmt.Printf("Description: %v\n", product["Description"])
+		fmt.Printf("Price:       %.2f\n", product["Price"])
+		fmt.Printf("Category:    %v\n", product["Category"])
+		fmt.Printf("Amount:      %v\n", product["Amount"])
+		fmt.Printf("Brand ID:    %v\n", product["IdBrand"])
+		fmt.Printf("Articule:    %v\n", product["Articule"])
+		fmt.Printf("Picture URL: %v\n", product["PicLink"])
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
+	}
 }
 
 func GetProductsByCategory(client *http.Client, reader *bufio.Reader) {
@@ -156,38 +191,30 @@ func GetProductsByCategory(client *http.Client, reader *bufio.Reader) {
 	category, _ := reader.ReadString('\n')
 	category = strings.TrimSpace(category)
 
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/products/?category="+category, nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/products?category="+category, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		fmt.Printf("❌ Failed to get products. Status: %s\nDetails: %s\n", resp.Status, string(body))
-		return
-	}
-
-	var products []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
-		fmt.Println("❌ Failed to decode products:", err)
-		return
-	}
-
-	if len(products) == 0 {
-		fmt.Println("No products found in this category.")
-		return
-	}
-	fmt.Printf("✅ Products in category '%s':\n", category)
-	for i, p := range products {
-		fmt.Printf("%d. %v — %v руб. (ID: %v)\n", i+1, p["Name"], p["Price"], p["Id"])
+	if resp.StatusCode == http.StatusOK {
+		var products []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&products)
+		fmt.Printf("SUCCESS: Found %d products in category '%s'\n", len(products), category)
+		for i, p := range products {
+			fmt.Printf("%d: %v - %.2f руб. (ID: %v)\n", i+1, p["Name"], p["Price"], p["Id"])
+		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -196,29 +223,65 @@ func GetProductsByBrand(client *http.Client, reader *bufio.Reader) {
 	brand, _ := reader.ReadString('\n')
 	brand = strings.TrimSpace(brand)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/products/?brand=%s", brand)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/products?brand=%s", brand)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var products []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&products); err != nil {
-		fmt.Println("❌ Failed to decode products:", err)
+	if resp.StatusCode == http.StatusOK {
+		var products []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&products)
+		fmt.Printf("SUCCESS: Found %d products by brand '%s'\n", len(products), brand)
+		for i, p := range products {
+			fmt.Printf("%d: %v - %.2f руб. (ID: %v)\n", i+1, p["Name"], p["Price"], p["Id"])
+		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
+	}
+}
+
+func GetReviewsForProduct(client *http.Client, reader *bufio.Reader) {
+	fmt.Print("Enter Product ID: ")
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
+
+	url := fmt.Sprintf("http://localhost:8080/api/v1/products/%s/reviews", productID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
-	fmt.Println("✅ Products by brand:")
-	for i, p := range products {
-		fmt.Printf("%d. %v — %v руб. (ID: %v)\n", i+1, p["Name"], p["Price"], p["Id"])
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("ERROR: Request failed:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		var reviews []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&reviews)
+		fmt.Printf("SUCCESS: Found %d reviews for product\n", len(reviews))
+		for i, review := range reviews {
+			fmt.Printf("%d: Rating: %v, Text: %v, Date: %v\n",
+				i+1, review["Rating"], review["Text"], review["Date"])
+		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }

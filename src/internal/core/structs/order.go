@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,3 +22,7 @@ type Order struct {
 	Status  string
 	Price   float64
 }
+
+var (
+	ErrOrderNotFound = errors.New("order not found")
+)

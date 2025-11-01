@@ -53,6 +53,7 @@ func runSQLScripts(db *sqlx.DB, scripts []string) error {
 			return fmt.Errorf("failed to execute %s: %w", path, err)
 		}
 	}
+	log.Println("SQL completed")
 	return nil
 }
 
@@ -64,8 +65,18 @@ func loadEnv() {
 
 func main() {
 
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Cant open log file: %v", err)
+	}
+
+	log.SetOutput(logFile)
+
+	log.Println("HELLO")
+
 	loadEnv()
 	dsn := os.Getenv("DB_DSN")
+	log.Println("DSN,", dsn)
 	key := []byte(os.Getenv("JWT_SECRET"))
 	acstime, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_LIFETIME_MINUTES"))
 	if err != nil {
@@ -81,20 +92,18 @@ func main() {
 		panic("failed to connect to test database: " + err.Error())
 	}
 
+	if err := db.Ping(); err != nil {
+		panic(err)
+	}
+
 	_ = runSQLScripts(db, []string{
+		"/home/taya/Desktop/ppo/src/internal/database/sql/delete.sql",
 		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
 		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
 		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
 	})
-
-	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Cant open log file: %v", err)
-	}
-
-	log.SetOutput(logFile)
 
 	gin.DefaultWriter = logFile
 

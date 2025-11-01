@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -33,6 +34,8 @@ type CreateBrandRequest struct {
 func (c *Controller) CreateBrandHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to create brand")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -74,6 +77,8 @@ func (c *Controller) CreateBrandHandler(ctx *gin.Context) {
 func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get brand")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -87,6 +92,13 @@ func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
 	brand, err := c.BrandService.GetById(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get brand by id: %v", err)
+		if errors.Is(err, structs.ErrBrandNotFound) ||
+			errors.Is(err, structs.ErrNotFound) ||
+			errors.Is(err, structs.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Brand not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Brand not found"})
 		return
 	}
@@ -112,6 +124,8 @@ func (c *Controller) GetBrandByIdHandler(ctx *gin.Context) {
 func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete brand")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -124,6 +138,12 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 
 	if err = c.BrandService.Delete(ctx, id); err != nil {
 		log.Printf("[ERROR] Cant delete brand: %v", err)
+		if errors.Is(err, structs.ErrBrandNotFound) ||
+			errors.Is(err, structs.ErrNotFound) ||
+			errors.Is(err, structs.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Brand not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -136,7 +156,7 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 // @Tags brands
 // @Accept json
 // @Produce json
-// @Param category query string true "Ценовая категория" Enums(бюджет, средний сегмент, люкс)
+// @Param category query string true "Ценовая категория" Enums(бюджет, средний, люкс)
 // @Success 200 {array} object "Список брендов в категории"
 // @Failure 400 {object} object "Неверная категория"
 // @Failure 404 {object} object "Бренды не найден"
@@ -145,7 +165,7 @@ func (c *Controller) DeleteBrandHandler(ctx *gin.Context) {
 func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {
 	category := ctx.Query("category")
 
-	possible := []string{"бюджет", "средний сегмент", "люкс"}
+	possible := []string{"бюджет", "средний", "люкс"}
 	inarr := false
 	for _, i := range possible {
 		if category == i {
@@ -161,7 +181,19 @@ func (c *Controller) GetAllBrandsInCategoryHander(ctx *gin.Context) {
 	res, err := c.BrandService.GetAllBrandsInCategory(ctx, category)
 	if err != nil {
 		log.Printf("[ERROR] Cant get brands by category: %v", err)
+
+		if errors.Is(err, structs.ErrBrandNotFound) ||
+			errors.Is(err, structs.ErrNotFound) ||
+			errors.Is(err, structs.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No brands found in this category"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	if len(res) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No brands found in this category"})
+		return
 	}
 	ctx.JSON(http.StatusOK, res)
 }

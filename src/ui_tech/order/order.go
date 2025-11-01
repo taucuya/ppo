@@ -17,264 +17,223 @@ func CreateOrder(client *http.Client, reader *bufio.Reader) {
 	address, _ := reader.ReadString('\n')
 	address = strings.TrimSpace(address)
 
-	payload := map[string]string{
-		"address": address,
-	}
+	payload := map[string]string{"address": address}
+	body, _ := json.Marshal(payload)
 
-	body, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
-		return
-	}
-
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/orders", bytes.NewBuffer(body))
-	if err != nil {
-		fmt.Println("❌ Request creation failed:", err)
-		return
-	}
+	req, _ := http.NewRequest("POST", "http://localhost:8080/api/v1/users/me/orders", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅ Order created successfully.")
-	} else {
-		var errResp map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&errResp)
-		fmt.Println("❌ Error:", errResp["error"])
+	body, _ = io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusCreated {
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
+		return
 	}
+
+	fmt.Println("SUCCESS: Order created")
 }
 
 func GetOrderById(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter Order ID (UUID): ")
+	fmt.Print("Enter Order ID: ")
 	orderID, _ := reader.ReadString('\n')
 	orderID = strings.TrimSpace(orderID)
-	_, err := uuid.Parse(orderID)
-	if err != nil {
-		fmt.Println("❌ Invalid UUID:", err)
+
+	if _, err := uuid.Parse(orderID); err != nil {
+		fmt.Println("ERROR: Invalid order ID")
 		return
 	}
 
-	resp, err := client.Get("http://localhost:8080/api/v1/orders/" + orderID)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users/me/orders/%s", orderID)
+	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
-	var order map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&order)
+	body, _ := io.ReadAll(resp.Body)
 
-	fmt.Println("✅ Order Info:")
-	fmt.Println("ID:      ", order["Id"])
-	fmt.Println("Date:    ", order["Date"])
-	fmt.Println("User ID: ", order["IdUser"])
-	fmt.Println("Address: ", order["Address"])
-	fmt.Println("Status:  ", order["Status"])
-	fmt.Println("Price:   ", order["Price"])
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
+		return
+	}
+
+	var order map[string]interface{}
+	json.Unmarshal(body, &order)
+
+	fmt.Println("SUCCESS: Order details")
+	fmt.Printf("ID: %v\nStatus: %v\nAddress: %v\nPrice: %v\n",
+		order["Id"], order["Status"], order["Address"], order["Price"])
 }
 
 func GetOrderItems(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter Order ID (UUID) to fetch items: ")
+	fmt.Print("Enter Order ID: ")
 	orderID, _ := reader.ReadString('\n')
 	orderID = strings.TrimSpace(orderID)
 
-	_, err := uuid.Parse(orderID)
-	if err != nil {
-		fmt.Println("❌ Invalid UUID:", err)
+	if _, err := uuid.Parse(orderID); err != nil {
+		fmt.Println("ERROR: Invalid order ID")
 		return
 	}
 
-	resp, err := client.Get("http://localhost:8080/api/v1/order/items/" + orderID)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users/me/orders/%s/items", orderID)
+	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		fmt.Printf("❌ Error: %s\n", string(body))
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
 		return
 	}
 
 	var items []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&items); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
+	json.Unmarshal(body, &items)
 
-	if len(items) == 0 {
-		fmt.Println("No items found in the order.")
-		return
-	}
-
-	fmt.Println("✅ Order Items:")
+	fmt.Printf("SUCCESS: %d items found\n", len(items))
 	for i, item := range items {
-		fmt.Printf("\nItem #%d:\n", i+1)
-		fmt.Println("  ID:       ", item["Id"])
-		fmt.Println("  Product:  ", item["IdProduct"])
-		fmt.Println("  Amount:   ", item["Amount"])
+		fmt.Printf("%d. Product: %v, Amount: %v\n", i+1, item["IdProduct"], item["Amount"])
 	}
 }
 
 func GetFreeOrders(client *http.Client) {
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/orders/?status=непринятый", nil)
-	if err != nil {
-		fmt.Println("Failed to create request:", err)
-		return
-	}
-
+	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/users/me/orders?status=непринятый", nil)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("❌ Failed to get free orders. Status: %s\n", resp.Status)
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
 		return
 	}
 
 	var orders []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&orders); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
+	json.Unmarshal(body, &orders)
 
-	if len(orders) == 0 {
-		fmt.Println("ℹ️ No free orders available.")
-		return
-	}
-
-	fmt.Println("✅ Free Orders:")
+	fmt.Printf("SUCCESS: %d free orders\n", len(orders))
 	for i, order := range orders {
-		fmt.Printf("\nOrder #%d\n", i+1)
-		fmt.Printf("  ID:      %v\n", order["Id"])
-		fmt.Printf("  Status:  %v\n", order["Status"])
-		fmt.Printf("  Address: %v\n", order["Address"])
-		fmt.Printf("  Price:   %v\n", order["Price"])
-		fmt.Printf("  Date:    %v\n", order["Date"])
+		fmt.Printf("%d. ID: %v, Address: %v, Price: %v\n",
+			i+1, order["Id"], order["Address"], order["Price"])
 	}
 }
 
 func ChangeOrderStatus(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter Order ID (UUID): ")
+	fmt.Print("Enter Order ID: ")
 	orderID, _ := reader.ReadString('\n')
 	orderID = strings.TrimSpace(orderID)
 
-	_, err := uuid.Parse(orderID)
-	if err != nil {
-		fmt.Println("❌ Invalid UUID:", err)
+	if _, err := uuid.Parse(orderID); err != nil {
+		fmt.Println("ERROR: Invalid order ID")
 		return
 	}
 
-	fmt.Print("Enter new status for the order: ")
+	fmt.Print("Enter new status: ")
 	status, _ := reader.ReadString('\n')
 	status = strings.TrimSpace(status)
 
-	payload := map[string]string{"status": status}
-	body, _ := json.Marshal(payload)
-
-	req, err := http.NewRequest("PATCH", "http://localhost:8080/api/v1/orders/"+orderID+"?status="+status, bytes.NewBuffer(body))
-	if err != nil {
-		fmt.Println("❌ Request creation failed:", err)
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
-
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users/me/orders/%s?status=%s", orderID, status)
+	req, _ := http.NewRequest("PATCH", url, nil)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Status updated successfully.")
-	} else {
-		var errResp map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&errResp)
-		fmt.Println("❌ Error:", errResp["error"])
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
+		return
 	}
+
+	fmt.Println("SUCCESS: Status updated")
 }
 
 func DeleteOrder(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Enter Order ID (UUID) to delete: ")
+	fmt.Print("Enter Order ID: ")
 	orderID, _ := reader.ReadString('\n')
 	orderID = strings.TrimSpace(orderID)
 
-	_, err := uuid.Parse(orderID)
-	if err != nil {
-		fmt.Println("❌ Invalid UUID:", err)
+	if _, err := uuid.Parse(orderID); err != nil {
+		fmt.Println("ERROR: Invalid order ID")
 		return
 	}
 
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/orders/"+orderID, nil)
-	if err != nil {
-		fmt.Println("❌ Request creation failed:", err)
-		return
-	}
-
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users/me/orders/%s", orderID)
+	req, _ := http.NewRequest("DELETE", url, nil)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Order deleted successfully.")
-	} else {
-		var errResp map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&errResp)
-		fmt.Println("❌ Error:", errResp["error"])
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
+		return
 	}
+
+	fmt.Println("SUCCESS: Order deleted")
 }
 
 func GetOrdersByUser(client *http.Client) {
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/orders/", nil)
-	if err != nil {
-		fmt.Println("Failed to create request:", err)
-		return
-	}
-
+	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/users/me/orders", nil)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Request failed:", err)
+		fmt.Println("ERROR: Request failed")
 		return
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("❌ Failed to get orders. Status: %s\n", resp.Status)
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
 		return
 	}
 
 	var orders []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&orders); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
+	json.Unmarshal(body, &orders)
 
-	if len(orders) == 0 {
-		fmt.Println("ℹ️ No orders available.")
-		return
-	}
-
-	fmt.Println("✅ User Orders:")
+	fmt.Printf("SUCCESS: %d orders\n", len(orders))
 	for i, order := range orders {
-		fmt.Printf("\nOrder #%d\n", i+1)
-		fmt.Printf("  ID:      %v\n", order["Id"])
-		fmt.Printf("  Status:  %v\n", order["Status"])
-		fmt.Printf("  Address: %v\n", order["Address"])
-		fmt.Printf("  Price:   %v\n", order["Price"])
-		fmt.Printf("  Date:    %v\n", order["Date"])
+		fmt.Printf("%d. ID: %v, Status: %v, Price: %v\n",
+			i+1, order["Id"], order["Status"], order["Price"])
 	}
+}
+
+func extractErrorMessage(body []byte) string {
+	if len(body) == 0 {
+		return "Unknown error"
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return string(body)
+	}
+
+	if errorMsg, ok := result["error"].(string); ok {
+		return errorMsg
+	}
+
+	return string(body)
 }

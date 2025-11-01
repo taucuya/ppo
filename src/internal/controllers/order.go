@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -109,6 +110,8 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get order items")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -122,7 +125,17 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 	items, err := c.OrderService.GetItems(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get order items: %v", err)
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Order items not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(items) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No items in order"})
 		return
 	}
 
@@ -158,6 +171,8 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 	goodA := c.VerifyA(ctx)
 
 	if !goodW && !goodA {
+		log.Printf("[ERROR] Cant autorize to get free orders")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 	status := ctx.Query("status")
@@ -169,6 +184,11 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 	ords, err := c.OrderService.GetFreeOrders(ctx)
 	if err != nil {
 		log.Printf("[ERROR] Cant get free orders: %v", err)
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No free orders found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -195,6 +215,8 @@ func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 	goodA := c.VerifyA(ctx)
 
 	if !goodW && !goodA {
+		log.Printf("[ERROR] Cant autorize to get order")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -208,6 +230,13 @@ func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
 	order, err := c.OrderService.GetById(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get order by id: %v", err)
+
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
 		return
 	}
@@ -236,6 +265,8 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	goodA := c.VerifyA(ctx)
 
 	if !goodW && !goodA {
+		log.Printf("[ERROR] Cant autorize to change order status")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -247,6 +278,7 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	for _, i := range possible {
 		if status == i {
 			inarr = true
+			break
 		}
 	}
 	if !inarr {
@@ -265,6 +297,13 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 	err = c.OrderService.ChangeOrderStatus(ctx, id, status)
 	if err != nil {
 		log.Printf("[ERROR] Cant change order status: %v", err)
+
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -289,6 +328,8 @@ func (c *Controller) ChangeOrderStatusHandler(ctx *gin.Context) {
 func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete order")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -301,6 +342,11 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 
 	if err := c.OrderService.Delete(ctx, id); err != nil {
 		log.Printf("[ERROR] Cant delete order by id: %v", err)
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -311,6 +357,8 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get orders")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -328,12 +376,22 @@ func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.OrderService.GetOrdersByUser(ctx, id)
+	orders, err := c.OrderService.GetOrdersByUser(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get orders by user: %v", err)
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No orders found for user"})
+			return
+		}
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Orders not found"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	if len(orders) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No orders found for user"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orders)
 }

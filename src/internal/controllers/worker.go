@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -31,6 +32,8 @@ type CreateWorkerRequest struct {
 func (c *Controller) CreateWorkerHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to create worker")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -49,6 +52,17 @@ func (c *Controller) CreateWorkerHandler(ctx *gin.Context) {
 
 	if err := c.WorkerService.Create(ctx, worker); err != nil {
 		log.Printf("[ERROR] Cant create worker: %v", err)
+
+		if errors.Is(err, structs.ErrDuplicateWorker) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Worker already exists for this user"})
+			return
+		}
+
+		if errors.Is(err, structs.ErrUserNotFound) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -74,6 +88,8 @@ func (c *Controller) CreateWorkerHandler(ctx *gin.Context) {
 func (c *Controller) DeleteWorkerHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete worker")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -86,6 +102,11 @@ func (c *Controller) DeleteWorkerHandler(ctx *gin.Context) {
 
 	if err := c.WorkerService.Delete(ctx, id); err != nil {
 		log.Printf("[ERROR] Cant delete worker by id: %v", err)
+		if errors.Is(err, structs.ErrWorkerNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Worker not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -110,6 +131,8 @@ func (c *Controller) DeleteWorkerHandler(ctx *gin.Context) {
 func (c *Controller) GetWorkerByIdHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get worker")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -123,6 +146,11 @@ func (c *Controller) GetWorkerByIdHandler(ctx *gin.Context) {
 	worker, err := c.WorkerService.GetById(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get worker by id: %v", err)
+		if errors.Is(err, structs.ErrWorkerNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Worker not found"})
+			return
+		}
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Worker not found"})
 		return
 	}
@@ -145,6 +173,8 @@ func (c *Controller) GetWorkerByIdHandler(ctx *gin.Context) {
 func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
 	good := c.VerifyW(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get worker orders")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -162,14 +192,24 @@ func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
 		return
 	}
 
-	worker, err := c.WorkerService.GetOrders(ctx, id)
+	orders, err := c.WorkerService.GetOrders(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get worker orders: %v", err)
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Orders not found"})
+			return
+		}
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Orders not found"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, worker)
+	if len(orders) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No orders found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, orders)
 }
 
 // GetAllWorkersHandler получает всех работников
@@ -188,13 +228,25 @@ func (c *Controller) GetWorkerOrders(ctx *gin.Context) {
 func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get all workers")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
 	workers, err := c.WorkerService.GetAllWorkers(ctx)
 	if err != nil {
 		log.Printf("[ERROR] Cant get all workers: %v", err)
+		if errors.Is(err, structs.ErrWorkerNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No workers found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(workers) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No workers found"})
 		return
 	}
 
@@ -219,6 +271,8 @@ func (c *Controller) GetAllWorkersHandler(ctx *gin.Context) {
 func (c *Controller) AcceptOrderHandler(ctx *gin.Context) {
 	good := c.VerifyW(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to accept order")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -251,6 +305,16 @@ func (c *Controller) AcceptOrderHandler(ctx *gin.Context) {
 
 	if err := c.WorkerService.AcceptOrder(ctx, id_ord, id); err != nil {
 		log.Printf("[ERROR] Cant accept order: %v", err)
+		if errors.Is(err, structs.ErrOrderNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+			return
+		}
+
+		if errors.Is(err, structs.ErrOrderAlreadyAccepted) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Order already accepted"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

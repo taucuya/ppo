@@ -159,7 +159,7 @@
                     {
                         "enum": [
                             "бюджет",
-                            "средний сегмент",
+                            "средний",
                             "люкс"
                         ],
                         "type": "string",
@@ -477,7 +477,7 @@
                     },
                     {
                         "enum": [
-                            "уходовая",
+                            "уход",
                             "декоративная",
                             "парфюмерия",
                             "для волос",
@@ -911,7 +911,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить корзину",
                 "responses": {
@@ -957,7 +957,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить товары корзины",
                 "responses": {
@@ -1004,7 +1004,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Добавить товар в корзину",
                 "parameters": [
@@ -1065,7 +1065,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Удалить товар из корзины",
                 "parameters": [
@@ -1126,7 +1126,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Обновить количество товара",
                 "parameters": [
@@ -1189,7 +1189,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить избранные товары",
                 "responses": {
@@ -1299,7 +1299,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Удалить товар из избранного",
                 "parameters": [

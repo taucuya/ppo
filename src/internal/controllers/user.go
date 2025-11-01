@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/taucuya/ppo/internal/core/structs"
 )
 
 // GetUserByPrivatesHandler получает пользователя по email или телефону
@@ -32,12 +34,13 @@ func (c *Controller) GetUserByPrivatesHandler(ctx *gin.Context) {
 	} else {
 		c.GetAllUsersHandler(ctx)
 	}
-	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email or phone parameter is required"})
 }
 
 func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get user")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -50,6 +53,13 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 	user, err := c.UserService.GetByMail(ctx, email)
 	if err != nil {
 		log.Printf("[ERROR] Cant get user by mail: %v", err)
+
+		if errors.Is(err, structs.ErrUserNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -60,17 +70,29 @@ func (c *Controller) GetUserByEmailHandler(ctx *gin.Context) {
 func (c *Controller) GetAllUsersHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get users")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
-	user, err := c.UserService.GetAllUsers(ctx)
+	users, err := c.UserService.GetAllUsers(ctx)
 	if err != nil {
 		log.Printf("[ERROR] Cant get all users: %v", err)
+		if errors.Is(err, structs.ErrUserNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No users found"})
+			return
+		}
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	if len(users) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No users found"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, users)
 }
 
 // func (c *Controller) GetUserByIdHandler(ctx *gin.Context) {
@@ -97,6 +119,8 @@ func (c *Controller) GetAllUsersHandler(ctx *gin.Context) {
 func (c *Controller) GetUserByPhoneHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get user")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -109,6 +133,13 @@ func (c *Controller) GetUserByPhoneHandler(ctx *gin.Context) {
 	user, err := c.UserService.GetByPhone(ctx, phone)
 	if err != nil {
 		log.Printf("[ERROR] Cant get user by phone: %v", err)
+
+		if errors.Is(err, structs.ErrUserNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}

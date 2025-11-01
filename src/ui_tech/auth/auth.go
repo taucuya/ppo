@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 func Signup(client *http.Client, reader *bufio.Reader) {
@@ -43,24 +41,40 @@ func Signup(client *http.Client, reader *bufio.Reader) {
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println("Failed to encode JSON:", err)
+		fmt.Println("ERROR: Failed to encode JSON:", err)
 		return
 	}
 
 	resp, err := http.Post("http://localhost:8080/api/v1/auth/signup", "application/json", bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println("Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("ERROR: Failed to read response:", err)
+		return
+	}
 
-	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅", result["message"])
-	} else {
-		fmt.Println("❌ Signup failed:", result["error"])
+	var result map[string]interface{}
+	if len(responseBody) > 0 {
+		if err := json.Unmarshal(responseBody, &result); err != nil {
+			fmt.Println("ERROR: Failed to parse response:", err)
+			return
+		}
+	}
+
+	switch resp.StatusCode {
+	case http.StatusCreated:
+		fmt.Println("SUCCESS:", result["message"])
+	case http.StatusBadRequest:
+		fmt.Println("ERROR: Invalid input data:", result["error"])
+	case http.StatusInternalServerError:
+		fmt.Println("ERROR: Registration failed:", result["error"])
+	default:
+		fmt.Printf("ERROR: Unexpected error (status %d): %v\n", resp.StatusCode, result["error"])
 	}
 }
 
@@ -81,42 +95,49 @@ func Login(client *http.Client, reader *bufio.Reader) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	responseBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("❌ Failed to read response body:", err)
+		fmt.Println("ERROR: Failed to read response:", err)
 		return
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		var errorResponse gin.H
-		if err := json.Unmarshal(responseBody, &errorResponse); err != nil {
-			fmt.Printf("❌ Login failed (status %d), and failed to parse error response: %v\n", resp.StatusCode, err)
+	var result map[string]interface{}
+	if len(responseBody) > 0 {
+		if err := json.Unmarshal(responseBody, &result); err != nil {
+			fmt.Println("ERROR: Failed to parse response:", err)
 			return
 		}
-		fmt.Printf("❌ Login failed: %v (status %d)\n", errorResponse["error"], resp.StatusCode)
-		return
 	}
 
-	cookies := resp.Cookies()
-	var gotAccessToken, gotRefreshToken bool
-	for _, cookie := range cookies {
-		if cookie.Name == "access_token" {
-			gotAccessToken = true
+	switch resp.StatusCode {
+	case http.StatusOK:
+		cookies := resp.Cookies()
+		var gotAccessToken, gotRefreshToken bool
+		for _, cookie := range cookies {
+			if cookie.Name == "access_token" {
+				gotAccessToken = true
+			}
+			if cookie.Name == "refresh_token" {
+				gotRefreshToken = true
+			}
 		}
-		if cookie.Name == "refresh_token" {
-			gotRefreshToken = true
-		}
-	}
 
-	if gotAccessToken && gotRefreshToken {
-		fmt.Println("✅ Logged in successfully!")
-	} else {
-		fmt.Println("✅ Login successful but tokens not set in cookies")
+		if gotAccessToken && gotRefreshToken {
+			fmt.Println("SUCCESS: Logged in successfully!")
+		} else {
+			fmt.Println("WARNING: Login successful but tokens not set in cookies")
+		}
+	case http.StatusBadRequest:
+		fmt.Println("ERROR: Invalid input data:", result["error"])
+	case http.StatusUnauthorized:
+		fmt.Println("ERROR: Invalid credentials:", result["error"])
+	default:
+		fmt.Printf("ERROR: Login failed (status %d): %v\n", resp.StatusCode, result["error"])
 	}
 }
 
@@ -132,7 +153,7 @@ func Logout(client *http.Client) {
 	}
 
 	if rtoken == "" {
-		fmt.Println("❌ No refresh_token found")
+		fmt.Println("ERROR: No refresh token found")
 		return
 	}
 
@@ -143,10 +164,33 @@ func Logout(client *http.Client) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Logout failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("✅", "Logged out")
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("ERROR: Failed to read response:", err)
+		return
+	}
+
+	var result map[string]interface{}
+	if len(responseBody) > 0 {
+		if err := json.Unmarshal(responseBody, &result); err != nil {
+			fmt.Println("ERROR: Failed to parse response:", err)
+			return
+		}
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+		fmt.Println("SUCCESS: Logged out successfully")
+	case http.StatusBadRequest:
+		fmt.Println("ERROR: Invalid input data:", result["error"])
+	case http.StatusInternalServerError:
+		fmt.Println("ERROR: Logout failed:", result["error"])
+	default:
+		fmt.Printf("ERROR: Unexpected error (status %d): %v\n", resp.StatusCode, result["error"])
+	}
 }

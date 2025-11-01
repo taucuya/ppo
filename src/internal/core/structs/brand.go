@@ -1,6 +1,10 @@
 package structs
 
-import "github.com/google/uuid"
+import (
+	"errors"
+
+	"github.com/google/uuid"
+)
 
 type Brand struct {
 	Id            uuid.UUID
@@ -8,3 +12,9 @@ type Brand struct {
 	Description   string
 	PriceCategory string
 }
+
+var (
+	ErrBrandNotFound = errors.New("brand not found")
+	ErrNotFound      = errors.New("not found")
+	ErrNoRows        = errors.New("no rows in result set")
+)

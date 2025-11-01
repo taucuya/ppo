@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -16,7 +17,7 @@ type AddFavouriteRequest struct {
 // GetFavouritesHandler получает все товары в избранном пользователя
 // @Summary Получить избранные товары
 // @Description Возвращает список всех товаров в избранном текущего пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -29,6 +30,8 @@ type AddFavouriteRequest struct {
 func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get favourites")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -49,7 +52,17 @@ func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 	items, err := c.FavouritesService.GetItems(ctx.Request.Context(), id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get favourites items: %v", err)
+		if errors.Is(err, structs.ErrFavouritesNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Favourites not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get items"})
+		return
+	}
+
+	if len(items) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No items in favourites"})
 		return
 	}
 
@@ -72,6 +85,8 @@ func (c *Controller) GetFavouritesHandler(ctx *gin.Context) {
 func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get favourites items")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -110,6 +125,10 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 
 	if err := c.FavouritesService.AddItem(ctx.Request.Context(), item, id); err != nil {
 		log.Printf("[ERROR] Cant add item to favourites: %v", err)
+		if errors.Is(err, structs.ErrDuplicateItem) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Item already in favourites"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add item"})
 		return
 	}
@@ -120,7 +139,7 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 // DeleteFavouritesItemHandler удаляет товар из избранного
 // @Summary Удалить товар из избранного
 // @Description Удаляет товар из избранного текущего пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -134,6 +153,8 @@ func (c *Controller) AddFavouritesItemHandler(ctx *gin.Context) {
 func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete favourites item")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -151,7 +172,7 @@ func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {
 		return
 	}
 
-	id_item, err := uuid.Parse(ctx.Param("id"))
+	id_item, err := uuid.Parse(ctx.Param("id_product"))
 	if err != nil {
 		log.Printf("[ERROR] Cant parse favourites id: %v", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -160,6 +181,14 @@ func (c *Controller) DeleteFavouritesItemHandler(ctx *gin.Context) {
 
 	if err := c.FavouritesService.DeleteItem(ctx.Request.Context(), id, id_item); err != nil {
 		log.Printf("[ERROR] Cant delete item from Favourites: %v", err)
+
+		if errors.Is(err, structs.ErrFavouritesNotFound) ||
+			errors.Is(err, structs.ErrNotFound) ||
+			errors.Is(err, structs.ErrItemNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Item not found in favourites"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
 		return
 	}

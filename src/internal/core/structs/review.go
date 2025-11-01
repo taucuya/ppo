@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,3 +15,7 @@ type Review struct {
 	Text      string    `pg:"r_text"`
 	Date      time.Time `pg:"date"`
 }
+
+var (
+	ErrDuplicateReview = errors.New("duplicate review")
+)

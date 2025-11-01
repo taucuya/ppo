@@ -233,7 +233,7 @@ paths:
       - description: Ценовая категория
         enum:
         - бюджет
-        - средний сегмент
+        - средний
         - люкс
         in: query
         name: category
@@ -437,7 +437,7 @@ paths:
         type: string
       - description: Категория продукта
         enum:
-        - уходовая
+        - уход
         - декоративная
         - парфюмерия
         - для волос
@@ -742,7 +742,7 @@ paths:
       - BearerAuth: []
       summary: Получить корзину
       tags:
-      - user
+      - users
   /api/v1/users/me/basket/items:
     delete:
       consumes:
@@ -782,7 +782,7 @@ paths:
       - BearerAuth: []
       summary: Удалить товар из корзины
       tags:
-      - user
+      - users
     get:
       consumes:
       - application/json
@@ -812,7 +812,7 @@ paths:
       - BearerAuth: []
       summary: Получить товары корзины
       tags:
-      - user
+      - users
     patch:
       consumes:
       - application/json
@@ -851,7 +851,7 @@ paths:
       - BearerAuth: []
       summary: Обновить количество товара
       tags:
-      - user
+      - users
     post:
       consumes:
       - application/json
@@ -890,7 +890,7 @@ paths:
       - BearerAuth: []
       summary: Добавить товар в корзину
       tags:
-      - user
+      - users
   /api/v1/users/me/favourite/items:
     get:
       consumes:
@@ -925,7 +925,7 @@ paths:
       - BearerAuth: []
       summary: Получить избранные товары
       tags:
-      - user
+      - users
     post:
       consumes:
       - application/json
@@ -999,7 +999,7 @@ paths:
       - BearerAuth: []
       summary: Удалить товар из избранного
       tags:
-      - user
+      - users
   /api/v1/users/me/orders:
     get:
       consumes:

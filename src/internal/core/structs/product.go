@@ -1,6 +1,10 @@
 package structs
 
-import "github.com/google/uuid"
+import (
+	"errors"
+
+	"github.com/google/uuid"
+)
 
 type Product struct {
 	Id          uuid.UUID
@@ -13,3 +17,9 @@ type Product struct {
 	PicLink     string
 	Articule    string
 }
+
+var (
+	ErrProductNotFound   = errors.New("product not found")
+	ErrReviewNotFound    = errors.New("review not found")
+	ErrDuplicateArticule = errors.New("duplicate articule")
+)

@@ -13,52 +13,60 @@ import (
 )
 
 func GetBasketItems(client *http.Client) {
-	url := "http://localhost:8080/api/v1/baskets/items"
+	url := "http://localhost:8080/api/v1/users/me/basket/items"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var items []map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&items)
-
-	fmt.Println("✅ Basket items:")
-	for _, item := range items {
-		fmt.Printf("ID: %v, Product ID: %v, Amount: %v\n", item["Id"], item["IdProduct"], item["Amount"])
+	if resp.StatusCode == http.StatusOK {
+		var items []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&items)
+		fmt.Printf("SUCCESS: Found %d items in basket\n", len(items))
+		for i, item := range items {
+			fmt.Printf("%d: ID: %v, Product ID: %v, Amount: %v\n", i+1, item["Id"], item["IdProduct"], item["Amount"])
+		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
 func GetBasket(client *http.Client) {
-	url := "http://localhost:8080/api/v1/baskets"
+	url := "http://localhost:8080/api/v1/users/me/basket"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var basket map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&basket); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
+	if resp.StatusCode == http.StatusOK {
+		var basket map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&basket)
+		fmt.Println("SUCCESS: Basket retrieved")
+		fmt.Printf("Basket ID: %v, User ID: %v, Date: %v\n", basket["Id"], basket["IdUser"], basket["Date"])
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
-
-	fmt.Printf("✅ Basket ID: %v, User ID: %v, Date: %v\n", basket["Id"], basket["IdUser"], basket["Date"])
 }
 
 func AddToBasket(client *http.Client, reader *bufio.Reader) {
@@ -66,9 +74,9 @@ func AddToBasket(client *http.Client, reader *bufio.Reader) {
 	productID, _ := reader.ReadString('\n')
 	productID = strings.TrimSpace(productID)
 
-	idProduct, err := uuid.Parse(productID)
+	_, err := uuid.Parse(productID)
 	if err != nil {
-		fmt.Println("❌ Invalid product ID:", err)
+		fmt.Println("ERROR: Invalid product ID:", err)
 		return
 	}
 
@@ -78,42 +86,41 @@ func AddToBasket(client *http.Client, reader *bufio.Reader) {
 
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
-		fmt.Println("❌ Invalid amount:", err)
+		fmt.Println("ERROR: Invalid amount:", err)
 		return
 	}
 
 	item := map[string]interface{}{
-		"id_product": idProduct.String(),
+		"product_id": productID,
 		"amount":     amount,
 	}
 
 	body, err := json.Marshal(item)
 	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
+		fmt.Println("ERROR: Failed to encode JSON:", err)
 		return
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/baskets/items", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/users/me/basket/items", bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var respData map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&respData)
-
 	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅ Item added to basket!")
+		fmt.Println("SUCCESS: Item added to basket")
 	} else {
-		fmt.Printf("❌ Error: %v\n", respData["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -122,43 +129,42 @@ func DeleteFromBasket(client *http.Client, reader *bufio.Reader) {
 	productID, _ := reader.ReadString('\n')
 	productID = strings.TrimSpace(productID)
 
-	idProduct, err := uuid.Parse(productID)
+	_, err := uuid.Parse(productID)
 	if err != nil {
-		fmt.Println("❌ Invalid product ID:", err)
+		fmt.Println("ERROR: Invalid product ID:", err)
 		return
 	}
 
 	payload := map[string]interface{}{
-		"product_id": idProduct,
+		"product_id": productID,
 	}
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
+		fmt.Println("ERROR: Failed to encode JSON:", err)
 		return
 	}
 
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/baskets/items", bytes.NewBuffer(body))
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/api/v1/users/me/basket/items", bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var respData map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&respData)
-
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Item deleted from basket!")
+		fmt.Println("SUCCESS: Item deleted from basket")
 	} else {
-		fmt.Println("❌ Error:", respData["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -167,9 +173,9 @@ func UpdateItemAmount(client *http.Client, reader *bufio.Reader) {
 	productID, _ := reader.ReadString('\n')
 	productID = strings.TrimSpace(productID)
 
-	idProduct, err := uuid.Parse(productID)
+	_, err := uuid.Parse(productID)
 	if err != nil {
-		fmt.Println("❌ Invalid product ID:", err)
+		fmt.Println("ERROR: Invalid product ID:", err)
 		return
 	}
 
@@ -179,41 +185,40 @@ func UpdateItemAmount(client *http.Client, reader *bufio.Reader) {
 
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
-		fmt.Println("❌ Invalid amount:", err)
+		fmt.Println("ERROR: Invalid amount:", err)
 		return
 	}
 
 	payload := map[string]interface{}{
-		"product_id": idProduct,
+		"product_id": productID,
 		"amount":     amount,
 	}
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
+		fmt.Println("ERROR: Failed to encode JSON:", err)
 		return
 	}
 
-	req, err := http.NewRequest("PATCH", "http://localhost:8080/api/v1/baskets/items", bytes.NewBuffer(body))
+	req, err := http.NewRequest("PATCH", "http://localhost:8080/api/v1/users/me/basket/items", bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var respData map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&respData)
-
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Item amount updated!")
+		fmt.Println("SUCCESS: Item amount updated")
 	} else {
-		fmt.Printf("❌ Error: %v\n", respData["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }

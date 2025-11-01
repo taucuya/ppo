@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -32,6 +33,8 @@ type CreateReviewRequest struct {
 func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to create review")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -73,6 +76,15 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 
 	if err := c.ReviewService.Create(ctx, r); err != nil {
 		log.Printf("[ERROR] Cant create review: %v", err)
+		if errors.Is(err, structs.ErrDuplicateReview) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "You have already reviewed this product"})
+			return
+		}
+
+		if errors.Is(err, structs.ErrProductNotFound) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Product not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -96,6 +108,8 @@ func (c *Controller) CreateReviewHandler(ctx *gin.Context) {
 func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get review")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -109,6 +123,13 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 	review, err := c.ReviewService.GetById(ctx, id)
 	if err != nil {
 		log.Printf("[ERROR] Cant get review by id: %v", err)
+
+		if errors.Is(err, structs.ErrReviewNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Review not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusNotFound, gin.H{"error": "Review not found"})
 		return
 	}
@@ -134,6 +155,8 @@ func (c *Controller) GetReviewByIdHandler(ctx *gin.Context) {
 func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete review")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -146,6 +169,13 @@ func (c *Controller) DeleteReviewHandler(ctx *gin.Context) {
 
 	if err := c.ReviewService.Delete(ctx, id); err != nil {
 		log.Printf("[ERROR] Cant delete review by id: %v", err)
+
+		if errors.Is(err, structs.ErrReviewNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Review not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

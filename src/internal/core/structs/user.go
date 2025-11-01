@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,3 +18,7 @@ type User struct {
 	Status        string
 	Role          string
 }
+
+var (
+	ErrUserNotFound = errors.New("user not found")
+)

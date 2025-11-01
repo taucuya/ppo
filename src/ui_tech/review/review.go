@@ -21,7 +21,7 @@ func CreateReview(client *http.Client, reader *bufio.Reader) {
 
 	ratingInt, err := strconv.Atoi(ratingStr)
 	if err != nil {
-		fmt.Println("❌ Invalid rating. Please enter a number from 1 to 5.")
+		fmt.Println("ERROR: Invalid rating. Please enter a number from 1 to 5.")
 		return
 	}
 
@@ -35,135 +35,136 @@ func CreateReview(client *http.Client, reader *bufio.Reader) {
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println("❌ Failed to encode JSON:", err)
+		fmt.Println("ERROR: Failed to encode JSON:", err)
 		return
 	}
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/reviews/%s", idProduct)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users/me/products/%s/reviews", idProduct)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
 	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅ Review created!")
+		fmt.Println("SUCCESS: Review created successfully")
 	} else {
-		fmt.Println("❌ Failed to create review:", result["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
 func GetReviewById(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Review ID: ")
-	id, _ := reader.ReadString('\n')
-	id = strings.TrimSpace(id)
+	fmt.Print("Product ID: ")
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/reviews/%s", id)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer YOUR_TOKEN")
+	fmt.Print("Review ID: ")
+	reviewID, _ := reader.ReadString('\n')
+	reviewID = strings.TrimSpace(reviewID)
+
+	url := fmt.Sprintf("http://localhost:8080/api/v1/products/%s/reviews/%s", productID, reviewID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("ERROR: Failed to create request:", err)
+		return
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var review map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&review); err != nil {
-		fmt.Println("❌ Failed to decode review:", err)
-		return
-	}
-
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Review Details:")
-		fmt.Printf("- ID: %v\n", review["Id"])
-		fmt.Printf("- Product ID: %v\n", review["IdProduct"])
-		fmt.Printf("- User ID: %v\n", review["IdUser"])
-		fmt.Printf("- Rating: %v/5\n", review["Rating"])
-		fmt.Printf("- Text: %v\n", review["Text"])
-		fmt.Printf("- Date: %v\n", review["Date"])
+		var review map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&review)
+		fmt.Println("SUCCESS: Review found")
+		fmt.Printf("ID: %v\n", review["Id"])
+		fmt.Printf("Product ID: %v\n", review["IdProduct"])
+		fmt.Printf("User ID: %v\n", review["IdUser"])
+		fmt.Printf("Rating: %v/5\n", review["Rating"])
+		fmt.Printf("Text: %v\n", review["Text"])
+		fmt.Printf("Date: %v\n", review["Date"])
 	} else {
-		fmt.Println("❌ Error:", review["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
 func GetReviewsByProductId(client *http.Client, reader *bufio.Reader) {
 	fmt.Print("Product ID: ")
-	pid, _ := reader.ReadString('\n')
-	pid = strings.TrimSpace(pid)
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/product/reviews/%s", pid)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Authorization", "Bearer YOUR_TOKEN")
+	url := fmt.Sprintf("http://localhost:8080/api/v1/products/%s/reviews", productID)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("ERROR: Failed to create request:", err)
+		return
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var reviews []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&reviews); err != nil {
-		fmt.Println("❌ Failed to decode reviews:", err)
-		return
-	}
-
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Reviews for Product ID:", pid)
-		if len(reviews) == 0 {
-			fmt.Println("No reviews found for this product.")
-			return
-		}
-
-		for _, r := range reviews {
-			fmt.Println("\n---- Review ----")
-			fmt.Printf("Review ID: %v\n", r["Id"])
-			fmt.Printf("User ID: %v\n", r["IdUser"])
-			fmt.Printf("Rating: %v/5\n", r["Rating"])
-			fmt.Printf("Text: %v\n", r["Text"])
-			fmt.Printf("Date: %v\n", r["Date"])
-			fmt.Println("-----------------")
+		var reviews []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&reviews)
+		fmt.Printf("SUCCESS: Found %d reviews for product %s\n", len(reviews), productID)
+		for i, review := range reviews {
+			fmt.Printf("%d: Rating: %v/5, Text: %v, Date: %v\n",
+				i+1, review["Rating"], review["Text"], review["Date"])
 		}
 	} else {
-		fmt.Println("❌ Failed to get reviews")
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
 func DeleteReview(client *http.Client, reader *bufio.Reader) {
-	fmt.Print("Review ID to delete: ")
-	id, _ := reader.ReadString('\n')
-	id = strings.TrimSpace(id)
+	fmt.Print("Product ID: ")
+	productID, _ := reader.ReadString('\n')
+	productID = strings.TrimSpace(productID)
 
-	url := fmt.Sprintf("http://localhost:8080/api/v1/review/%s", id)
-	req, _ := http.NewRequest("DELETE", url, nil)
-	req.Header.Set("Authorization", "Bearer YOUR_TOKEN")
+	fmt.Print("Review ID: ")
+	reviewID, _ := reader.ReadString('\n')
+	reviewID = strings.TrimSpace(reviewID)
+
+	url := fmt.Sprintf("http://localhost:8080/api/v1/products/%s/reviews/%s", productID, reviewID)
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		fmt.Println("ERROR: Failed to create request:", err)
+		return
+	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
 	if resp.StatusCode == http.StatusOK {
-		fmt.Println("✅ Review deleted!")
+		fmt.Println("SUCCESS: Review deleted successfully")
 	} else {
-		fmt.Println("❌ Failed to delete review:", result["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
