@@ -20,7 +20,7 @@ func CreateOrder(client *http.Client, reader *bufio.Reader) {
 	payload := map[string]string{"address": address}
 	body, _ := json.Marshal(payload)
 
-	req, _ := http.NewRequest("POST", "http://localhost:8080/api/v1/users/me/orders", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "http://localhost:8080/api/v1/orders", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
@@ -108,7 +108,33 @@ func GetOrderItems(client *http.Client, reader *bufio.Reader) {
 }
 
 func GetFreeOrders(client *http.Client) {
-	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/users/me/orders?status=непринятый", nil)
+	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/orders?status=непринятый", nil)
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("ERROR: Request failed")
+		return
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("ERROR: %s\n", extractErrorMessage(body))
+		return
+	}
+
+	var orders []map[string]interface{}
+	json.Unmarshal(body, &orders)
+
+	fmt.Printf("SUCCESS: %d free orders\n", len(orders))
+	for i, order := range orders {
+		fmt.Printf("%d. ID: %v, Address: %v, Price: %v\n",
+			i+1, order["Id"], order["Address"], order["Price"])
+	}
+}
+
+func GetAllOrders(client *http.Client) {
+	req, _ := http.NewRequest("GET", "http://localhost:8080/api/v1/orders", nil)
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("ERROR: Request failed")

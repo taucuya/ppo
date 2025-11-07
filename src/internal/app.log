@@ -1866,3 +1866,502 @@
 [GIN] 2025/10/31 - 11:42:55 | 200 |    2.108965ms |       127.0.0.1 | GET      "/api/v1/workers/60ea9cce-c805-40cf-866e-65f4f3498ae4"
 [GIN] 2025/10/31 - 11:43:10 | 200 |     7.20479ms |       127.0.0.1 | DELETE   "/api/v1/workers/60ea9cce-c805-40cf-866e-65f4f3498ae4"
 [GIN] 2025/10/31 - 11:43:20 | 200 |    2.199239ms |       127.0.0.1 | GET      "/api/v1/workers"
+2025/11/06 11:42:07 HELLO
+2025/11/06 11:42:07 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 11:42:07 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 11:42:25 | 404 |       1.091µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 11:42:29 | 404 |       1.081µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 11:45:01 | 404 |       1.059µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 11:45:02 | 404 |       1.209µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 11:45:20 | 404 |       1.467µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 11:45:22 | 404 |       6.123µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 11:56:04 | 200 |  194.926559ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 13:26:45 | 200 |  181.296588ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 13:27:45 | 404 |       1.194µs |       127.0.0.1 | GET      "/"
+[GIN] 2025/11/06 - 13:31:00 | 200 |  162.387489ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 13:49:18 | 200 |   295.22387ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 13:49:40 | 200 |  121.105209ms |       127.0.0.1 | GET      "/api/v1/users/me/orders?status=%D0%BD%D0%B5%D0%BF%D1%80%D0%B8%D0%BD%D1%8F%D1%82%D1%8B%D0%B9"
+2025/11/06 14:07:33 Shutting down server...
+2025/11/06 14:07:33 Server exiting
+2025/11/06 14:07:38 HELLO
+2025/11/06 14:07:38 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:07:38 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+2025/11/06 14:11:08 Shutting down server...
+2025/11/06 14:11:08 Server exiting
+2025/11/06 14:13:40 HELLO
+2025/11/06 14:13:40 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:13:40 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:14:25 | 200 |  172.827567ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:14:31 [ERROR] Cant parse status to get free orders
+[GIN] 2025/11/06 - 14:14:31 | 400 |    5.697993ms |       127.0.0.1 | GET      "/api/v1/orders"
+[GIN] 2025/11/06 - 14:14:37 | 200 |    3.300979ms |       127.0.0.1 | GET      "/api/v1/orders?status=%D0%BD%D0%B5%D0%BF%D1%80%D0%B8%D0%BD%D1%8F%D1%82%D1%8B%D0%B9"
+[GIN] 2025/11/06 - 14:15:08 | 200 |  166.934349ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:16:44 [ERROR] Cant bind JSON: Key: 'LoginRequest.Email' Error:Field validation for 'Email' failed on the 'email' tag
+[GIN] 2025/11/06 - 14:16:44 | 400 |     298.921µs |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 14:16:59 | 200 |  163.764434ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:17:05 [ERROR] Cant parse status to get free orders
+[GIN] 2025/11/06 - 14:17:05 | 400 |    3.549962ms |       127.0.0.1 | GET      "/api/v1/orders"
+2025/11/06 14:18:18 Shutting down server...
+2025/11/06 14:18:18 Server exiting
+2025/11/06 14:18:20 HELLO
+2025/11/06 14:18:20 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:18:20 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:18:40 | 200 |  163.671937ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:18:45 [ERROR] Cant parse status to get free orders
+[GIN] 2025/11/06 - 14:18:45 | 400 |    3.045016ms |       127.0.0.1 | GET      "/api/v1/orders"
+2025/11/06 14:19:35 Shutting down server...
+2025/11/06 14:19:35 Server exiting
+2025/11/06 14:19:37 HELLO
+2025/11/06 14:19:37 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:19:37 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:19:52 | 200 |  164.327741ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:19:58 [ERROR] Cant parse status to get free orders
+[GIN] 2025/11/06 - 14:19:58 | 400 |    3.578735ms |       127.0.0.1 | GET      "/api/v1/orders"
+2025/11/06 14:21:36 Shutting down server...
+2025/11/06 14:21:36 Server exiting
+2025/11/06 14:21:47 HELLO
+2025/11/06 14:21:47 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:21:47 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:22:05 | 200 |  167.893762ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:22:12 [ERROR] Cant parse status to get free orders
+[GIN] 2025/11/06 - 14:22:12 | 400 |    3.561124ms |       127.0.0.1 | GET      "/api/v1/orders?status="
+2025/11/06 14:23:41 Shutting down server...
+2025/11/06 14:23:41 Server exiting
+2025/11/06 14:23:44 HELLO
+2025/11/06 14:23:44 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:23:44 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderByIdHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:24:03 | 200 |  164.784465ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 14:24:10 | 200 |    4.818654ms |       127.0.0.1 | GET      "/api/v1/orders"
+2025/11/06 14:24:17 [ERROR] Cant autorize to get free orders
+[GIN] 2025/11/06 - 14:24:17 | 401 |    1.616691ms |       127.0.0.1 | GET      "/api/v1/orders?status=%D0%BD%D0%B5%D0%BF%D1%80%D0%B8%D0%BD%D1%8F%D1%82%D1%8B%D0%B9"
+[GIN] 2025/11/06 - 14:24:24 | 200 |   283.19983ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 14:24:33 | 200 |    3.457067ms |       127.0.0.1 | GET      "/api/v1/orders?status=%D0%BD%D0%B5%D0%BF%D1%80%D0%B8%D0%BD%D1%8F%D1%82%D1%8B%D0%B9"
+[GIN] 2025/11/06 - 14:24:37 | 200 |    4.365055ms |       127.0.0.1 | GET      "/api/v1/orders"
+2025/11/06 14:31:00 Shutting down server...
+2025/11/06 14:31:00 Server exiting
+2025/11/06 14:32:36 HELLO
+2025/11/06 14:32:36 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:32:37 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:33:14 | 200 |  183.542083ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 14:33:38 | 404 |    1.895722ms |       127.0.0.1 | GET      "/api/v1/users/me/orders"
+2025/11/06 14:50:46 Shutting down server...
+2025/11/06 14:50:46 Server exiting
+2025/11/06 14:51:00 HELLO
+2025/11/06 14:51:00 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:51:00 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+2025/11/06 14:51:15 Shutting down server...
+2025/11/06 14:51:15 Server exiting
+2025/11/06 14:51:23 HELLO
+2025/11/06 14:51:23 DSN, postgres://test_user:test_password@localhost:5434/test_db?sslmode=disable
+2025/11/06 14:51:23 SQL completed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (1 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/taucuya/ppo/internal/controllers.(*Controller).SignupHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/taucuya/ppo/internal/controllers.(*Controller).LoginHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/auth/logout       --> github.com/taucuya/ppo/internal/controllers.(*Controller).LogoutHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users             --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetUserByPrivatesHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketByIdHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBasketItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddBasketItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBasketItemHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/basket/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).UpdateBasketItemAmountHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetFavouritesHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/favourite/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).AddFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/favourite/items/:id_product --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteFavouritesItemHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders   --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersByUserHandler-fm (3 handlers)
+[GIN-debug] PATCH  /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).ChangeOrderStatusHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/users/me/orders/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/users/me/orders/:id/items --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrderItemsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/users/me/products/:id_product/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetOrdersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/orders            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateOrderHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllBrandsInCategoryHander-fm (3 handlers)
+[GIN-debug] POST   /api/v1/brands            --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetBrandByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/brands/:id        --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteBrandHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetProductsHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/products          --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateProductHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id      --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewsForProductHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetReviewByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/products/:id/reviews/:id --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteReviewHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetAllWorkersHandler-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers           --> github.com/taucuya/ppo/internal/controllers.(*Controller).CreateWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerByIdHandler-fm (3 handlers)
+[GIN-debug] DELETE /api/v1/workers/:id       --> github.com/taucuya/ppo/internal/controllers.(*Controller).DeleteWorkerHandler-fm (3 handlers)
+[GIN-debug] GET    /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).GetWorkerOrders-fm (3 handlers)
+[GIN-debug] POST   /api/v1/workers/me/orders --> github.com/taucuya/ppo/internal/controllers.(*Controller).AcceptOrderHandler-fm (3 handlers)
+[GIN] 2025/11/06 - 14:51:47 | 200 |  290.640506ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+2025/11/06 14:51:52 [ERROR] Cant autorize to get free orders
+[GIN] 2025/11/06 - 14:51:52 | 401 |    1.751473ms |       127.0.0.1 | GET      "/api/v1/orders"
+[GIN] 2025/11/06 - 14:52:08 | 200 |  254.813528ms |       127.0.0.1 | POST     "/api/v1/auth/login"
+[GIN] 2025/11/06 - 14:52:12 | 200 |    3.066553ms |       127.0.0.1 | GET      "/api/v1/orders"

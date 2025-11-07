@@ -106,10 +106,12 @@ func printWelcome() {
 	yellow.Println("\n  [ Order Management ]")
 	client.Printf("  %-25s", "create-order")
 	white.Println("- Create order from basket")
+	client.Printf("  %-25s", "get-all-orders")
+	white.Println("- Get orders")
 	client.Printf("  %-25s", "get-user-orders")
 	white.Println("- Get user's orders")
-	admin.Printf("  %-25s", "get-order-by-id")
-	white.Println("- Get order by ID (admin/worker)")
+	// admin.Printf("  %-25s", "get-order-by-id")
+	// white.Println("- Get order by ID (admin/worker)")
 	client.Printf("  %-25s", "get-order-items")
 	white.Println("- Get items in order")
 	worker.Printf("  %-25s", "get-free-orders")
@@ -230,6 +232,8 @@ func main() {
 
 		case cmd == "create-order":
 			client_order.CreateOrder(client, reader)
+		case cmd == "get-all-orders":
+			client_order.GetAllOrders(client)
 		case cmd == "get-user-orders":
 			client_order.GetOrdersByUser(client)
 		case cmd == "get-order-by-id":

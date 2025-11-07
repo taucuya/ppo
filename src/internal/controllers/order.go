@@ -144,7 +144,7 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 
 // GetOrdersHandler получает заказы
 // @Summary Получить заказы
-// @Description Возвращает список заказов. Без параметров - заказы текущего пользователя, с status=непринятый - свободные заказы для работников
+// @Description Возвращает список заказов. Всех, если без параметров только для админа, если status=непринятый - свободные заказы для работников и админов
 // @Tags orders
 // @Accept json
 // @Produce json
@@ -156,13 +156,13 @@ func (c *Controller) GetOrderItemsHandler(ctx *gin.Context) {
 // @Failure 403 {object} object "Недостаточно прав"
 // @Failure 404 {object} object "Заказы не найдены"
 // @Failure 500 {object} object "Ошибка сервера при получении заказов"
-// @Router /api/v1/users/me/orders [get]
+// @Router /api/v1/orders [get]
 func (c *Controller) GetOrdersHandler(ctx *gin.Context) {
 	status := ctx.Query("status")
-	if status != "" {
+	if status == "непринятый" {
 		c.GetFreeOrdersHandler(ctx)
 	} else {
-		c.GetOrdersByUserHandler(ctx)
+		c.GetAllOrdersHandler(ctx)
 	}
 }
 
@@ -196,52 +196,27 @@ func (c *Controller) GetFreeOrdersHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ords)
 }
 
-// GetOrderByIdHandler получает заказ по ID
-// @Summary Получить заказ по ID
-// @Description Возвращает информацию о заказе по его идентификатору (для работников и администраторов)
-// @Tags orders
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param id path string true "UUID заказа"
-// @Success 200 {object} object "Данные заказа"
-// @Failure 400 {object} object "Неверный формат UUID"
-// @Failure 401 {object} object "Неавторизованный доступ"
-// @Failure 403 {object} object "Недостаточно прав"
-// @Failure 404 {object} object "Заказ не найден"
-// @Router /api/v1/users/me/orders/{id} [get]
-func (c *Controller) GetOrderByIdHandler(ctx *gin.Context) {
-	goodW := c.VerifyW(ctx)
+func (c *Controller) GetAllOrdersHandler(ctx *gin.Context) {
 	goodA := c.VerifyA(ctx)
 
-	if !goodW && !goodA {
-		log.Printf("[ERROR] Cant autorize to get order")
+	if !goodA {
+		log.Printf("[ERROR] Cant autorize to get free orders")
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
-
-	id, err := uuid.Parse(ctx.Param("id"))
+	ords, err := c.OrderService.GetAllOrders(ctx)
 	if err != nil {
-		log.Printf("[ERROR] Cant parse order id: %v", err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid order ID format"})
-		return
-	}
-
-	order, err := c.OrderService.GetById(ctx, id)
-	if err != nil {
-		log.Printf("[ERROR] Cant get order by id: %v", err)
-
+		log.Printf("[ERROR] Cant get free orders: %v", err)
 		if errors.Is(err, structs.ErrOrderNotFound) ||
 			errors.Is(err, structs.ErrNotFound) {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No free orders found"})
 			return
 		}
-
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, order)
+	ctx.JSON(http.StatusOK, ords)
 }
 
 // ChangeOrderStatusHandler изменяет статус заказа
@@ -354,6 +329,20 @@ func (c *Controller) DeleteOrderHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Order deleted"})
 }
 
+// GetOrdersByUserHandler получает заказы
+// @Summary Получить заказы
+// @Description Возвращает список заказов. Заказы текущего пользователя
+// @Accept json
+// @Tags orders
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {array} object "Список заказов"
+// @Failure 400 {object} object "Неверный параметр статуса"
+// @Failure 401 {object} object "Неавторизованный доступ"
+// @Failure 403 {object} object "Недостаточно прав"
+// @Failure 404 {object} object "Заказы не найдены"
+// @Failure 500 {object} object "Ошибка сервера при получении заказов"
+// @Router /api/v1/users/me/orders [get]
 func (c *Controller) GetOrdersByUserHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {

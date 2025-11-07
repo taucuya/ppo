@@ -186,9 +186,8 @@ func main() {
 
 				orders := me.Group("/orders")
 				{
-					orders.GET("", c.GetOrdersHandler)
-					orders.POST("", c.CreateOrderHandler)
-					orders.GET("/:id", c.GetOrderByIdHandler)
+					orders.GET("", c.GetOrdersByUserHandler)
+					// orders.GET("/:id", c.GetOrderByIdHandler)
 					orders.PATCH("/:id", c.ChangeOrderStatusHandler)
 					orders.DELETE("/:id", c.DeleteOrderHandler)
 					orders.GET("/:id/items", c.GetOrderItemsHandler)
@@ -199,6 +198,12 @@ func main() {
 					products.POST("/:id_product/reviews", c.CreateReviewHandler)
 				}
 			}
+		}
+
+		ords := api.Group("/orders")
+		{
+			ords.GET("", c.GetOrdersHandler)
+			ords.POST("", c.CreateOrderHandler)
 		}
 
 		brands := api.Group("/brands")
