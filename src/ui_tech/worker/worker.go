@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 )
@@ -30,18 +29,17 @@ func CreateWorker(client *http.Client, reader *bufio.Reader) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
-
 	if resp.StatusCode == http.StatusCreated {
-		fmt.Println("✅ Worker created successfully!")
+		fmt.Println("SUCCESS: Worker created successfully")
 	} else {
-		fmt.Println("❌ Failed to create worker:", result["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -53,21 +51,17 @@ func DeleteWorker(client *http.Client, reader *bufio.Reader) {
 	req, _ := http.NewRequest("DELETE", "http://localhost:8080/api/v1/workers/"+id, nil)
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
-
 	if resp.StatusCode == http.StatusOK {
-		fmt.Printf("✅ Worker with ID %s successfully deleted!\n", id)
+		fmt.Println("SUCCESS: Worker deleted successfully")
 	} else {
-		fmt.Printf("❌ Failed to delete worker. Error: %s\n", result["error"])
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -76,60 +70,48 @@ func GetWorkerById(client *http.Client, reader *bufio.Reader) {
 	id, _ := reader.ReadString('\n')
 	id = strings.TrimSpace(id)
 
-	resp, err := client.Get("http://localhost:8080/api/v1/workers/" + id)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/workers/%s", id)
+	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("❌ Failed to retrieve worker. Status: %s\n", resp.Status)
-		return
+	if resp.StatusCode == http.StatusOK {
+		var worker map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&worker)
+		fmt.Println("SUCCESS: Worker found")
+		fmt.Printf("ID: %v\n", worker["Id"])
+		fmt.Printf("User ID: %v\n", worker["IdUser"])
+		fmt.Printf("Job Title: %v\n", worker["JobTitle"])
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
-
-	var worker map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&worker); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
-
-	fmt.Println("✅ Worker Details:")
-	fmt.Printf("ID: %v\n", worker["Id"])
-	fmt.Printf("User ID: %v\n", worker["IdUser"])
-	fmt.Printf("Job Title: %s\n", worker["JobTitle"])
 }
 
 func GetAllWorkers(client *http.Client) {
-	resp, err := client.Get("http://localhost:8080/api/v1/workers/all")
+	resp, err := client.Get("http://localhost:8080/api/v1/workers")
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("❌ Failed to get workers. Status: %s\n", resp.Status)
-		return
-	}
-
-	var workers []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&workers); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
-
-	if len(workers) == 0 {
-		fmt.Println("❌ No workers found.")
-		return
-	}
-
-	fmt.Println("✅ Workers List:")
-	for _, worker := range workers {
-		fmt.Printf("ID: %v\n", worker["Id"])
-		fmt.Printf("User ID: %v\n", worker["IdUser"])
-		fmt.Printf("Job Title: %s\n", worker["JobTitle"])
-		fmt.Println("------------------------------")
+	if resp.StatusCode == http.StatusOK {
+		var workers []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&workers)
+		fmt.Printf("SUCCESS: Found %d workers\n", len(workers))
+		for i, worker := range workers {
+			fmt.Printf("%d: ID: %v, User ID: %v, Job Title: %v\n",
+				i+1, worker["Id"], worker["IdUser"], worker["JobTitle"])
+		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
@@ -138,70 +120,54 @@ func AcceptOrder(client *http.Client, reader *bufio.Reader) {
 	orderID, _ := reader.ReadString('\n')
 	orderID = strings.TrimSpace(orderID)
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/workers/accept?order_id="+orderID, nil)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/workers/me/orders?order_id=%s", orderID)
+	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-
-	var response map[string]interface{}
-	if err := json.Unmarshal(body, &response); err != nil {
-		fmt.Println("❌ Failed to decode JSON:", err)
-		return
-	}
-
-	if msg, exists := response["message"]; exists {
-		fmt.Printf("✅ %v\n", msg)
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("SUCCESS: Order accepted successfully")
 	} else {
-		fmt.Println("❌ No success message found in response.")
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }
 
 func GetWorkerOrders(client *http.Client) {
-	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/workers/orders", nil)
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/workers/me/orders", nil)
 	if err != nil {
-		fmt.Println("❌ Failed to create request:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
 		return
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request failed:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		fmt.Printf("❌ Error: %s\n", string(body))
-		return
-	}
-
-	var orders []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&orders); err != nil {
-		fmt.Println("❌ Failed to decode response:", err)
-		return
-	}
-
-	if len(orders) == 0 {
-		fmt.Println("No orders found for this worker.")
-		return
-	}
-
-	fmt.Println("📦 Worker Orders:")
-	for i, order := range orders {
-		fmt.Printf("\n Order #%d\n", i+1)
-		for key, value := range order {
-			fmt.Printf("   %s: %v\n", key, value)
+	if resp.StatusCode == http.StatusOK {
+		var orders []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&orders)
+		fmt.Printf("SUCCESS: Found %d orders assigned to worker\n", len(orders))
+		for i, order := range orders {
+			fmt.Printf("%d: Order ID: %v, Status: %v, Address: %v\n",
+				i+1, order["Id"], order["Status"], order["Address"])
 		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
 }

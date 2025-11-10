@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -13,35 +14,37 @@ func GetUserByEmail(client *http.Client, reader *bufio.Reader) {
 	email, _ := reader.ReadString('\n')
 	email = strings.TrimSpace(email)
 
-	resp, err := client.Get("http://localhost:8080/api/v1/users/email?email=" + email)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users?email=%s", url.QueryEscape(email))
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("❌ Error:", resp.Status)
-		return
+	if resp.StatusCode == http.StatusOK {
+		var user map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&user)
+		fmt.Println("SUCCESS: User found by email")
+		fmt.Printf("User ID: %v\n", user["Id"])
+		fmt.Printf("Name: %v\n", user["Name"])
+		fmt.Printf("Date of Birth: %v\n", user["Date_of_birth"])
+		fmt.Printf("Email: %v\n", user["Mail"])
+		fmt.Printf("Phone: %v\n", user["Phone"])
+		fmt.Printf("Address: %v\n", user["Address"])
+		fmt.Printf("Status: %v\n", user["Status"])
+		fmt.Printf("Role: %v\n", user["Role"])
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
-
-	var user map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		fmt.Println("❌ Failed to decode user data:", err)
-		return
-	}
-
-	fmt.Println("✅ User Information:")
-	fmt.Println("---------------------------")
-	fmt.Printf("User ID: %v\n", user["Id"])
-	fmt.Printf("Name: %v\n", user["Name"])
-	fmt.Printf("Date of Birth: %v\n", user["Date_of_birth"])
-	fmt.Printf("Email: %v\n", user["Mail"])
-	fmt.Printf("Phone: %v\n", user["Phone"])
-	fmt.Printf("Address: %v\n", user["Address"])
-	fmt.Printf("Status: %v\n", user["Status"])
-	fmt.Printf("Role: %v\n", user["Role"])
-	fmt.Println("---------------------------")
 }
 
 func GetUserByPhone(client *http.Client, reader *bufio.Reader) {
@@ -49,72 +52,64 @@ func GetUserByPhone(client *http.Client, reader *bufio.Reader) {
 	phone, _ := reader.ReadString('\n')
 	phone = strings.TrimSpace(phone)
 
-	if strings.HasPrefix(phone, "+") {
-		phone = strings.Replace(phone, "+", "%2B", 1)
+	url := fmt.Sprintf("http://localhost:8080/api/v1/users?phone=%s", url.QueryEscape(phone))
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("ERROR: Failed to create request:", err)
+		return
 	}
 
-	resp, err := client.Get("http://localhost:8080/api/v1/users/phone?phone=" + phone)
+	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("❌ Error:", resp.Status)
-		return
+	if resp.StatusCode == http.StatusOK {
+		var user map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&user)
+		fmt.Println("SUCCESS: User found by phone")
+		fmt.Printf("User ID: %v\n", user["Id"])
+		fmt.Printf("Name: %v\n", user["Name"])
+		fmt.Printf("Date of Birth: %v\n", user["Date_of_birth"])
+		fmt.Printf("Email: %v\n", user["Mail"])
+		fmt.Printf("Phone: %v\n", user["Phone"])
+		fmt.Printf("Address: %v\n", user["Address"])
+		fmt.Printf("Status: %v\n", user["Status"])
+		fmt.Printf("Role: %v\n", user["Role"])
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
-
-	var user map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		fmt.Println("❌ Failed to decode user data:", err)
-		return
-	}
-
-	fmt.Println("✅ User Information:")
-	fmt.Println("---------------------------")
-	fmt.Printf("User ID: %v\n", user["Id"])
-	fmt.Printf("Name: %v\n", user["Name"])
-	fmt.Printf("Date of Birth: %v\n", user["Date_of_birth"])
-	fmt.Printf("Email: %v\n", user["Mail"])
-	fmt.Printf("Phone: %v\n", user["Phone"])
-	fmt.Printf("Address: %v\n", user["Address"])
-	fmt.Printf("Status: %v\n", user["Status"])
-	fmt.Printf("Role: %v\n", user["Role"])
-	fmt.Println("---------------------------")
 }
 
-func GetAllUsers(client *http.Client, reader *bufio.Reader) {
-
-	resp, err := client.Get("http://localhost:8080/api/v1/users/all")
+func GetAllUsers(client *http.Client) {
+	req, err := http.NewRequest("GET", "http://localhost:8080/api/v1/users", nil)
 	if err != nil {
-		fmt.Println("❌ Request error:", err)
+		fmt.Println("ERROR: Failed to create request:", err)
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Println("ERROR: Request failed:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("❌ Error:", resp.Status)
-		return
+	if resp.StatusCode == http.StatusOK {
+		var users []map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&users)
+		fmt.Printf("SUCCESS: Found %d users\n", len(users))
+		for i, user := range users {
+			fmt.Printf("\n%d: User ID: %v, Name: %v, Email: %v, Role: %v\n",
+				i+1, user["Id"], user["Name"], user["Mail"], user["Role"])
+		}
+	} else {
+		var errorResponse map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errorResponse)
+		fmt.Println("ERROR:", errorResponse["error"])
 	}
-
-	var user []map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
-		fmt.Println("❌ Failed to decode user data:", err)
-		return
-	}
-
-	for _, v := range user {
-		fmt.Println("✅ User Information:")
-		fmt.Println("---------------------------")
-		fmt.Printf("User ID: %v\n", v["Id"])
-		fmt.Printf("Name: %v\n", v["Name"])
-		fmt.Printf("Date of Birth: %v\n", v["Date_of_birth"])
-		fmt.Printf("Email: %v\n", v["Mail"])
-		fmt.Printf("Phone: %v\n", v["Phone"])
-		fmt.Printf("Address: %v\n", v["Address"])
-		fmt.Printf("Status: %v\n", v["Status"])
-		fmt.Println("---------------------------")
-	}
-
 }

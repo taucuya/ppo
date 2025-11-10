@@ -54,6 +54,7 @@ func runSQLScripts(db *sqlx.DB, scripts []string) error {
 			return fmt.Errorf("failed to execute %s: %w", path, err)
 		}
 	}
+	log.Println("SQL completed")
 	return nil
 }
 
@@ -64,6 +65,13 @@ func loadEnv() {
 }
 
 func main() {
+
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Cant open log file: %v", err)
+	}
+
+	log.SetOutput(logFile)
 
 	loadEnv()
 	dsn := os.Getenv("DB_DSN")
@@ -99,6 +107,19 @@ func main() {
 		return
 	}
 
+	if err := db.Ping(); err != nil {
+		panic(err)
+	}
+
+// 	_ = runSQLScripts(db, []string{
+// 		"/home/taya/Desktop/ppo/src/internal/database/sql/delete.sql",
+// 		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
+// 		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
+// 		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
+// 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
+// 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
+// 	})
+
 	_ = runSQLScripts(db, []string{
 		"./internal/database/sql/01-create.sql",
 		"./internal/database/sql/02-constraints.sql",
@@ -106,12 +127,6 @@ func main() {
 		"./internal/database/sql/trigger_accept.sql",
 		"./internal/database/sql/trigger_order.sql",
 	})
-
-	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Cant open log file: %v", err)
-	}
-	log.SetOutput(logFile)
 
 	gin.DefaultWriter = logFile
 	ar := auth_rep.New(db)
@@ -193,9 +208,8 @@ func main() {
 
 				orders := me.Group("/orders")
 				{
-					orders.GET("", c.GetOrdersHandler)
-					orders.POST("", c.CreateOrderHandler)
-					orders.GET("/:id", c.GetOrderByIdHandler)
+					orders.GET("", c.GetOrdersByUserHandler)
+					// orders.GET("/:id", c.GetOrderByIdHandler)
 					orders.PATCH("/:id", c.ChangeOrderStatusHandler)
 					orders.DELETE("/:id", c.DeleteOrderHandler)
 					orders.GET("/:id/items", c.GetOrderItemsHandler)
@@ -206,6 +220,12 @@ func main() {
 					products.POST("/:id_product/reviews", c.CreateReviewHandler)
 				}
 			}
+		}
+
+		ords := api.Group("/orders")
+		{
+			ords.GET("", c.GetOrdersHandler)
+			ords.POST("", c.CreateOrderHandler)
 		}
 
 		brands := api.Group("/brands")

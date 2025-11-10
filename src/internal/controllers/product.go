@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -38,6 +39,8 @@ type CreateProductRequest struct {
 func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to create product")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -84,6 +87,10 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 
 	if err := c.ProductService.Create(ctx, p); err != nil {
 		log.Printf("[ERROR] Cant create product: %v", err)
+		if errors.Is(err, structs.ErrDuplicateArticule) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Product with this articule already exists"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -100,7 +107,7 @@ func (c *Controller) CreateProductHandler(ctx *gin.Context) {
 // @Security BearerAuth
 // @Param id query string false "UUID продукта"
 // @Param art query string false "Артикул продукта"
-// @Param category query string false "Категория продукта" Enums(уходовая, декоративная, парфюмерия, для волос, мужская)
+// @Param category query string false "Категория продукта" Enums(уход, декоративная, парфюмерия, для волос, мужская)
 // @Param brand query string false "Название бренда"
 // @Success 200 {object} object "Данные продукта или список продуктов"
 // @Failure 400 {object} object "Неверные параметры запроса"
@@ -124,6 +131,8 @@ func (c *Controller) GetProductsHandler(ctx *gin.Context) {
 func (c *Controller) GetProductHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get product")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -138,6 +147,12 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 		product, err := c.ProductService.GetById(ctx, pid)
 		if err != nil {
 			log.Printf("[ERROR] Cant get product by id: %v", err)
+			if errors.Is(err, structs.ErrProductNotFound) ||
+				errors.Is(err, structs.ErrNotFound) {
+				ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+				return
+			}
+
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 			return
 		}
@@ -157,6 +172,11 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 		product, err := c.ProductService.GetByArticule(ctx, art)
 		if err != nil {
 			log.Printf("[ERROR] Cant get product by articule: %v", err)
+			if errors.Is(err, structs.ErrProductNotFound) ||
+				errors.Is(err, structs.ErrNotFound) {
+				ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+				return
+			}
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 			return
 		}
@@ -185,6 +205,8 @@ func (c *Controller) GetProductHandler(ctx *gin.Context) {
 func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 	good := c.VerifyA(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete product")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -197,6 +219,11 @@ func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 
 	if err := c.ProductService.Delete(ctx, id); err != nil {
 		log.Printf("[ERROR] Cant delete product by id: %v", err)
+		if errors.Is(err, structs.ErrProductNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -211,6 +238,7 @@ func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
 	for _, i := range possible {
 		if category == i {
 			inarr = true
+			break
 		}
 	}
 	if !inarr {
@@ -221,7 +249,17 @@ func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
 	products, err := c.ProductService.GetByCategory(ctx, category)
 	if err != nil {
 		log.Printf("[ERROR] Cant get products by category: %v", err)
+		if errors.Is(err, structs.ErrProductNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No products found in this category"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(products) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No products found in this category"})
 		return
 	}
 
@@ -229,11 +267,28 @@ func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
 }
 
 func (c *Controller) GetProductsByBrandHandler(ctx *gin.Context) {
-	brand := ctx.Param("brand")
+	brand := ctx.Query("brand")
+	if brand == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Brand parameter is required"})
+		return
+	}
+
 	products, err := c.ProductService.GetByBrand(ctx, brand)
 	if err != nil {
 		log.Printf("[ERROR] Cant get products by brand: %v", err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+		if errors.Is(err, structs.ErrProductNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No products found for this brand"})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get products by brand"})
+		return
+	}
+
+	if len(products) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No products found for this brand"})
 		return
 	}
 
@@ -263,7 +318,19 @@ func (c *Controller) GetReviewsForProductHandler(ctx *gin.Context) {
 	reviews, err := c.ReviewService.ReviewsForProduct(ctx, productID)
 	if err != nil {
 		log.Printf("[ERROR] Cant get reviews for product: %v", err)
+
+		if errors.Is(err, structs.ErrReviewNotFound) ||
+			errors.Is(err, structs.ErrNotFound) {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "No reviews found for this product"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(reviews) == 0 {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "No reviews found for this product"})
 		return
 	}
 

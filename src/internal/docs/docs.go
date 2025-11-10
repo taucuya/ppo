@@ -170,7 +170,7 @@ const docTemplate = `{
                     {
                         "enum": [
                             "бюджет",
-                            "средний сегмент",
+                            "средний",
                             "люкс"
                         ],
                         "type": "string",
@@ -399,6 +399,76 @@ const docTemplate = `{
             }
         },
         "/api/v1/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Возвращает список заказов. Всех, если без параметров только для админа, если status=непринятый - свободные заказы для работников и админов",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Получить заказы",
+                "parameters": [
+                    {
+                        "enum": [
+                            "непринятый"
+                        ],
+                        "type": "string",
+                        "description": "Статус заказа для фильтрации",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список заказов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный параметр статуса",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизованный доступ",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "403": {
+                        "description": "Недостаточно прав",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "404": {
+                        "description": "Заказы не найдены",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка сервера при получении заказов",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -488,7 +558,7 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "уходовая",
+                            "уход",
                             "декоративная",
                             "парфюмерия",
                             "для волос",
@@ -922,7 +992,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить корзину",
                 "responses": {
@@ -968,7 +1038,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить товары корзины",
                 "responses": {
@@ -1015,7 +1085,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Добавить товар в корзину",
                 "parameters": [
@@ -1076,7 +1146,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Удалить товар из корзины",
                 "parameters": [
@@ -1137,7 +1207,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Обновить количество товара",
                 "parameters": [
@@ -1200,7 +1270,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Получить избранные товары",
                 "responses": {
@@ -1310,7 +1380,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "user"
+                    "users"
                 ],
                 "summary": "Удалить товар из избранного",
                 "parameters": [
@@ -1363,7 +1433,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Возвращает список заказов. Без параметров - заказы текущего пользователя, с status=непринятый - свободные заказы для работников",
+                "description": "Возвращает список заказов. Заказы текущего пользователя",
                 "consumes": [
                     "application/json"
                 ],
@@ -1374,17 +1444,6 @@ const docTemplate = `{
                     "orders"
                 ],
                 "summary": "Получить заказы",
-                "parameters": [
-                    {
-                        "enum": [
-                            "непринятый"
-                        ],
-                        "type": "string",
-                        "description": "Статус заказа для фильтрации",
-                        "name": "status",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Список заказов",
@@ -1429,65 +1488,6 @@ const docTemplate = `{
             }
         },
         "/api/v1/users/me/orders/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Возвращает информацию о заказе по его идентификатору (для работников и администраторов)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Получить заказ по ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "UUID заказа",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Данные заказа",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "400": {
-                        "description": "Неверный формат UUID",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "401": {
-                        "description": "Неавторизованный доступ",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "403": {
-                        "description": "Недостаточно прав",
-                        "schema": {
-                            "type": "object"
-                        }
-                    },
-                    "404": {
-                        "description": "Заказ не найден",
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "security": [
                     {

@@ -41,6 +41,7 @@ func (rep *Repository) GetById(ctx context.Context, id uuid.UUID) (structs.Revie
 		return structs.Review{}, fmt.Errorf("failed to get review: %w", err)
 	}
 	rw := structs.Review{
+		Id:        r.Id,
 		IdProduct: r.IdProduct,
 		IdUser:    r.IdUser,
 		Rating:    r.Rating,

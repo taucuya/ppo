@@ -1,6 +1,8 @@
 package structs
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 )
 
@@ -14,3 +16,9 @@ type Favourites struct {
 	Id     uuid.UUID
 	IdUser uuid.UUID
 }
+
+var (
+	ErrFavouritesNotFound = errors.New("favourites not found")
+	ErrItemNotFound       = errors.New("item not found")
+	ErrDuplicateItem      = errors.New("item already exists")
+)

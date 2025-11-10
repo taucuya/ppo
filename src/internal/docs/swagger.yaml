@@ -233,7 +233,7 @@ paths:
       - description: Ценовая категория
         enum:
         - бюджет
-        - средний сегмент
+        - средний
         - люкс
         in: query
         name: category
@@ -385,6 +385,52 @@ paths:
       tags:
       - brands
   /api/v1/orders:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список заказов. Всех, если без параметров только для
+        админа, если status=непринятый - свободные заказы для работников и админов
+      parameters:
+      - description: Статус заказа для фильтрации
+        enum:
+        - непринятый
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список заказов
+          schema:
+            items:
+              type: object
+            type: array
+        "400":
+          description: Неверный параметр статуса
+          schema:
+            type: object
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            type: object
+        "403":
+          description: Недостаточно прав
+          schema:
+            type: object
+        "404":
+          description: Заказы не найдены
+          schema:
+            type: object
+        "500":
+          description: Ошибка сервера при получении заказов
+          schema:
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить заказы
+      tags:
+      - orders
     post:
       consumes:
       - application/json
@@ -437,7 +483,7 @@ paths:
         type: string
       - description: Категория продукта
         enum:
-        - уходовая
+        - уход
         - декоративная
         - парфюмерия
         - для волос
@@ -742,7 +788,7 @@ paths:
       - BearerAuth: []
       summary: Получить корзину
       tags:
-      - user
+      - users
   /api/v1/users/me/basket/items:
     delete:
       consumes:
@@ -782,7 +828,7 @@ paths:
       - BearerAuth: []
       summary: Удалить товар из корзины
       tags:
-      - user
+      - users
     get:
       consumes:
       - application/json
@@ -812,7 +858,7 @@ paths:
       - BearerAuth: []
       summary: Получить товары корзины
       tags:
-      - user
+      - users
     patch:
       consumes:
       - application/json
@@ -851,7 +897,7 @@ paths:
       - BearerAuth: []
       summary: Обновить количество товара
       tags:
-      - user
+      - users
     post:
       consumes:
       - application/json
@@ -890,7 +936,7 @@ paths:
       - BearerAuth: []
       summary: Добавить товар в корзину
       tags:
-      - user
+      - users
   /api/v1/users/me/favourite/items:
     get:
       consumes:
@@ -925,7 +971,7 @@ paths:
       - BearerAuth: []
       summary: Получить избранные товары
       tags:
-      - user
+      - users
     post:
       consumes:
       - application/json
@@ -999,20 +1045,12 @@ paths:
       - BearerAuth: []
       summary: Удалить товар из избранного
       tags:
-      - user
+      - users
   /api/v1/users/me/orders:
     get:
       consumes:
       - application/json
-      description: Возвращает список заказов. Без параметров - заказы текущего пользователя,
-        с status=непринятый - свободные заказы для работников
-      parameters:
-      - description: Статус заказа для фильтрации
-        enum:
-        - непринятый
-        in: query
-        name: status
-        type: string
+      description: Возвращает список заказов. Заказы текущего пользователя
       produces:
       - application/json
       responses:
@@ -1084,45 +1122,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Удалить заказ
-      tags:
-      - orders
-    get:
-      consumes:
-      - application/json
-      description: Возвращает информацию о заказе по его идентификатору (для работников
-        и администраторов)
-      parameters:
-      - description: UUID заказа
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Данные заказа
-          schema:
-            type: object
-        "400":
-          description: Неверный формат UUID
-          schema:
-            type: object
-        "401":
-          description: Неавторизованный доступ
-          schema:
-            type: object
-        "403":
-          description: Недостаточно прав
-          schema:
-            type: object
-        "404":
-          description: Заказ не найден
-          schema:
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Получить заказ по ID
       tags:
       - orders
     patch:

@@ -1,25 +1,25 @@
 -- Вставляем пользователей с новыми ролями
--- Вставляем пользователей с хешированными паролями (bcrypt)
+-- Вставляем пользователей с правильными хешированными паролями (bcrypt)
 INSERT INTO "user" (name, date_of_birth, mail, password, phone, address, status, role) VALUES
--- Обычные пользователи (пароль: user123)
-('Анна Смирнова', '1990-05-15', 'anna.smirnova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79161234567', 'ул. Ленина, 10', 'active', 'обычный пользователь'),
-('Елена Кузнецова', '1985-08-20', 'elena.kuznetsova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79162345678', 'ул. Пушкина, 5', 'active', 'обычный пользователь'),
-('Мария Иванова', '1995-02-10', 'maria.ivanova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79163456789', 'пр. Мира, 15', 'active', 'обычный пользователь'),
-('Ольга Петрова', '1988-11-30', 'olga.petrova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79164567890', 'ул. Гагарина, 3', 'active', 'обычный пользователь'),
-('Ирина Соколова', '1992-07-25', 'irina.sokolova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79165678901', 'ул. Кирова, 7', 'active', 'обычный пользователь'),
-('Наталья Волкова', '1993-04-18', 'natalia.volkova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79166789012', 'ул. Советская, 22', 'active', 'обычный пользователь'),
-('Виктория Федорова', '1987-09-05', 'victoria.fedorova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79167890123', 'ул. Садовая, 14', 'active', 'обычный пользователь'),
-('Юлия Морозова', '1991-12-12', 'julia.morozova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79168901234', 'ул. Лесная, 8', 'active', 'обычный пользователь'),
-('Александра Николаева', '1989-06-28', 'alexandra.nikolaeva@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79169012345', 'пр. Победы, 17', 'active', 'обычный пользователь'),
-('Екатерина Павлова', '1994-03-08', 'ekaterina.pavlova@example.com', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79160123456', 'ул. Цветочная, 9', 'active', 'обычный пользователь'),
+-- Обычные пользователи (пароль: 123456)
+('Анна Смирнова', '1990-05-15', 'anna.smirnova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79161234567', 'ул. Ленина, 10', 'active', 'обычный пользователь'),
+('Елена Кузнецова', '1985-08-20', 'elena.kuznetsova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79162345678', 'ул. Пушкина, 5', 'active', 'обычный пользователь'),
+('Мария Иванова', '1995-02-10', 'maria.ivanova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79163456789', 'пр. Мира, 15', 'active', 'обычный пользователь'),
+('Ольга Петрова', '1988-11-30', 'olga.petrova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79164567890', 'ул. Гагарина, 3', 'active', 'обычный пользователь'),
+('Ирина Соколова', '1992-07-25', 'irina.sokolova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79165678901', 'ул. Кирова, 7', 'active', 'обычный пользователь'),
+('Наталья Волкова', '1993-04-18', 'natalia.volkova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79166789012', 'ул. Советская, 22', 'active', 'обычный пользователь'),
+('Виктория Федорова', '1987-09-05', 'victoria.fedorova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79167890123', 'ул. Садовая, 14', 'active', 'обычный пользователь'),
+('Юлия Морозова', '1991-12-12', 'julia.morozova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79168901234', 'ул. Лесная, 8', 'active', 'обычный пользователь'),
+('Александра Николаева', '1989-06-28', 'alexandra.nikolaeva@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79169012345', 'пр. Победы, 17', 'active', 'обычный пользователь'),
+('Екатерина Павлова', '1994-03-08', 'ekaterina.pavlova@example.com', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79160123456', 'ул. Цветочная, 9', 'active', 'обычный пользователь'),
 
 -- Администратор (пароль: admin123)
-('Алексей Администратор', '1980-01-01', 'admin@cosmetics.ru', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79150000001', 'ул. Центральная, 1', 'active', 'админ'),
+('Алексей Администратор', '1980-01-01', 'admin@cosmetics.ru', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79150000001', 'ул. Центральная, 1', 'active', 'админ'),
 
 -- Работники склада (пароль: worker123)
-('Иван Складской', '1985-03-15', 'worker1@cosmetics.ru', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79150000002', 'ул. Складская, 5', 'active', 'работник склада'),
-('Петр Складской', '1988-07-20', 'worker2@cosmetics.ru', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79150000003', 'ул. Складская, 10', 'active', 'работник склада'),
-('Сергей Складской', '1990-11-30', 'worker3@cosmetics.ru', '$2a$10$2sOJWDJ/OJielZc2GINfNeyHplhp0r4KjImsXdjZWmLOgRKXbaEDC', '+79150000004', 'ул. Складская, 15', 'active', 'работник склада');
+('Иван Складской', '1985-03-15', 'worker1@cosmetics.ru', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79150000002', 'ул. Складская, 5', 'active', 'работник склада'),
+('Петр Складской', '1988-07-20', 'worker2@cosmetics.ru', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79150000003', 'ул. Складская, 10', 'active', 'работник склада'),
+('Сергей Складской', '1990-11-30', 'worker3@cosmetics.ru', '$2a$10$xxpcJqlcfO4fHKO5CTk7outRtcLS.cnTTqM9CkU07lPUhP7Pj4uRK', '+79150000004', 'ул. Складская, 15', 'active', 'работник склада');
 
 -- Вставляем бренды с новыми категориями
 INSERT INTO brand (name, description, price_category) VALUES

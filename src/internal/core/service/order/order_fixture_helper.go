@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/taucuya/ppo/internal/core/mock_structs"
 	"github.com/taucuya/ppo/internal/core/structs"
 )
 
@@ -70,11 +69,11 @@ func (f *TestFixture) Cleanup() {
 	f.ctrl.Finish()
 }
 
-func (f *TestFixture) CreateServiceWithMocks() (*Service, *mock_structs.MockOrderRepository) {
-	mockRepo := mock_structs.NewMockOrderRepository(f.ctrl)
-	service := New(mockRepo)
-	return service, mockRepo
-}
+// func (f *TestFixture) CreateServiceWithMocks() (*Service, *mock_structs.MockOrderRepository) {
+// mockRepo := mock_structs.NewMockOrderRepository(f.ctrl)
+// service := New(mockRepo)
+// return service, mockRepo
+// }
 
 func (f *TestFixture) AssertError(err error, expectedErr error) {
 	if expectedErr != nil {

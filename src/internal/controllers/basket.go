@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -22,7 +25,7 @@ type BasketItemDeleteRequest struct {
 // GetBasketItemsHandler получает все товары в корзине пользователя
 // @Summary Получить товары корзины
 // @Description Возвращает список всех товаров в корзине текущего пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -34,6 +37,8 @@ type BasketItemDeleteRequest struct {
 func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get basket items")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -64,7 +69,7 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 // GetBasketByIdHandler получает корзину по ID пользователя
 // @Summary Получить корзину
 // @Description Возвращает корзину текущего пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -76,6 +81,8 @@ func (c *Controller) GetBasketItemsHandler(ctx *gin.Context) {
 func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to get basket")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -107,7 +114,7 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 // AddBasketItemHandler добавляет товар в корзину
 // @Summary Добавить товар в корзину
 // @Description Добавляет товар с указанным количеством в корзину пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -121,6 +128,8 @@ func (c *Controller) GetBasketByIdHandler(ctx *gin.Context) {
 func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to add basket")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -154,6 +163,13 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 
 	if err := c.BasketService.AddItem(ctx.Request.Context(), item, id); err != nil {
 		log.Printf("[ERROR] Cant add item to basket: %v", err)
+
+		if errors.Is(err, sql.ErrNoRows) ||
+			strings.Contains(strings.ToLower(err.Error()), "not found") {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Basket not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add item"})
 		return
 	}
@@ -164,7 +180,7 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 // DeleteBasketItemHandler удаляет товар из корзины
 // @Summary Удалить товар из корзины
 // @Description Удаляет указанный товар из корзины пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -178,6 +194,8 @@ func (c *Controller) AddBasketItemHandler(ctx *gin.Context) {
 func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to delete basket item")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -205,6 +223,13 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 
 	if err := c.BasketService.DeleteItem(ctx.Request.Context(), id, input.ProductID); err != nil {
 		log.Printf("[ERROR] Cant delete item from basket: %v", err)
+
+		if errors.Is(err, sql.ErrNoRows) ||
+			strings.Contains(strings.ToLower(err.Error()), "not found") {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Basket not found"})
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete item"})
 		return
 	}
@@ -215,7 +240,7 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 // UpdateBasketItemAmountHandler обновляет количество товара в корзине
 // @Summary Обновить количество товара
 // @Description Обновляет количество указанного товара в корзине пользователя
-// @Tags user
+// @Tags users
 // @Accept json
 // @Produce json
 // @Security BearerAuth
@@ -229,6 +254,8 @@ func (c *Controller) DeleteBasketItemHandler(ctx *gin.Context) {
 func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 	good := c.Verify(ctx)
 	if !good {
+		log.Printf("[ERROR] Cant autorize to update basket item")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
 
@@ -256,6 +283,11 @@ func (c *Controller) UpdateBasketItemAmountHandler(ctx *gin.Context) {
 
 	if err := c.BasketService.UpdateItemAmount(ctx.Request.Context(), id, input.ProductID, input.Amount); err != nil {
 		log.Printf("[ERROR] Cant update item in basket: %v", err)
+		if errors.Is(err, sql.ErrNoRows) ||
+			strings.Contains(strings.ToLower(err.Error()), "not found") {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "Basket item not found"})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update item amount"})
 		return
 	}
