@@ -1,0 +1,213 @@
+name: CI/CD Pipeline with Allure
+
+on:
+  push:
+    branches: [ testing ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+        cache-dependency-path: src/go.sum
+
+    - name: Install gotestsum
+      run: |
+        go install gotest.tools/gotestsum@latest
+
+    - name: Run unit tests
+      working-directory: ./src
+      run: |
+        mkdir -p allure-results
+        gotestsum --junitfile allure-results/junit-unit.xml --format standard-verbose -- ./internal/core/service/... ./internal/repository/postgres/reps/... -v -race
+
+    - name: Upload unit tests results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-test-results
+        path: src/allure-results/
+        retention-days: 1
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create directory for test results
+        run: |
+          mkdir -p allure-results-1
+          chmod 777 allure-results-1
+
+      - name: Run integration tests with fixed command
+        run: |
+          docker network create app-network 2>/dev/null || true
+          
+          docker compose -f docker-compose.integrationtest.yml up -d postgres
+          sleep 10
+          docker compose -f docker-compose.integrationtest.yml run --rm init-db
+          
+          docker compose -f docker-compose.integrationtest.yml run --rm \
+            -v $(pwd)/allure-results-1:/app/allure-results \
+            tests sh -c "
+              mkdir -p /app/allure-results &&
+              gotestsum --junitfile /app/allure-results/junit-integration.xml \
+              --format standard-verbose \
+              -- ./internal/integration_tests/... -v -tags=integration
+            "
+
+      - name: Upload integration tests results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: allure-results-1/
+          retention-days: 1
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: integration-tests
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Create shared directory for results
+      run: |
+        mkdir -p shared-results
+        chmod 777 shared-results
+
+    - name: Build and run E2E tests with shared volume
+      run: |
+        docker compose -f docker-compose.yml up -d --build
+        sleep 30
+        docker run --rm --network container:$(docker compose -f docker-compose.yml ps -q api) -v $(pwd)/shared-results:/results -e API_URL="http://api:8080" $(docker build -q -f Dockerfile.tests .) sh -c "mkdir -p /results && gotestsum --junitfile /results/junit-e2e.xml --format standard-verbose -- ./internal/e2e_tests/... -v -tags=e2e"
+        docker compose -f docker-compose.yml down
+
+    - name: Process and upload E2E results
+      if: always()
+      run: |
+        mkdir -p e2e-allure-results
+        cp shared-results/* e2e-allure-results/ 2>/dev/null || echo "No files to copy"
+
+    - name: Upload E2E test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: e2e-test-results
+        path: e2e-allure-results/
+        retention-days: 1
+
+  generate-allure-report:
+    name: Generate and Publish Allure Report
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, e2e-tests]
+    if: always()
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download all test results
+        if: always()
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+
+      - name: Checkout gh-pages for history
+        if: always()
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Install Allure
+        if: always()
+        run: |
+          sudo apt-get update
+          sudo apt-get install default-jre wget -y
+          wget -q -O allure-2.27.0.tgz https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+          sudo tar -zxvf allure-2.27.0.tgz -C /opt/
+          sudo ln -sf /opt/allure-2.27.0/bin/allure /usr/bin/allure
+
+      - name: Prepare results with history
+        if: always()
+        run: |
+          mkdir -p combined-results
+          find all-results -name "*.xml" -exec cp {} combined-results/ \;
+          
+          if [ -d "gh-pages/history" ]; then
+            echo "Restoring history from gh-pages"
+            mkdir -p combined-results/history
+            cp -r gh-pages/history/* combined-results/history/
+          fi
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          allure generate combined-results -o allure-report --clean
+
+      - name: Prepare gh-pages content
+        if: always()
+        run: |
+          rm -rf gh-pages/*
+          cp -r allure-report/* gh-pages/
+
+      - name: Setup Git config
+        if: always()
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: gh-pages
+          force_orphan: false
+          keep_files: false
+
+      - name: Upload history for future runs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-history
+          path: gh-pages/history
+          retention-days: 30

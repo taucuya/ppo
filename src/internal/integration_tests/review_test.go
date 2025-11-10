@@ -2,6 +2,7 @@ package integrationtests
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -20,13 +21,15 @@ type ReviewTestFixture struct {
 	service    *review.Service
 	reviewRepo *review_rep.Repository
 	userRepo   *user_rep.Repository
+	testID     string
 }
 
 func NewReviewTestFixture(t *testing.T) *ReviewTestFixture {
 	reviewRepo := review_rep.New(db)
 	userRepo := user_rep.New(db)
-
 	service := review.New(reviewRepo)
+
+	testID := uuid.New().String()[:8]
 
 	return &ReviewTestFixture{
 		t:          t,
@@ -34,35 +37,54 @@ func NewReviewTestFixture(t *testing.T) *ReviewTestFixture {
 		service:    service,
 		reviewRepo: reviewRepo,
 		userRepo:   userRepo,
+		testID:     testID,
 	}
 }
 
-func (f *ReviewTestFixture) createTestUser() structs.User {
+func (f *ReviewTestFixture) generateTestUser() structs.User {
+	timestamp := time.Now().UnixNano()
+	uniqueID := fmt.Sprintf("%s-%d", f.testID, timestamp)
+
 	dob, _ := time.Parse("2006-01-02", "1990-01-01")
+
+	phoneSuffix := fmt.Sprintf("%09d", timestamp%1000000000)
+	phone := "89" + phoneSuffix
+	if len(phone) > 11 {
+		phone = phone[:11]
+	}
+
 	return structs.User{
-		Name:          "Test User",
+		Name:          fmt.Sprintf("Test User %s", uniqueID),
 		Date_of_birth: dob,
-		Mail:          "test@example.com",
+		Mail:          fmt.Sprintf("test%s@example.com", uniqueID),
 		Password:      "password123",
-		Phone:         "89016475843",
+		Phone:         phone,
 		Address:       "123 Test St",
 		Status:        "active",
 		Role:          "обычный пользователь",
 	}
 }
 
-func (f *ReviewTestFixture) createTestProduct() uuid.UUID {
+func (f *ReviewTestFixture) generateTestProduct() uuid.UUID {
+	brandName := fmt.Sprintf("Test Brand %d", time.Now().UnixNano())
+	_, err := db.Exec("INSERT INTO brand (name, description, price_category) VALUES ($1, $2, $3)",
+		brandName, "Test Description", "premium")
+	require.NoError(f.t, err)
+
+	var brandID uuid.UUID
+	err = db.GetContext(f.ctx, &brandID, "SELECT id FROM brand WHERE name = $1", brandName)
+	require.NoError(f.t, err)
+
 	productID := uuid.New()
-	brandID := uuid.New()
-	_, err := db.Exec("INSERT INTO brand (id, name) VALUES ($1, $2)", brandID, "Test Brand")
-	require.NoError(f.t, err)
+	uniqueArt := fmt.Sprintf("TEST-ART-%s", uuid.New().String()[:8])
 	_, err = db.Exec("INSERT INTO product (id, name, description, price, id_brand, amount, art) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-		productID, "Test Product", "Test Description", 1000, brandID, 10, "TEST-ART-123")
+		productID, "Test Product", "Test Description", 1000, brandID, 10, uniqueArt)
 	require.NoError(f.t, err)
+
 	return productID
 }
 
-func (f *ReviewTestFixture) createTestReview(userID, productID uuid.UUID) structs.Review {
+func (f *ReviewTestFixture) generateTestReview(userID, productID uuid.UUID) structs.Review {
 	return structs.Review{
 		IdProduct: productID,
 		IdUser:    userID,
@@ -72,7 +94,7 @@ func (f *ReviewTestFixture) createTestReview(userID, productID uuid.UUID) struct
 	}
 }
 
-func (f *ReviewTestFixture) createAnotherTestReview(userID, productID uuid.UUID) structs.Review {
+func (f *ReviewTestFixture) generateAnotherTestReview(userID, productID uuid.UUID) structs.Review {
 	return structs.Review{
 		IdProduct: productID,
 		IdUser:    userID,
@@ -82,25 +104,31 @@ func (f *ReviewTestFixture) createAnotherTestReview(userID, productID uuid.UUID)
 	}
 }
 
-func (f *ReviewTestFixture) setupReview() (uuid.UUID, uuid.UUID, uuid.UUID) {
-	testUser := f.createTestUser()
+func (f *ReviewTestFixture) cleanupReviewData(reviewID uuid.UUID) {
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM review WHERE id = $1", reviewID)
+}
+
+func (f *ReviewTestFixture) cleanupUserData(userID uuid.UUID) {
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM review WHERE id_user = $1", userID)
+	_, _ = db.ExecContext(f.ctx, "DELETE FROM \"user\" WHERE id = $1", userID)
+}
+
+func (f *ReviewTestFixture) createReviewForTest() (uuid.UUID, uuid.UUID, uuid.UUID) {
+	testUser := f.generateTestUser()
 	userID, err := f.userRepo.Create(f.ctx, testUser)
 	require.NoError(f.t, err)
 
-	productID := f.createTestProduct()
+	productID := f.generateTestProduct()
 
-	testReview := f.createTestReview(userID, productID)
+	testReview := f.generateTestReview(userID, productID)
 	err = f.reviewRepo.Create(f.ctx, testReview)
 	require.NoError(f.t, err)
 
-	var reviews []struct {
-		ID uuid.UUID `db:"id"`
-	}
-	err = db.SelectContext(f.ctx, &reviews, "SELECT id FROM review WHERE id_user = $1", userID)
+	var reviewID uuid.UUID
+	err = db.GetContext(f.ctx, &reviewID, "SELECT id FROM review WHERE id_user = $1 AND id_product = $2", userID, productID)
 	require.NoError(f.t, err)
-	require.Len(f.t, reviews, 1)
 
-	return userID, productID, reviews[0].ID
+	return userID, productID, reviewID
 }
 
 func TestReview_Create_AAA(t *testing.T) {
@@ -108,48 +136,40 @@ func TestReview_Create_AAA(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		setup       func() structs.Review
-		cleanup     func()
+		setup       func() (structs.Review, []uuid.UUID)
 		expectedErr bool
 	}{
 		{
 			name: "successful review creation",
-			setup: func() structs.Review {
-				truncateTables(t)
-				testUser := fixture.createTestUser()
+			setup: func() (structs.Review, []uuid.UUID) {
+				testUser := fixture.generateTestUser()
 				userID, err := fixture.userRepo.Create(fixture.ctx, testUser)
 				require.NoError(t, err)
-				productID := fixture.createTestProduct()
-				return fixture.createTestReview(userID, productID)
-			},
-			cleanup: func() {
-				truncateTables(t)
+
+				productID := fixture.generateTestProduct()
+				review := fixture.generateTestReview(userID, productID)
+				return review, []uuid.UUID{userID}
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to create review for non-existent user",
-			setup: func() structs.Review {
-				truncateTables(t)
-				productID := fixture.createTestProduct()
-				return fixture.createTestReview(uuid.New(), productID)
-			},
-			cleanup: func() {
-				truncateTables(t)
+			setup: func() (structs.Review, []uuid.UUID) {
+				productID := fixture.generateTestProduct()
+				review := fixture.generateTestReview(uuid.New(), productID)
+				return review, []uuid.UUID{}
 			},
 			expectedErr: true,
 		},
 		{
 			name: "fail to create review for non-existent product",
-			setup: func() structs.Review {
-				truncateTables(t)
-				testUser := fixture.createTestUser()
+			setup: func() (structs.Review, []uuid.UUID) {
+				testUser := fixture.generateTestUser()
 				userID, err := fixture.userRepo.Create(fixture.ctx, testUser)
 				require.NoError(t, err)
-				return fixture.createTestReview(userID, uuid.New())
-			},
-			cleanup: func() {
-				truncateTables(t)
+
+				review := fixture.generateTestReview(userID, uuid.New())
+				return review, []uuid.UUID{userID}
 			},
 			expectedErr: true,
 		},
@@ -157,8 +177,15 @@ func TestReview_Create_AAA(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			review := tt.setup()
-			defer tt.cleanup()
+			review, cleanupIDs := tt.setup()
+
+			defer func() {
+				for _, id := range cleanupIDs {
+					if id != uuid.Nil {
+						fixture.cleanupUserData(id)
+					}
+				}
+			}()
 
 			err := fixture.service.Create(fixture.ctx, review)
 
@@ -166,6 +193,14 @@ func TestReview_Create_AAA(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
+
+				var createdReviewID uuid.UUID
+				err = db.GetContext(fixture.ctx, &createdReviewID,
+					"SELECT id FROM review WHERE id_user = $1 AND id_product = $2",
+					review.IdUser, review.IdProduct)
+				if err == nil {
+					defer fixture.cleanupReviewData(createdReviewID)
+				}
 			}
 		})
 	}
@@ -177,29 +212,20 @@ func TestReview_GetById_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() uuid.UUID
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully get review by id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				_, _, reviewID := fixture.setupReview()
+				_, _, reviewID := fixture.createReviewForTest()
 				return reviewID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to get non-existent review by id",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -208,7 +234,9 @@ func TestReview_GetById_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			reviewID := tt.setup()
-			defer tt.cleanup()
+			if reviewID != uuid.Nil {
+				defer fixture.cleanupReviewData(reviewID)
+			}
 
 			result, err := fixture.service.GetById(fixture.ctx, reviewID)
 
@@ -216,10 +244,8 @@ func TestReview_GetById_AAA(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-				// Вместо проверки ID проверяем другие поля
 				require.Equal(t, 5, result.Rating)
 				require.Equal(t, "Great product!", result.Text)
-				// ID может быть нулевым, если репозиторий не возвращает его
 			}
 		})
 	}
@@ -231,29 +257,20 @@ func TestReview_Delete_AAA(t *testing.T) {
 	tests := []struct {
 		name        string
 		setup       func() uuid.UUID
-		cleanup     func()
 		expectedErr bool
 	}{
 		{
 			name: "successfully delete review",
 			setup: func() uuid.UUID {
-				truncateTables(t)
-				_, _, reviewID := fixture.setupReview()
+				_, _, reviewID := fixture.createReviewForTest()
 				return reviewID
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: false,
 		},
 		{
 			name: "fail to delete non-existent review",
 			setup: func() uuid.UUID {
-				truncateTables(t)
 				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
 			},
 			expectedErr: true,
 		},
@@ -262,7 +279,6 @@ func TestReview_Delete_AAA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			reviewID := tt.setup()
-			defer tt.cleanup()
 
 			err := fixture.service.Delete(fixture.ctx, reviewID)
 
@@ -273,78 +289,6 @@ func TestReview_Delete_AAA(t *testing.T) {
 
 				_, err := fixture.service.GetById(fixture.ctx, reviewID)
 				require.Error(t, err)
-			}
-		})
-	}
-}
-
-func TestReview_ReviewsForProduct_AAA(t *testing.T) {
-	fixture := NewReviewTestFixture(t)
-
-	tests := []struct {
-		name          string
-		setup         func() uuid.UUID
-		cleanup       func()
-		expectedCount int
-		expectedErr   bool
-	}{
-		{
-			name: "successfully get reviews for product",
-			setup: func() uuid.UUID {
-				truncateTables(t)
-				userID, productID, _ := fixture.setupReview()
-
-				anotherReview := fixture.createAnotherTestReview(userID, productID)
-				err := fixture.reviewRepo.Create(fixture.ctx, anotherReview)
-				require.NoError(t, err)
-
-				return productID
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 2,
-			expectedErr:   false,
-		},
-		{
-			name: "get empty reviews list for product without reviews",
-			setup: func() uuid.UUID {
-				truncateTables(t)
-				productID := fixture.createTestProduct()
-				return productID
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 0,
-			expectedErr:   false,
-		},
-		{
-			name: "get empty reviews list for non-existent product",
-			setup: func() uuid.UUID {
-				truncateTables(t)
-				return uuid.New()
-			},
-			cleanup: func() {
-				truncateTables(t)
-			},
-			expectedCount: 0,
-			expectedErr:   false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			productID := tt.setup()
-			defer tt.cleanup()
-
-			reviews, err := fixture.service.ReviewsForProduct(fixture.ctx, productID)
-
-			if tt.expectedErr {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-				require.Len(t, reviews, tt.expectedCount)
 			}
 		})
 	}

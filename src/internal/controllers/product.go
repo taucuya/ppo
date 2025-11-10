@@ -206,7 +206,7 @@ func (c *Controller) DeleteProductHandler(ctx *gin.Context) {
 
 func (c *Controller) GetProductsByCategoryHandler(ctx *gin.Context) {
 	category := ctx.Query("category")
-	possible := []string{"уходовая", "декоративная", "парфюмерия", "для волос", "мужская"}
+	possible := []string{"уход", "декоративная", "парфюмерия", "для волос", "мужская"}
 	inarr := false
 	for _, i := range possible {
 		if category == i {
