@@ -73,8 +73,6 @@ func main() {
 
 	log.SetOutput(logFile)
 
-	log.Println("HELLO")
-
 	loadEnv()
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
@@ -109,11 +107,6 @@ func main() {
 		return
 	}
 
-	db, err := sqlx.Connect("postgres", dsn)
-	if err != nil {
-		panic("failed to connect to test database: " + err.Error())
-	}
-
 	if err := db.Ping(); err != nil {
 		panic(err)
 	}
@@ -134,12 +127,6 @@ func main() {
 		"./internal/database/sql/trigger_accept.sql",
 		"./internal/database/sql/trigger_order.sql",
 	})
-
-	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Cant open log file: %v", err)
-	}
-	log.SetOutput(logFile)
 
 	gin.DefaultWriter = logFile
 	ar := auth_rep.New(db)
