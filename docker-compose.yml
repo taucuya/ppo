@@ -54,7 +54,7 @@ services:
       DB_NAME: test_db
     command: [
         "sh", "-c",
-        "go test -v ./internal/e2e_tests/..."
+        "echo 'Waiting for API to start...' && go test -v ./internal/e2e_tests/..."
       ]
 
 networks:

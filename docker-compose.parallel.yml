@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  init-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration_tests
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_DSN: postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable
+    command: [
+        "sh", "-c",
+        "echo 'Initializing database...' && 
+         go run init_test_db.go &&
+         echo 'Database initialized successfully'"
+      ]
+
+  tests-instance1:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration_tests
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    environment:
+      DB_DSN: postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable
+      JWT_SECRET: supersecretkey
+      TEST_INSTANCE: 1
+    volumes:
+      - ./allure-results-1:/app/allure-results
+    command: [
+        "sh", "-c",
+        "echo 'Instance 1 starting tests...' && go test -v ./internal/integration_tests/..."
+      ]
+
+  tests-instance2:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration_tests
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    environment:
+      DB_DSN: postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable
+      JWT_SECRET: supersecretkey
+      TEST_INSTANCE: 2
+    volumes:
+      - ./allure-results-2:/app/allure-results
+    command: [
+        "sh", "-c",
+        "echo 'Instance 2 starting tests...' && go test -v ./internal/integration_tests/..."
+      ]
+
+  tests-instance3:
+    build:
+      context: .
+      dockerfile: Dockerfile.integration_tests
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    environment:
+      DB_DSN: postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable
+      JWT_SECRET: supersecretkey
+      TEST_INSTANCE: 3
+    volumes:
+      - ./allure-results-3:/app/allure-results
+    command: [
+        "sh", "-c",
+        "echo 'Instance 3 starting tests...' && go test -v ./internal/integration_tests/..."
+      ]

@@ -104,8 +104,12 @@ func (c *Controller) LoginHandler(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", accessToken, 900, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "localhost", false, true)
+	// ctx.SetCookie("access_token", accessToken, 900, "/", "localhost", false, true)
+	// ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "localhost", false, true)
+
+	// для e2e
+	ctx.SetCookie("access_token", accessToken, 900, "/", "", false, true)
+	ctx.SetCookie("refresh_token", refreshToken, 604800, "/", "", false, true)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 	})

@@ -335,7 +335,7 @@ func TestDeleteItem(t *testing.T) {
 		{
 			name: "successful delete item",
 			setupMock: func() {
-				fixture.mock.ExpectExec("delete from favourites_item where id_product = \\$1 and id_favourites = \\$2").
+				fixture.mock.ExpectExec("delete from favourites_item where id = \\$1 and id_favourites = \\$2").
 					WithArgs(fixture.favouritesItem.IdProduct, fixture.favourites.Id).
 					WillReturnResult(sqlmock.NewResult(0, 1))
 			},
@@ -344,7 +344,7 @@ func TestDeleteItem(t *testing.T) {
 		{
 			name: "item not found",
 			setupMock: func() {
-				fixture.mock.ExpectExec("delete from favourites_item where id_product = \\$1 and id_favourites = \\$2").
+				fixture.mock.ExpectExec("delete from favourites_item where id = \\$1 and id_favourites = \\$2").
 					WithArgs(fixture.favouritesItem.IdProduct, fixture.favourites.Id).
 					WillReturnResult(sqlmock.NewResult(0, 0))
 			},
@@ -353,7 +353,7 @@ func TestDeleteItem(t *testing.T) {
 		{
 			name: "database error when deleting item",
 			setupMock: func() {
-				fixture.mock.ExpectExec("delete from favourites_item where id_product = \\$1 and id_favourites = \\$2").
+				fixture.mock.ExpectExec("delete from favourites_item where id = \\$1 and id_favourites = \\$2").
 					WithArgs(fixture.favouritesItem.IdProduct, fixture.favourites.Id).
 					WillReturnError(errTest)
 			},
@@ -363,7 +363,7 @@ func TestDeleteItem(t *testing.T) {
 			name: "error getting rows affected",
 			setupMock: func() {
 				result := sqlmock.NewErrorResult(errTest)
-				fixture.mock.ExpectExec("delete from favourites_item where id_product = \\$1 and id_favourites = \\$2").
+				fixture.mock.ExpectExec("delete from favourites_item where id = \\$1 and id_favourites = \\$2").
 					WithArgs(fixture.favouritesItem.IdProduct, fixture.favourites.Id).
 					WillReturnResult(result)
 			},
