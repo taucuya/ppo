@@ -37,10 +37,10 @@ INSERT INTO brand (name, description, price_category) VALUES
 INSERT INTO product (name, description, price, category, amount, id_brand, pic_link, art) VALUES
 ('Тональный крем True Match', 'Тональный крем с SPF 30, 30 мл', 2500.00, 'декоративная', 15, (SELECT id FROM brand WHERE name = 'L''Oreal'), '/images/foundation.jpg', 'LOR-TM-001'),
 ('Тушь для ресниц Lash Sensational', 'Объемная тушь для ресниц', 1200.00, 'декоративная', 50, (SELECT id FROM brand WHERE name = 'Maybelline'), '/images/mascara.jpg', 'MAY-LS-002'),
-('Увлажняющий крем Soft', 'Крем для лица с гиалуроновой кислотой, 50 мл', 1800.00, 'уход', 30, (SELECT id FROM brand WHERE name = 'Nivea'), '/images/moisturizer.jpg', 'NIV-SF-003'),
+('Увлажняющий крем Soft', 'Крем для лица с гиалуроновой кислотой, 50 мл', 1800.00, 'уход', 30, (SELECT id FROM brand WHERE name = 'Clinique'), '/images/moisturizer.jpg', 'NIV-SF-003'),
 ('Помада Super Lustrous', 'Стойкая матовая помада, 4.5 г', 1500.00, 'декоративная', 25, (SELECT id FROM brand WHERE name = 'Revlon'), '/images/lipstick.jpg', 'REV-SL-004'),
 ('Сыворотка Vitamin C', 'Сыворотка с витамином С, 30 мл', 3500.00, 'уход', 20, (SELECT id FROM brand WHERE name = 'The Ordinary'), '/images/serum.jpg', 'ORD-VC-005'),
-('Очищающий гель Pure Active', 'Гель для умывания для проблемной кожи', 900.00, 'уход', 100, (SELECT id FROM brand WHERE name = 'Garnier'), '/images/cleanser.jpg', 'GAR-PA-006'),
+('Очищающий гель Pure Active', 'Гель для умывания для проблемной кожи', 900.00, 'уход', 100, (SELECT id FROM brand WHERE name = 'Clinique'), '/images/cleanser.jpg', 'GAR-PA-006'),
 ('Тени для век Ultimate', 'Палетка теней, 12 оттенков', 2800.00, 'декоративная', 35, (SELECT id FROM brand WHERE name = 'NYX'), '/images/eyeshadow.jpg', 'NYX-UL-007'),
 ('Солнцезащитный крем Anthelios', 'Крем с SPF 50, 50 мл', 2200.00, 'уход', 18, (SELECT id FROM brand WHERE name = 'La Roche-Posay'), '/images/sunscreen.jpg', 'LRP-AN-008'),
 ('Духи Beautiful', 'Цветочный аромат, 50 мл', 6500.00, 'парфюмерия', 40, (SELECT id FROM brand WHERE name = 'Estée Lauder'), '/images/perfume.jpg', 'EST-BF-009'),

@@ -33,10 +33,10 @@ func main() {
 func runSQLScriptsSequentially(db *sqlx.DB) error {
 	scripts := []string{
 		"/app/internal/database/sql/01-create.sql",
-		"/app/internal/database/sql/02-constraints.sql",
-		"/app/internal/database/sql/03-inserts.sql",
-		"/app/internal/database/sql/trigger_accept.sql",
-		"/app/internal/database/sql/trigger_order.sql",
+		// "/app/internal/database/sql/02-constraints.sql",
+		// "/app/internal/database/sql/03-inserts.sql",
+		// "/app/internal/database/sql/trigger_accept.sql",
+		// "/app/internal/database/sql/trigger_order.sql",
 	}
 
 	for _, script := range scripts {

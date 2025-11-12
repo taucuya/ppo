@@ -111,23 +111,6 @@ func main() {
 		panic(err)
 	}
 
-// 	_ = runSQLScripts(db, []string{
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/delete.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
-// 	})
-
-	_ = runSQLScripts(db, []string{
-		"./internal/database/sql/01-create.sql",
-		"./internal/database/sql/02-constraints.sql",
-		"./internal/database/sql/03-inserts.sql",
-		"./internal/database/sql/trigger_accept.sql",
-		"./internal/database/sql/trigger_order.sql",
-	})
-
 	gin.DefaultWriter = logFile
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(time.Duration(acstime)*time.Minute), time.Duration(time.Duration(reftime)*24*time.Hour))
