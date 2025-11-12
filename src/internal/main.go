@@ -14,9 +14,10 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
-	// swaggerFiles "github.com/swaggo/files"
-	// ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/taucuya/ppo/internal/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -41,22 +42,6 @@ import (
 	user_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/user"
 	worker_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/worker"
 )
-
-func runSQLScripts(db *sqlx.DB, scripts []string) error {
-	for _, path := range scripts {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("failed to read %s: %w", path, err)
-		}
-
-		_, err = db.Exec(string(content))
-		if err != nil {
-			return fmt.Errorf("failed to execute %s: %w", path, err)
-		}
-	}
-	log.Println("SQL completed")
-	return nil
-}
 
 func loadEnv() {
 	if err := godotenv.Load(); err != nil {
@@ -111,23 +96,6 @@ func main() {
 		panic(err)
 	}
 
-// 	_ = runSQLScripts(db, []string{
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/delete.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/01-create.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/02-constraints.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/03-inserts.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_accept.sql",
-// 		"/home/taya/Desktop/ppo/src/internal/database/sql/trigger_order.sql",
-// 	})
-
-	_ = runSQLScripts(db, []string{
-		"./internal/database/sql/01-create.sql",
-		"./internal/database/sql/02-constraints.sql",
-		"./internal/database/sql/03-inserts.sql",
-		"./internal/database/sql/trigger_accept.sql",
-		"./internal/database/sql/trigger_order.sql",
-	})
-
 	gin.DefaultWriter = logFile
 	ar := auth_rep.New(db)
 	ap := auth_prov.New(key, time.Duration(time.Duration(acstime)*time.Minute), time.Duration(time.Duration(reftime)*24*time.Hour))
@@ -163,6 +131,8 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	router.GET("/api/v1/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.GET("/health", func(c *gin.Context) {
 		fmt.Println("Health check called")
