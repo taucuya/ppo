@@ -1,0 +1,2 @@
+rps,samples,average_ms,median_ms,min_ms,max_ms,std_ms,p95_ms
+560,10,46.0,45.5,43,51,2.4083189157584592,50.099999999999994

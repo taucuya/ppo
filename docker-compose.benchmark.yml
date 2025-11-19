@@ -16,9 +16,13 @@ services:
       retries: 5
     command: [
         "postgres", 
-        "-c", "max_connections=1000",
-        "-c", "shared_buffers=256MB",
-        "-c", "work_mem=4MB"
+        "-c", "max_connections=300",
+        "-c", "shared_buffers=2GB",
+        "-c", "work_mem=32MB",
+        "-c", "maintenance_work_mem=512MB",
+        "-c", "effective_cache_size=6GB",
+        "-c", "max_parallel_workers=4",
+        "-c", "max_worker_processes=8"
       ]
     networks:
       - app-network
@@ -44,6 +48,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+    container_name: ppo-api
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -65,17 +74,31 @@ services:
   benchmark:
     build:
       context: .
+      dockerfile: Dockerfile.benchmark
     depends_on:
       api:
         condition: service_started
     networks:
       - app-network
+    volumes:
+      - ./benchmark-results:/app/results
+      - /var/run/docker.sock:/var/run/docker.sock
     command: [
-        "sh", "-c",
-        "echo 'Waiting for API to be ready...' &&
-         echo 'API is ready. Starting benchmark...' &&
-         go run ./benchmark/main.go"
-      ]
+      "sh", "-c",
+      "echo 'Waiting for API to be ready...' &&
+      echo 'API is ready. Starting benchmarks...' &&
+      mkdir -p /app/results &&
+      chmod +x /app/monitor_docker.sh &&
+      echo \"x,y\" > /app/results/grad.csv &&
+      echo \"p50,p75,p90,p95,p99,y\" > /app/results/percentiles.csv &&
+      echo \"timestamp,cpu_percent,memory_usage,memory_limit,memory_percent\" > /app/results/metrics_gradual_load.csv &&
+      echo \"avg\" > /app/results/constant.csv &&
+      echo \"rec\" > /app/results/recovery.csv &&
+      for i in $(seq 1 10); do
+        echo \"Run $i/100\";
+        go run ./benchmark/main.go;
+      done"
+    ]
 
 networks:
   app-network:

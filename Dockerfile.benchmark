@@ -1,19 +1,15 @@
 FROM golang:1.24.0-alpine
 
+RUN apk add --no-cache docker-cli
+
 WORKDIR /app
 
 COPY ./src/go.mod ./src/go.sum ./
 RUN go mod download
 
-COPY ./src .
+COPY ./src/ ./
 
 COPY monitor_docker.sh /app/monitor_docker.sh
 RUN chmod +x /app/monitor_docker.sh
 
-COPY ./src/internal/.env .
-
-RUN go build -o main ./internal/main.go
-
-EXPOSE 8080
-CMD ["./main"]
-
+CMD ["sh", "-c", "go run ./benchmark/main.go"]

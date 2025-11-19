@@ -1,0 +1,14 @@
+=== RECOVERY TIME STATISTICS ===
+
+Total samples: 10
+Overall average: 46.00ms
+Overall median: 45.50ms
+
+RPS 560:
+  Samples:    10
+  Average:    46.00ms
+  Median:     45.50ms
+  Range:      43.00ms - 51.00ms
+  Std Dev:    2.41ms
+  95th %ile:  50.10ms
+

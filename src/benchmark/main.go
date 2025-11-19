@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -54,6 +55,7 @@ type SignUpResult struct {
 	UserCreationRate   float64           `json:"user_creation_rate"`
 	RequestsPerSecond  float64           `json:"requests_per_second"`
 	DegradationPoint   int               `json:"degradation_point"`
+	RecoveryTime       time.Duration     `json:"recovery_time"`
 }
 
 type ErrorBreakdown struct {
@@ -145,7 +147,7 @@ func cleanupDatabase() error {
 	}
 	defer db.Close()
 
-	_, err = db.Exec("truncate table \"user\";")
+	_, err = db.Exec("truncate table \"user\" restart identity")
 	if err != nil {
 		return fmt.Errorf("failed to cleanup database: %v", err)
 	}
@@ -196,12 +198,12 @@ func GenerateSignUpRequest(template SignUpRequest, iteration int, userIndex int)
 }
 
 const (
-	criticalResponseTime = 3 * time.Second
+	criticalResponseTime = 500 * time.Millisecond
 )
 
 func runSignUpGradualLoad() *SignUpResult {
-	maxUsers := 1000
-	step := 10
+	maxUsers := 2000
+	step := 1
 
 	collector := &StatisticsCollector{}
 	var (
@@ -215,13 +217,13 @@ func runSignUpGradualLoad() *SignUpResult {
 	startTime := time.Now()
 	var degradationPoint int
 
-	file, err := os.OpenFile("grad.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("/app/results/grad.csv", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	file_perc, err := os.OpenFile("percentiles.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file_perc, err := os.OpenFile("/app/results/percentiles.csv", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -291,20 +293,20 @@ func runSignUpGradualLoad() *SignUpResult {
 		wg.Wait()
 
 		percentiles := collector.GetPercentiles()
-		if p100, exists := percentiles["p100"]; exists && p100 > criticalResponseTime {
-			log.Printf("Performance degradation at %d users: P100 = %v", concurrentUsers, p100)
+		if p95, exists := percentiles["p95"]; exists && p95 > criticalResponseTime {
+			log.Printf("Performance degradation at %d users: P95 = %v", concurrentUsers, p95)
 			degradationPoint = concurrentUsers
 			dot = degradationPoint
 			break
 		}
 
 		log.Println(percentiles["p100"], "for\t", concurrentUsers)
-		_, err = fmt.Fprintln(file, percentiles["p95"], concurrentUsers)
+		_, err = fmt.Fprintf(file, "%v,%v\n", percentiles["p95"], concurrentUsers)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		_, err = fmt.Fprintln(file_perc, percentiles["p50"], percentiles["p75"], percentiles["p90"], percentiles["p95"], percentiles["p99"], concurrentUsers)
+		_, err = fmt.Fprintf(file_perc, "%v,%v,%v,%v,%v,%v\n", percentiles["p50"], percentiles["p75"], percentiles["p90"], percentiles["p95"], percentiles["p99"], concurrentUsers)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -347,7 +349,7 @@ func runSignUpGradualLoad() *SignUpResult {
 func runSignUpConstantLoad() *SignUpResult {
 	maxUsers := dot
 	concurrentUsers := maxUsers * 80 / 100
-	testDuration := 30 * time.Second
+	testDuration := 5 * time.Second
 
 	collector := &StatisticsCollector{}
 	var (
@@ -360,6 +362,11 @@ func runSignUpConstantLoad() *SignUpResult {
 
 	fmt.Printf("Running constant load: %d users for %v\n", concurrentUsers, testDuration)
 
+	file, err := os.OpenFile("/app/results/constant.csv", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
 	var wg sync.WaitGroup
 	startTime := time.Now()
 	endTime := startTime.Add(testDuration)
@@ -420,11 +427,14 @@ func runSignUpConstantLoad() *SignUpResult {
 	totalRequests := collector.TotalRequests()
 	percentiles := collector.GetPercentiles()
 
+	duration := finalEndTime.Sub(startTime)
+	fmt.Fprintln(file, percentiles["p95"])
+
 	return &SignUpResult{
 		ScenarioName:       "constant_load",
 		StartTime:          startTime,
 		EndTime:            finalEndTime,
-		Duration:           finalEndTime.Sub(startTime),
+		Duration:           duration,
 		TotalRequests:      totalRequests,
 		SuccessfulRequests: int(successCount),
 		FailedRequests:     totalRequests - int(successCount),
@@ -452,8 +462,8 @@ func runSignUpConstantLoad() *SignUpResult {
 func runSignUpOverloadThenReduce() *SignUpResult {
 	maxUsers := dot
 	overloadUsers := maxUsers * 120 / 100
-	normalUsers := maxUsers / 2
-	phaseDuration := 15 * time.Second
+	normalUsers := maxUsers * 80 / 100
+	phaseDuration := 200 * time.Second
 
 	collector := &StatisticsCollector{}
 	var (
@@ -464,20 +474,47 @@ func runSignUpOverloadThenReduce() *SignUpResult {
 		otherErrors      int32
 	)
 
+	file, err := os.OpenFile("/app/results/recovery.csv", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
 	startTime := time.Now()
 
-	fmt.Printf("Phase 1: Overload with %d users for %v\n", overloadUsers, phaseDuration)
-	runLoadPhase(overloadUsers, phaseDuration, collector, &successCount, &validationErrors, &duplicateErrors, &serverErrors, &otherErrors)
+	fmt.Printf("Phase 1: Overload with %d users for %v\n", overloadUsers, 20*time.Second)
+	runLoadPhase(overloadUsers, 20*time.Second, collector, &successCount, &validationErrors, &duplicateErrors, &serverErrors, &otherErrors)
 
 	fmt.Printf("Phase 2: Normal load with %d users for %v\n", normalUsers, phaseDuration)
-	runLoadPhase(normalUsers, phaseDuration, collector, &successCount, &validationErrors, &duplicateErrors, &serverErrors, &otherErrors)
+	recoveryStart := time.Now()
+	var recoveryTime time.Duration
+	for i := 0; i < 30; i++ {
+
+		runLoadPhase(normalUsers, 1*time.Second, collector, &successCount, &validationErrors, &duplicateErrors, &serverErrors, &otherErrors)
+
+		percentiles := collector.GetPercentiles()
+		successRate := float64(successCount) / float64(collector.TotalRequests()) * 100
+		errorRate := 100 - successRate
+
+		if p95, exists := percentiles["p95"]; exists &&
+			p95 <= criticalResponseTime {
+			recoveryTime = time.Since(recoveryStart)
+			log.Printf("System recovered after %v", recoveryTime)
+			break
+		}
+
+		log.Printf("Still recovering... errors=%.1f%%, P95=%v", errorRate, percentiles["p95"])
+	}
 
 	endTime := time.Now()
 	totalRequests := collector.TotalRequests()
 	percentiles := collector.GetPercentiles()
 
+	fmt.Fprintln(file, endTime.Sub(startTime))
+
 	return &SignUpResult{
 		ScenarioName:       "overload_then_reduce",
+		RecoveryTime:       recoveryTime,
 		StartTime:          startTime,
 		EndTime:            endTime,
 		Duration:           endTime.Sub(startTime),
@@ -558,28 +595,80 @@ func runLoadPhase(concurrentUsers int, duration time.Duration, collector *Statis
 				collector.AddMeasurement(responseTime, success)
 			}
 		}(i)
-		cleanupDatabase()
 	}
 
 	wg.Wait()
 	cleanupDatabase()
 }
 
+func runScenarioWithMonitoring(scenarioName string, duration int) {
+	fmt.Printf("=== Starting %s scenario WITH monitoring ===\n", scenarioName)
+
+	metricsFile := fmt.Sprintf("/app/results/metrics_%s.csv", scenarioName)
+	monitorCmd := exec.Command("sh", "/app/monitor_docker.sh", "ppo-api", metricsFile, fmt.Sprintf("%d", duration))
+
+	fmt.Printf("Starting monitoring for api...\n")
+	if err := monitorCmd.Start(); err != nil {
+		log.Fatalf("Failed to start monitoring: %v", err)
+	}
+
+	fmt.Println("Waiting for monitor to start...")
+	time.Sleep(3 * time.Second)
+
+	fmt.Printf("Running %s benchmark scenario...\n", scenarioName)
+	var result *SignUpResult
+	switch scenarioName {
+	case "gradual_load":
+		result = runSignUpGradualLoad()
+	default:
+		log.Printf("Unknown scenario for monitoring: %s", scenarioName)
+		return
+	}
+
+	printResult(result)
+	monitorCmd.Process.Kill()
+	fmt.Println("Waiting for monitoring to complete...")
+	if err := monitorCmd.Wait(); err != nil {
+		log.Printf("Monitoring finished with error: %v", err)
+	} else {
+		fmt.Printf("Monitoring completed. Metrics saved to: %s\n", metricsFile)
+	}
+}
+
+func runScenarioWithoutMonitoring(scenarioName string) {
+	fmt.Printf("=== Starting %s scenario WITHOUT monitoring ===\n", scenarioName)
+
+	fmt.Printf("Running %s benchmark scenario...\n", scenarioName)
+	var result *SignUpResult
+	switch scenarioName {
+	case "constant_load":
+		result = runSignUpConstantLoad()
+	case "overload_reduce":
+		result = runSignUpOverloadThenReduce()
+	default:
+		fmt.Printf("Unknown scenario: %s\n", scenarioName)
+		return
+	}
+	printResult(result)
+
+	fmt.Printf("=== %s benchmark completed ===\n", scenarioName)
+}
+
 func main() {
-	fmt.Println("Starting benchmark tests...")
+	fmt.Println("=== Starting benchmark tests ===")
 	fmt.Printf("Target API: %s\n", targetURL)
 
-	fmt.Println("\n=== СЦЕНАРИЙ 1: Постепенная нагрузка ===")
-	result1 := runSignUpGradualLoad()
-	printResult(result1)
+	runScenarioWithMonitoring("gradual_load", 120)
 
-	fmt.Println("\n=== СЦЕНАРИЙ 2: Постоянная нагрузка ===")
-	result2 := runSignUpConstantLoad()
-	printResult(result2)
+	time.Sleep(3 * time.Second)
 
-	fmt.Println("\n=== СЦЕНАРИЙ 3: Перегрузка + снижение ===")
-	result3 := runSignUpOverloadThenReduce()
-	printResult(result3)
+	runScenarioWithoutMonitoring("constant_load")
+
+	time.Sleep(3 * time.Second)
+	runScenarioWithoutMonitoring("overload_reduce")
+
+	fmt.Println("\n=== All benchmarks completed ===")
+	fmt.Println("Metrics for gradual_load saved to: /app/results/metrics_gradual_load.csv")
 }
 
 func printResult(result *SignUpResult) {

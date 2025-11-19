@@ -42,22 +42,6 @@ import (
 	worker_rep "github.com/taucuya/ppo/internal/repository/postgres/reps/worker"
 )
 
-func runSQLScripts(db *sqlx.DB, scripts []string) error {
-	for _, path := range scripts {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("failed to read %s: %w", path, err)
-		}
-
-		_, err = db.Exec(string(content))
-		if err != nil {
-			return fmt.Errorf("failed to execute %s: %w", path, err)
-		}
-	}
-	log.Println("SQL completed")
-	return nil
-}
-
 func loadEnv() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Файл .env не найден, используются переменные окружения")
@@ -65,7 +49,7 @@ func loadEnv() {
 }
 
 func main() {
-
+	//runtime.GOMAXPROCS(1)
 	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Cant open log file: %v", err)
@@ -90,12 +74,15 @@ func main() {
 		}
 	}
 
-	fmt.Printf("DSN: %s\n", dsn)
-
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		panic("failed to connect to database: " + err.Error())
 	}
+	db.SetMaxOpenConns(200)
+	db.SetMaxIdleConns(100)
+	db.SetConnMaxLifetime(30 * time.Minute)
+	db.SetConnMaxIdleTime(10 * time.Minute)
+
 	defer db.Close()
 	key := []byte(os.Getenv("JWT_SECRET"))
 	acstime, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_LIFETIME_MINUTES"))
