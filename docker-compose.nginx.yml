@@ -1,21 +1,47 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:15-alpine
+    container_name: postgres_primary
     environment:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
     ports:
       - "5434:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/conf/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+      - ./postgres/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
     networks:
       - app-network
+
+  postgres-replica:
+    image: postgres:15-alpine
+    container_name: postgres_replica
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+      - ./postgres/conf/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+      - ./postgres/init-replica:/docker-entrypoint-initdb.d:ro
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   init-db:
     build:
@@ -33,6 +59,7 @@ services:
       ]
     networks:
       - app-network
+
   api:
     build:
       context: .
@@ -44,8 +71,89 @@ services:
       DB_PASSWORD: test_password
       DB_NAME: test_db
       JWT_SECRET: "your_jwt_secret_key_here"
+      INSTANCE_NAME: "primary"
+      PORT: 8080
+      DB_DSN: "postgres://test_user:test_password@postgres:5432/test_db?sslmode=disable"
     ports:
       - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  api-readonly-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: readonly_user
+      DB_PASSWORD: readonly_password
+      DB_NAME: test_db
+      JWT_SECRET: "your_jwt_secret_key_here"
+      INSTANCE_NAME: "readonly1"
+      PORT: 8081
+      DB_DSN: "postgres://readonly_user:readonly_password@postgres:5432/test_db?sslmode=disable"
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: [
+        "sh", "-c",
+        "echo 'Starting read-only API instance 1 on port 8081' && 
+        ./main --port 8081"
+      ]
+
+  api-readonly-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: readonly_user
+      DB_PASSWORD: readonly_password
+      DB_NAME: test_db
+      JWT_SECRET: "your_jwt_secret_key_here"
+      INSTANCE_NAME: "readonly2"
+      PORT: 8082
+      DB_DSN: "postgres://readonly_user:readonly_password@postgres:5432/test_db?sslmode=disable"
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+    command: [
+        "sh", "-c",
+        "echo 'Starting read-only API instance 2 on port 8082' && 
+        ./main --port 8082"
+      ]
+
+  api-mirror:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: readonly_user
+      DB_PASSWORD: readonly_password
+      DB_NAME: test_db
+      JWT_SECRET: "your_jwt_secret_key_here_mirror"
+      APP_BASE_PATH: "/mirror"
+      DB_DSN: "postgres://readonly_user:readonly_password@postgres:5432/test_db?sslmode=disable"
+    ports:
+      - "8083:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,6 +171,9 @@ services:
       - ./static:/usr/share/nginx/static:ro
     depends_on:
       - api
+      - api-readonly-1
+      - api-readonly-2
+      - api-mirror
     networks:
       - app-network
     restart: unless-stopped
@@ -81,14 +192,13 @@ services:
       - app-network
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
-      
 networks:
   app-network:
-    driver: bridge
-  test_network:
     driver: bridge
 
 volumes:
   postgres_data:
+  postgres_replica_data:

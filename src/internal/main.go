@@ -15,6 +15,7 @@ import (
 	_ "github.com/lib/pq"
 
 	_ "github.com/taucuya/ppo/internal/docs"
+	"github.com/taucuya/ppo/internal/middleware"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -59,6 +60,10 @@ func main() {
 	log.SetOutput(logFile)
 
 	loadEnv()
+	port := os.Getenv("PORT")
+	instanceName := os.Getenv("INSTANCE_NAME")
+	isReadOnly := os.Getenv("DB_USER") == "readonly_user"
+
 	dsn := os.Getenv("DB_DSN")
 	if dsn == "" {
 		dbHost := os.Getenv("DB_HOST")
@@ -132,11 +137,22 @@ func main() {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 
+	router.Use(middleware.InstanceInfoMiddleware(port, instanceName, isReadOnly))
+	router.Use(middleware.ReadOnlyMiddleware(isReadOnly))
+
 	router.GET("/api/v1/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.GET("/health", func(c *gin.Context) {
-		fmt.Println("Health check called")
-		c.JSON(200, gin.H{"status": "ok", "service": "running"})
+		currentPort := port
+
+		c.JSON(200, gin.H{
+			"status":   "ok",
+			"service":  "running",
+			"port":     currentPort,
+			"role":     map[bool]string{true: "readonly", false: "readwrite"}[isReadOnly],
+			"instance": instanceName,
+			"db_user":  os.Getenv("DB_USER"),
+		})
 	})
 
 	api := router.Group("/api/v1")
@@ -235,7 +251,7 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + string(port),
 		Handler: router,
 	}
 
